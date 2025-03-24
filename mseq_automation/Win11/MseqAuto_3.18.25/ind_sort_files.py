@@ -13,7 +13,7 @@ from file_system_dao import FileSystemDAO
 from folder_processor import FolderProcessor
 from logger import setup_logger
 
-# Check for 32-bit Python requirement - gracefully fallback if not available
+'''# Check for 32-bit Python requirement - gracefully fallback if not available
 if sys.maxsize > 2**32:
     # Path to 32-bit Python
     py32_path = MseqConfig.PYTHON32_PATH
@@ -28,7 +28,7 @@ if sys.maxsize > 2**32:
         sys.exit(0)
     else:
         print("32-bit Python not specified or same as current interpreter")
-        print("Continuing with current Python interpreter")
+        print("Continuing with current Python interpreter")'''
 
 def get_folder_from_user():
     """Get folder selection from user using a simple approach"""
@@ -56,7 +56,6 @@ def get_folder_from_user():
 
 def get_recent_inumbers(file_dao, config, logger):
     """Get list of recent I numbers to process based on order key"""
-    # Use similar logic from the legacy script to find recent I numbers
     paths = ['G:\\Lab\\Spreadsheets\\Individual Uploaded to ABI', 'G:\\Lab\\Spreadsheets']
     
     # Try to find the most recent I number from the Data/Individuals folder

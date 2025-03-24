@@ -198,7 +198,7 @@ class FolderProcessor:
         # Check if file is a reinject
         is_reinject = False
         if hasattr(self, 'reinject_list') and self.reinject_list:
-            is_reinject = normalized_name in [self.file_dao.normalize_filename(r) for r in self.reinject_list]
+            is_reinject = normalized_name in [self.file_dao.standardize_filename_for_matching(r) for r in self.reinject_list]
         self.logger(f"Is reinject: {is_reinject}")
         
         # Handle file placement
@@ -239,6 +239,54 @@ class FolderProcessor:
             self.file_dao.move_file(file_path, target_file_path)
             self.logger(f"File moved to main folder")
             return True
+        
+    def get_pcr_folder_path(self, pcr_number, base_path):
+        """Get proper PCR folder path or create one if needed"""
+        pcr_folder_name = f"FB-PCR{pcr_number}"
+        
+        # Check for existing folders with this PCR number
+        for item in os.listdir(base_path):
+            if os.path.isdir(os.path.join(base_path, item)):
+                if re.search(f'fb-pcr{pcr_number}', item.lower()):
+                    return os.path.join(base_path, item)
+        
+        # If no folder exists, create one
+        new_folder_path = os.path.join(base_path, pcr_folder_name)
+        self.file_dao.create_folder_if_not_exists(new_folder_path)
+        return new_folder_path
+    
+    def process_pcr_folder(self, pcr_folder):
+        """Process all files in a PCR folder - simpler matching logic"""
+        self.logger(f"Processing PCR folder: {os.path.basename(pcr_folder)}")
+        
+        for file in os.listdir(pcr_folder):
+            if file.endswith('.ab1'):
+                # Clean the filename for matching with reinject list
+                clean_name = self.file_dao.standardize_filename_for_matching(file)
+                
+                # Check if it's in the reinject list
+                is_reinject = clean_name in self.reinject_list
+                
+                if is_reinject:
+                    # Make sure Alternate Injections folder exists
+                    alt_folder = os.path.join(pcr_folder, "Alternate Injections")
+                    if not os.path.exists(alt_folder):
+                        os.mkdir(alt_folder)
+                    
+                    # Move file to Alternate Injections
+                    source = os.path.join(pcr_folder, file)
+                    dest = os.path.join(alt_folder, file)  # Keep original filename with brackets
+                    if os.path.exists(source) and not os.path.exists(dest):
+                        self.file_dao.move_file(source, dest)
+                        self.logger(f"Moved reinject {file} to Alternate Injections")
+                
+        # Now process the folder with mSeq if it's ready
+        was_mseqed, has_braces, has_ab1_files = self.check_order_status(pcr_folder)
+        if not was_mseqed and not has_braces and has_ab1_files:
+            self.ui_automation.process_folder(pcr_folder)
+            self.logger(f"mSeq completed: {os.path.basename(pcr_folder)}")
+        else:
+            self.logger(f"mSeq NOT completed: {os.path.basename(pcr_folder)}")
 
     def sort_ind_folder(self, folder_path, reinject_list, order_key, recent_inumbers):
         """Sort all files in a BioI folder using batch processing"""
@@ -377,7 +425,8 @@ class FolderProcessor:
             self.logger(f"Error during folder cleanup: {e}")
         
         return new_folder_path
-        
+    
+       
     def _cleanup_original_folder(self, original_folder, new_folder):
         """
         Enhanced cleanup to remove the original folder if all files have been processed
@@ -478,16 +527,56 @@ class FolderProcessor:
         day_data_path = os.path.dirname(os.path.dirname(file_path))
         
         # Create PCR folder name and path
-        pcr_folder_name = f"FB-{pcr_number}"
-        pcr_folder_path = os.path.join(day_data_path, pcr_folder_name)
+        pcr_folder_path = self.get_pcr_folder_path(pcr_number, day_data_path)
         
         # Create PCR folder if it doesn't exist
         if not os.path.exists(pcr_folder_path):
             os.makedirs(pcr_folder_path)
         
-        # Use the same move file logic
-        normalized_name = self.file_dao.normalize_filename(file_name)
-        return self._move_file_to_destination(file_path, pcr_folder_path, normalized_name)
+        # Special handling for PCR files
+        # Use standard normalization first (which removes ab1 extension)
+        normalized_name = self.file_dao.standardize_filename_for_matching(file_name)
+        
+        # Debug output for troubleshooting
+        self.logger(f"PCR file normalized name: {normalized_name}")
+        
+        # For PCR files, manually check against reinject list
+        is_reinject = False
+        raw_name = None
+        
+        if hasattr(self, 'reinject_list') and self.reinject_list:
+            for i, item in enumerate(self.reinject_list):
+                reinj_norm = self.file_dao.standardize_filename_for_matching(item)
+                if normalized_name == reinj_norm:
+                    is_reinject = True
+                    raw_name = self.raw_reinject_list[i] if hasattr(self, 'raw_reinject_list') else item
+                    self.logger(f"Found PCR file in reinject list: {item}")
+                    break
+        
+        # Create the destination path
+        clean_name = re.sub(r'{.*?}', '', file_name)
+        target_path = os.path.join(pcr_folder_path, clean_name)
+        
+        # Handle reinjects
+        if is_reinject:
+            # Check for preemptive reinject
+            if raw_name and '{!P}' in raw_name:
+                # Preemptive reinject goes in main folder
+                self.logger(f"Preemptive reinject moved to main folder")
+                return self.file_dao.move_file(file_path, target_path)
+            else:
+                # Regular reinject goes to alternate injections
+                alt_inj_folder = os.path.join(pcr_folder_path, "Alternate Injections")
+                if not os.path.exists(alt_inj_folder):
+                    os.makedirs(alt_inj_folder)
+                    
+                alt_file_path = os.path.join(alt_inj_folder, file_name)
+                self.logger(f"Reinject moved to alternate injections")
+                return self.file_dao.move_file(file_path, alt_file_path)
+        else:
+            # Regular file goes in main folder
+            self.logger(f"File moved to main folder")
+            return self.file_dao.move_file(file_path, target_path)
 
     def _sort_control_file(self, file_path):
         """Sort a control file to the Controls folder"""
@@ -621,7 +710,7 @@ class FolderProcessor:
                 for j in range(5, min(101, data.shape[0])):
                     if j < data.shape[0] and data.shape[1] > 1:
                         raw_reinject_list.append(data[j, 1])
-                        cleaned_name = self.file_dao.clean_braces_format(data[j, 1])
+                        cleaned_name = self.file_dao.standardize_filename_for_matching(data[j, 1])
                         reinject_list.append(cleaned_name)
             except Exception as e:
                 self.logger(f"Error processing reinject file {file_path}: {e}")
@@ -675,7 +764,7 @@ class FolderProcessor:
                                     
                                     if len(indices) > 0:
                                         raw_reinject_list.append(data[j, 1])
-                                        cleaned_name = self.file_dao.clean_braces_format(data[j, 1])
+                                        cleaned_name = self.file_dao.standardize_filename_for_matching(data[j, 1])
                                         reinject_list.append(cleaned_name)
                         except Exception as e:
                             self.logger(f"Error processing txt file {file_path}: {e}")
@@ -687,20 +776,220 @@ class FolderProcessor:
         self.raw_reinject_list = raw_reinject_list
         return reinject_list
 
+    def test_specific_pcr_sorting(self, pcr_number, folder_path=None):
+        """Test PCR file sorting for a specific PCR number"""
+        # Set up file output
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_file = f"pcr_test_{pcr_number}_{timestamp}.txt"
+        
+        # Function to log both to console and file
+        def log(message):
+            print(message)
+            with open(output_file, "a") as f:
+                f.write(message + "\n")
+        
+        log(f"\n=== Testing PCR {pcr_number} Sorting ===")
+        log(f"Output saved to: {output_file}")
+        
+        # Load the reinject list
+        if not hasattr(self, 'reinject_list') or not self.reinject_list:
+            log("Loading reinject list...")
+            i_numbers = ['21888', '21889', '21890', '21891']  # Hardcode I numbers for testing
+            reinject_path = f"P:\\Data\\Reinjects\\Reinject List_{datetime.now().strftime('%m-%d-%Y')}.xlsx"
+            self.reinject_list = self.get_reinject_list(i_numbers, reinject_path)
+            log(f"Loaded {len(self.reinject_list)} reinjections")
+            
+        if folder_path:
+            log(f"\nListing ALL files in folder: {folder_path}")
+            log("=" * 50)
+            
+            # Get all files in this folder recursively
+            all_files = []
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    all_files.append(os.path.join(root, file))
+            
+            # Group by file extension
+            file_by_ext = {}
+            for file_path in all_files:
+                ext = os.path.splitext(file_path)[1].lower()
+                if ext not in file_by_ext:
+                    file_by_ext[ext] = []
+                file_by_ext[ext].append(file_path)
+            
+            # Print summary of file types
+            log(f"Found {len(all_files)} total files:")
+            for ext, files in file_by_ext.items():
+                log(f"  {ext}: {len(files)} files")
+            
+            # Print all .ab1 files
+            log("\nAll .ab1 files:")
+            ab1_files = file_by_ext.get('.ab1', [])
+            for i, file_path in enumerate(ab1_files):
+                log(f"  {i+1}. {os.path.relpath(file_path, folder_path)}")
+            
+            # Check file contents for PCR number
+            pcr_files = []
+            for file_path in ab1_files:
+                file_content = os.path.basename(file_path)
+                if f"PCR{pcr_number}" in file_content:
+                    pcr_files.append(file_path)
+            
+            log(f"\nFound {len(pcr_files)} PCR {pcr_number} files")
+            if pcr_files:
+                log("PCR files found:")
+                for i, file_path in enumerate(pcr_files):
+                    log(f"  {i+1}. {os.path.basename(file_path)}")
+            
+        else:
+            log("No folder specified, using test files")
+            pcr_files = [
+                "{07E}{06G}940.9.H446_940R{PCR2961exp1}{2_28}{I-21889}.ab1",
+                "{06G}940.9.H446_940R{PCR2961exp1}.ab1"
+            ]
+        
+        # Check reinject list for entries that might match these files
+        log("\nChecking reinject list for matches:")
+        matches_found = 0
+        
+        if hasattr(self, 'reinject_list') and self.reinject_list and pcr_files:
+            for file_path in pcr_files:
+                file_name = os.path.basename(file_path) if os.path.exists(file_path) else file_path
+                log(f"\nFile: {file_name}")
+                
+                # Standard normalization (with extension removal)
+                std_norm = self.file_dao.standardize_filename_for_matching(file_name)
+                log(f"Standard normalized: {std_norm}")
+                
+                # PCR normalization (with manual extension removal)
+                pcr_norm = self.file_dao.standardize_filename_for_matching(file_name)
+                if pcr_norm.endswith('.ab1'):
+                    pcr_norm = pcr_norm[:-4]
+                log(f"PCR normalized: {pcr_norm}")
+                
+                # Check for matches in reinject list
+                found_match = False
+                for i, item in enumerate(self.reinject_list):
+                    reinj_std_norm = self.file_dao.standardize_filename_for_matching(item)
+                    
+                    if std_norm == reinj_std_norm:
+                        log(f"MATCH found with reinject #{i+1}: {item}")
+                        log(f"  Normalized to: {reinj_std_norm}")
+                        found_match = True
+                        matches_found += 1
+                        break
+                
+                if not found_match:
+                    log("No matches found in reinject list")
+        else:
+            log("No reinject list available for testing or no PCR files found")
+        
+        log(f"\nFound {matches_found} files that match entries in the reinject list")
+        log("===================================")
+        
+        # Display all entries in reinject list for reference
+        log("\nFull reinject list for reference:")
+        if hasattr(self, 'reinject_list') and self.reinject_list:
+            for i, item in enumerate(self.reinject_list):
+                log(f"{i+1}. {item}")
+        else:
+            log("No reinject list available")
+            
+        log(f"\nTest completed. Results saved to {output_file}")
+
 if __name__ == "__main__":
     # Simple test if run directly
     from config import MseqConfig
     from file_system_dao import FileSystemDAO
-    
+    from datetime import datetime
+
     config = MseqConfig()
     file_dao = FileSystemDAO(config)
     processor = FolderProcessor(file_dao, None, config)
-    
+
     # Test folder processing
     test_path = os.getcwd()
     print(f"Testing with folder: {test_path}")
-    
+
     # Test getting I number from a folder name
     test_folder_name = "BioI-12345_Customer_67890"
     i_num = processor.file_dao.get_inumber_from_name(test_folder_name)
     print(f"I number from {test_folder_name}: {i_num}")
+    
+    # Add this simple reinject list test
+    import tkinter as tk
+    from tkinter import filedialog
+    
+    # Create a simple dialog to select folder
+    root = tk.Tk()
+    root.withdraw()
+    folder_path = filedialog.askdirectory(title="Select folder to check reinjections")
+    
+    if folder_path:
+        print(f"Testing reinject detection for: {folder_path}")
+        
+        # Get I numbers from the folder
+        i_numbers, _ = processor.get_todays_inumbers_from_folder(folder_path)
+        print(f"Found I numbers: {i_numbers}")
+        
+        # Get reinject list
+        reinject_list = processor.get_reinject_list(i_numbers)
+        
+        # Print the results
+        print(f"\nReinject List ({len(reinject_list)} entries):")
+        for i, item in enumerate(reinject_list):
+            print(f"{i+1}. {item}")
+    processor.test_specific_pcr_sorting("2961", folder_path)
+    processor.test_specific_pcr_sorting("2872", folder_path)
+        
+'''        # Test file with period normalization
+        test_filename = "{06G}940.9.H446_940R{PCR2961exp1}"
+        normalized_test = file_dao.normalize_filename(test_filename)
+        print(f"\nNormalization test:")
+        print(f"Original: {test_filename}")
+        print(f"Normalized: {normalized_test}")
+        
+        # Check if this would be found in the reinject list
+        is_in_list = False
+        for item in reinject_list:
+            normalized_item = file_dao.normalize_filename(item)
+            if normalized_item == normalized_test:
+                is_in_list = True
+                print(f"MATCH FOUND: {item} normalizes to {normalized_item}")
+                break
+        
+        if not is_in_list:
+            print("NO MATCH FOUND in reinject list")
+            
+            # Let's see what might be close matches
+            print("\nChecking for close matches:")
+            for item in reinject_list:
+                normalized_item = file_dao.normalize_filename(item)
+                if "940" in normalized_item and "H446" in normalized_item:
+                    print(f"Possible match: {item}")
+                    print(f"  Normalized to: {normalized_item}")
+    # Test normalize_filename function with different inputs
+    print("\nTesting normalize_filename function:")
+    test_filenames = [
+        "{06G}940.9.H446_940R{PCR2961exp1}",
+        "{06G}940.9.H446_940R",
+        "940.9.H446_940R",
+        "940.9_H446_940R",
+        "940_9_H446_940R"
+    ]
+    # Add test with remove_extension=False
+    print("\nTesting normalize_filename with remove_extension=False:")
+    test_filenames = [
+        "{06G}940.9.H446_940R{PCR2961exp1}",
+        "940.9.H446_940R"
+    ]
+    
+    for test_file in test_filenames:
+        normalized = file_dao.normalize_filename(test_file, remove_extension=False)
+        print(f"Original: '{test_file}'")
+        print(f"Normalized: '{normalized}'")
+        print()
+        '''
+
+

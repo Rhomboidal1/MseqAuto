@@ -158,14 +158,18 @@ class FileSystemDAO:
         # Step 1: Adjust characters
         adjusted_name = self.adjust_abi_chars(file_name)
         
-        # Step 2: Remove extension if needed
-        if remove_extension and '.' in adjusted_name:
-            name_without_ext = adjusted_name[:adjusted_name.rfind('.')]
-        else:
-            name_without_ext = adjusted_name
+        # Step 2: Remove extension if needed (specific handling for .ab1)
+        if remove_extension:
+            if adjusted_name.endswith('.ab1'):
+                # Special handling for .ab1 files
+                adjusted_name = adjusted_name[:-4]
+            elif '.' in adjusted_name:
+                # Legacy behavior for other extensions
+                name_without_ext = adjusted_name[:adjusted_name.rfind('.')]
+                adjusted_name = name_without_ext
         
         # Step 3: Remove suffixes
-        neutralized_name = self.neutralize_suffixes(name_without_ext)
+        neutralized_name = self.neutralize_suffixes(adjusted_name)
         
         # Step 4: Remove brace content
         cleaned_name = re.sub(r'{.*?}', '', neutralized_name)
@@ -235,17 +239,14 @@ class FileSystemDAO:
         return dest_path
     
     # PCR folder operations
-    def get_pcr_number(self, file_name):
-        """Extract PCR number from filename using specific regex pattern
-        This uses the same pattern as the legacy GetPCRNumber function
-        """
-        # Use the exact regex pattern from the legacy script
-        if re.search(r'{pcr\d+.+}', file_name.lower()):
-            pcr = re.search(r"{pcr\d+.+}", file_name.lower()).group().upper()  # Get the bracket information {PCR123_exp1}
-            pcr = re.search(r"PCR\d+", pcr).group()  # Then get only PCR123 out of that string
-            return pcr
-        else:
-            return ''
+    def get_pcr_number(self, fileName):
+        """Extract PCR number from file name"""
+        pcr_num = ''
+        # Look for PCR pattern in brackets - only this matters for folder sorting
+        if re.search('{pcr\\d+.+}', fileName.lower()):
+            pcr_bracket = re.search("{pcr\\d+.+}", fileName.lower()).group()
+            pcr_num = re.search("pcr(\\d+)", pcr_bracket).group(1)
+        return pcr_num
     
     def is_control_file(self, file_name, control_list):
         """Check if file is a control sample"""
@@ -389,6 +390,30 @@ class FileSystemDAO:
         
         return file_path
 
+
+    def standardize_filename_for_matching(self, file_name, remove_extension=True):
+        """
+        Standardized filename cleaning method for consistent matching across all code
+        Used for PCR files, reinject lists, and any other string comparison operations
+        """
+        # Step 1: Remove file extension if needed
+        if remove_extension and file_name.endswith('.ab1'):
+            clean_name = file_name[:-4]
+        else:
+            clean_name = file_name
+        
+        # Step 2: Remove content in brackets (PCR numbers, well locations)
+        clean_name = re.sub(r'{.*?}', '', clean_name)
+        
+        # Step 3: Remove standard suffixes
+        clean_name = clean_name.replace('_Premixed', '')
+        clean_name = clean_name.replace('_RTI', '')
+        
+        # Step 4: Character standardization (only if needed for PCR matching)
+        # Note: For PCR files we generally don't need this step as we want exact matches
+        # clean_name = self.adjust_abi_chars(clean_name)
+        
+        return clean_name
 
 if __name__ == "__main__":
     # Simple test if run directly
