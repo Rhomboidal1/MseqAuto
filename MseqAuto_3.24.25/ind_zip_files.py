@@ -1,10 +1,9 @@
 # ind_zip_files.py
 import os
+import subprocess
 import sys
 import tkinter as tk
 from tkinter import filedialog
-import subprocess
-import re
 
 from config import MseqConfig
 from file_system_dao import FileSystemDAO
