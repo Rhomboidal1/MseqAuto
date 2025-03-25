@@ -75,10 +75,6 @@ def get_documents_folder():
         os.path.join("C:", "Users", current_user, "My Documents"),
         # OneDrive path
         os.path.join("C:", "Users", current_user, "OneDrive", "Documents"),
-        # Windows localized names
-        os.path.join("C:", "Users", current_user, "Dokumenter"),  # Danish
-        os.path.join("C:", "Users", current_user, "Dokumente"),   # German
-        os.path.join("C:", "Users", current_user, "Documentos"),  # Spanish
         # D: drive possibility
         os.path.join("D:", "Users", current_user, "Documents"),
     ]
