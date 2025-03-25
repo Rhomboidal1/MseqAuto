@@ -7,8 +7,8 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 
 class FileSystemDAO:
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, config_obj):
+        self.config = config_obj
         self.directory_cache = {}
 
         # Precompiled regex patterns
@@ -40,13 +40,13 @@ class FileSystemDAO:
 
     def get_folders(self, path, pattern=None):
         """Get folders matching an optional regex pattern"""
-        folders = []
+        folder_list = []
         for item in self.get_directory_contents(path):
             full_path = os.path.join(path, item)
             if os.path.isdir(full_path):
                 if pattern is None or re.search(pattern, item.lower()):
-                    folders.append(full_path)
-        return folders
+                    folder_list.append(full_path)
+        return folder_list
     
     def get_files_by_extension(self, folder, extension):
         """Get all files with specified extension in a folder"""
@@ -86,10 +86,10 @@ class FileSystemDAO:
     def get_parent_folder(self, path):
         """Get the parent folder path"""
         return os.path.dirname(path)
-    
-    def join_paths(self, *args):
+
+    def join_paths(self, base_path, *args):
         """Join path components"""
-        return os.path.join(*args)
+        return os.path.join(base_path, *args)
     
     def load_order_key(self, key_file_path):
         """Load the order key file"""
@@ -201,23 +201,24 @@ class FileSystemDAO:
             if os.path.isfile(file_path) and file_path.endswith(self.config.ZIP_EXTENSION):
                 return True
         return False
-    
-    def zip_files(self, source_folder, zip_path, file_extensions=None, exclude_extensions=None):
+
+    def zip_files(self, source_folder: str, zip_path: str, file_extensions=None, exclude_extensions=None):
         """Create a zip file from files in source_folder matching extensions"""
         with ZipFile(zip_path, 'w') as zip_file:
             for item in self.get_directory_contents(source_folder):
-                file_path = os.path.join(source_folder, item)
+                # Convert item to string if needed
+                item_str = str(item)
+                file_path = os.path.join(source_folder, item_str)
                 if not os.path.isfile(file_path):
                     continue
-                    
-                if file_extensions and not any(item.endswith(ext) for ext in file_extensions):
+                if file_extensions and not any(item_str.endswith(ext) for ext in file_extensions):
                     continue
-                
-                if exclude_extensions and any(item.endswith(ext) for ext in exclude_extensions):
+
+                if exclude_extensions and any(item_str.endswith(ext) for ext in exclude_extensions):
                     continue
-                
-                zip_file.write(file_path, arcname=item, compress_type=ZIP_DEFLATED)
-        
+
+                zip_file.write(file_path, arcname=item_str, compress_type=ZIP_DEFLATED)
+
         return True
     
     def get_zip_contents(self, zip_path):
@@ -239,12 +240,12 @@ class FileSystemDAO:
         return dest_path
     
     # PCR folder operations
-    def get_pcr_number(self, fileName):
+    def get_pcr_number(self, filename):
         """Extract PCR number from file name"""
         pcr_num = ''
         # Look for PCR pattern in brackets - only this matters for folder sorting
-        if re.search('{pcr\\d+.+}', fileName.lower()):
-            pcr_bracket = re.search("{pcr\\d+.+}", fileName.lower()).group()
+        if re.search('{pcr\\d+.+}', filename.lower()):
+            pcr_bracket = re.search("{pcr\\d+.+}", filename.lower()).group()
             pcr_num = re.search("pcr(\\d+)", pcr_bracket).group(1)
         return pcr_num
     
@@ -270,32 +271,32 @@ class FileSystemDAO:
             return True
             
         return False
-    
+
     def get_most_recent_inumber(self, path):
         """Find the most recent I number based on folder modification times"""
         try:
             # Current timestamp and cutoff (7 days ago)
             current_timestamp = datetime.now().timestamp()
             cutoff_timestamp = current_timestamp - (7 * 24 * 3600)
-            
-            folders = []
-            
+
+            recent_dirs = []  # Changed from 'folders' to 'recent_dirs'
+
             # Get folders modified in the last 7 days
             with os.scandir(path) as entries:
                 for entry in entries:
                     if entry.is_dir():
                         last_modified_timestamp = entry.stat().st_mtime
                         if last_modified_timestamp >= cutoff_timestamp:
-                            folders.append(entry.name)
-            
+                            recent_dirs.append(entry.name)
+
             # Sort folders by modification time (newest first)
-            sorted_folders = sorted(folders, key=lambda f: os.path.getmtime(os.path.join(path, f)), reverse=True)
-            
+            sorted_dirs = sorted(recent_dirs, key=lambda f: os.path.getmtime(os.path.join(path, f)), reverse=True)
+
             # Extract I number from the most recent folder
-            if sorted_folders:
-                inum = self.get_inumber_from_name(sorted_folders[0])
+            if sorted_dirs:
+                inum = self.get_inumber_from_name(sorted_dirs[0])
                 return inum
-                
+
             return None
         except Exception as e:
             print(f"Error getting most recent I number: {e}")
