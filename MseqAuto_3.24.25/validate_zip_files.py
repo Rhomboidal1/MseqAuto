@@ -1,16 +1,15 @@
 # validate_zip_files.py
 import os
+import subprocess
 import sys
 import tkinter as tk
-from tkinter import filedialog
-import subprocess
-import re
 from datetime import datetime
+from tkinter import filedialog
 
 from config import MseqConfig
+from excel_dao import ExcelDAO
 from file_system_dao import FileSystemDAO
 from folder_processor import FolderProcessor
-from excel_dao import ExcelDAO
 from logger import setup_logger
 
 # Check for 32-bit Python requirement

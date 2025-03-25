@@ -1,37 +1,38 @@
 # excel_dao.py
 import os
-import pylightxl as xl
-from datetime import datetime
+
+from pylightxl import Database, writexl, readxl
+
 
 class ExcelDAO:
     def __init__(self, config):
         self.config = config
-    
+
     def create_workbook(self):
         """Create a new workbook"""
-        db = xl.Database()
+        db = Database()
         db.add_ws(ws="Sheet1")
         return db
-    
+
     def load_workbook(self, file_path):
         """Load an existing workbook"""
         if not os.path.exists(file_path):
             return None
         try:
-            return xl.readxl(file_path)
+            return readxl(file_path)
         except Exception as e:
             print(f"Error loading Excel file: {e}")
             return None
-    
+
     def save_workbook(self, workbook, file_path):
         """Save workbook to file"""
         try:
-            xl.writexl(db=workbook, fn=file_path)
+            writexl(db=workbook, fn=file_path)
             return file_path
         except Exception as e:
             print(f"Error saving Excel file: {e}")
             return None
-    
+
     def set_cell_value(self, worksheet, row, col, value):
         """Set cell value"""
         # pylightxl uses 1-based indexing like Excel
@@ -123,8 +124,7 @@ class ExcelDAO:
 
 if __name__ == "__main__":
     # Simple test if run directly
-    from config import MseqConfig
-    
+
     class TestConfig:
         TEXT_FILES = ['.raw.qual.txt', '.raw.seq.txt', '.seq.info.txt', '.seq.qual.txt', '.seq.txt']
     
