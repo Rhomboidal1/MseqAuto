@@ -52,7 +52,7 @@ class ExcelDAO:
         """Get maximum row number"""
         return worksheet.maxrow
     
-    def create_validation_summary(self, worksheet, data_folder, prefix=None):
+    def create_validation_summary(self, worksheet, _data_folder, _prefix=None):
         """Create a validation summary workbook"""
         # Set headers
         headers = ['I Number', 'Order Number', 'Status', 'Zip Filename', 
