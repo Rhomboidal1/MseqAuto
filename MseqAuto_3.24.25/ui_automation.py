@@ -92,11 +92,11 @@ class MseqAutomation:
                                      value=True)
     def _scroll_if_needed(self, item):
         """Scroll through the tree item to see more children"""
+        import logging
+        logger = logging.getLogger(__name__)
         try:
             from pywinauto.keyboard import send_keys
-            import logging
-            
-            logger = logging.getLogger(__name__)
+
             logger.info("Attempting to scroll to find more items")
             
             # Ensure item is visible and expanded
