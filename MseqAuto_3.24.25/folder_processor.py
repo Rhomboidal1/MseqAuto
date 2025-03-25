@@ -427,7 +427,7 @@ class FolderProcessor:
 
         return new_folder_path
 
-    def _cleanup_original_folder(self, original_folder, new_folder):
+    def _cleanup_original_folder(self, original_folder: str, new_folder: str):
         """
         Enhanced cleanup to remove the original folder if all files have been processed
         """
@@ -464,22 +464,23 @@ class FolderProcessor:
 
         # Try to move any remaining Control/Blank folders to the new location
         moved_all = True
+        item: str
         for item in list(remaining_items):  # Create a copy of the list to avoid iteration issues
-            item_path = os.path.join(original_folder, item)
+            item_path = os.path.join(original_folder, str(item))  # Explicit conversion to string
 
             if item in ["Controls", "Blank", "Alternate Injections"]:
                 # Try to move this folder to the new location if it's not empty
                 if os.path.isdir(item_path) and os.listdir(item_path):
                     try:
                         # Create target folder in new location if needed
-                        target_path = os.path.join(new_folder, item)
+                        target_path = os.path.join(new_folder, item)  # Explicit conversion to string
                         if not os.path.exists(target_path):
                             os.makedirs(target_path)
 
                         # Move all files from old to new location
                         for subitem in os.listdir(item_path):
-                            old_file = os.path.join(item_path, subitem)
-                            new_file = os.path.join(target_path, subitem)
+                            old_file = os.path.join(item_path, subitem)  # Explicit conversion to string
+                            new_file = os.path.join(target_path, subitem)  # Explicit conversion to string
                             if os.path.isfile(old_file):
                                 self.file_dao.move_file(old_file, new_file)
                                 self.logger(f"Moved remaining file {subitem} to {target_path}")
@@ -897,6 +898,59 @@ class FolderProcessor:
             log("No reinject list available")
 
         log(f"\nTest completed. Results saved to {output_file}")
+
+    def check_order_status(self, folder_path):
+        """
+        Check the processing status of a folder
+
+        Args:
+            folder_path (str): Path to the folder to check
+
+        Returns:
+            tuple: (was_mseqed, has_braces, has_ab1_files)
+                - was_mseqed: True if folder has been processed by mSeq
+                - has_braces: True if any files have brace tags (e.g., {tag})
+                - has_ab1_files: True if folder contains .ab1 files
+        """
+        was_mseqed = False
+        has_braces = False
+        has_ab1_files = False
+
+        # Get all files in the folder
+        folder_contents = self.file_dao.get_directory_contents(folder_path)
+
+        # Check for mSeq directory structure
+        mseq_set = {'chromat_dir', 'edit_dir', 'phd_dir', 'mseq4.ini'}
+        current_proj = [item for item in folder_contents if item in mseq_set]
+
+        # A folder has been mSeqed if it contains all the required directories/files
+        if set(current_proj) == mseq_set:
+            was_mseqed = True
+
+        # Check for the 5 txt files as an additional verification
+        txt_file_count = 0
+        for item in folder_contents:
+            item_path = os.path.join(folder_path, item)
+            if os.path.isfile(item_path):
+                if (item.endswith('.raw.qual.txt') or
+                        item.endswith('.raw.seq.txt') or
+                        item.endswith('.seq.info.txt') or
+                        item.endswith('.seq.qual.txt') or
+                        item.endswith('.seq.txt')):
+                    txt_file_count += 1
+
+        # If all 5 txt files are present, that's another indicator it was mSeqed
+        if txt_file_count == 5:
+            was_mseqed = True
+
+        # Check for .ab1 files and braces
+        for item in folder_contents:
+            if item.endswith('.ab1'):
+                has_ab1_files = True
+                if '{' in item or '}' in item:
+                    has_braces = True
+
+        return was_mseqed, has_braces, has_ab1_files
 
 
 if __name__ == "__main__":
