@@ -92,3 +92,63 @@
 2025-03-18 10:30:43,385 - INFO - Closing mSeq...
 2025-03-18 10:30:43,396 - INFO - Done
 2025-03-18 10:30:43,418 - INFO - ==================================================
+2025-03-25 09:57:28,816 - INFO - ==================================================
+2025-03-25 09:57:28,817 - INFO - Starting mSeq open test...
+2025-03-25 09:57:28,887 - INFO - Platform: Windows-10-10.0.19045-SP0
+2025-03-25 09:57:28,889 - INFO - Config loaded
+2025-03-25 09:57:28,890 - INFO - FileSystemDAO initialized
+2025-03-25 09:57:28,891 - INFO - UI Automation initialized
+2025-03-25 09:57:28,891 - INFO - Current user: tyler
+2025-03-25 09:57:28,892 - INFO - Trying Windows Shell API method
+2025-03-25 09:57:28,899 - WARNING - Error getting Documents via Windows API: _type_ must have storage info
+2025-03-25 09:57:28,900 - INFO - Trying environment variable method
+2025-03-25 09:57:28,900 - INFO - Checking environment path: C:\Users\tyler\Documents
+2025-03-25 09:57:28,901 - INFO - Found Documents via environment variable: C:\Users\tyler\Documents
+2025-03-25 09:57:28,901 - INFO - Overriding automatically detected path with custom folder: P:\Data\Testing\Win11Test
+2025-03-25 09:57:28,902 - INFO - Path discovery took 0.01 seconds
+2025-03-25 09:57:28,902 - INFO - Using test folder: P:\Data\Testing\Win11Test
+2025-03-25 09:57:28,903 - INFO - Folders in P:\Data\Testing\Win11Test:
+2025-03-25 09:57:28,906 - INFO -   - BioI-21884
+2025-03-25 09:57:28,907 - INFO -   - BioI-21885
+2025-03-25 09:57:28,907 - INFO -   - Copy from here
+2025-03-25 09:57:28,908 - INFO -   - FB-PCR2939
+2025-03-25 09:57:28,908 - INFO -   - FB-PCR2940
+2025-03-25 09:57:28,910 - INFO -   ... and 2 more
+2025-03-25 09:57:28,911 - INFO - Attempting to open mSeq and navigate...
+2025-03-25 09:57:28,911 - INFO - Connecting to or starting mSeq...
+2025-03-25 09:57:29,489 - INFO - Connection took 0.58 seconds
+2025-03-25 09:57:29,499 - INFO - mSeq window: MseqAuto_3.24.25
+2025-03-25 09:57:29,683 - INFO - Set focus to main window
+2025-03-25 09:57:29,683 - INFO - Pressing Ctrl+N...
+2025-03-25 09:57:29,840 - INFO - Waiting for Browse For Folder dialog...
+2025-03-25 09:57:31,421 - INFO - Falling back to generic dialog detection...
+2025-03-25 09:58:10,019 - INFO - ==================================================
+2025-03-25 09:58:10,021 - INFO - Starting mSeq open test...
+2025-03-25 09:58:10,090 - INFO - Platform: Windows-10-10.0.19045-SP0
+2025-03-25 09:58:10,092 - INFO - Config loaded
+2025-03-25 09:58:10,093 - INFO - FileSystemDAO initialized
+2025-03-25 09:58:10,093 - INFO - UI Automation initialized
+2025-03-25 09:58:10,094 - INFO - Current user: tyler
+2025-03-25 09:58:10,094 - INFO - Trying Windows Shell API method
+2025-03-25 09:58:10,102 - WARNING - Error getting Documents via Windows API: _type_ must have storage info
+2025-03-25 09:58:10,102 - INFO - Trying environment variable method
+2025-03-25 09:58:10,103 - INFO - Checking environment path: C:\Users\tyler\Documents
+2025-03-25 09:58:10,103 - INFO - Found Documents via environment variable: C:\Users\tyler\Documents
+2025-03-25 09:58:10,104 - INFO - Overriding automatically detected path with custom folder: P:\Data\Testing\Win11Test
+2025-03-25 09:58:10,104 - INFO - Path discovery took 0.01 seconds
+2025-03-25 09:58:10,105 - INFO - Using test folder: P:\Data\Testing\Win11Test
+2025-03-25 09:58:10,105 - INFO - Folders in P:\Data\Testing\Win11Test:
+2025-03-25 09:58:10,106 - INFO -   - BioI-21884
+2025-03-25 09:58:10,107 - INFO -   - BioI-21885
+2025-03-25 09:58:10,107 - INFO -   - Copy from here
+2025-03-25 09:58:10,108 - INFO -   - FB-PCR2939
+2025-03-25 09:58:10,109 - INFO -   - FB-PCR2940
+2025-03-25 09:58:10,111 - INFO -   ... and 2 more
+2025-03-25 09:58:10,111 - INFO - Attempting to open mSeq and navigate...
+2025-03-25 09:58:10,112 - INFO - Connecting to or starting mSeq...
+2025-03-25 09:58:10,657 - INFO - Connection took 0.54 seconds
+2025-03-25 09:58:10,667 - INFO - mSeq window: MseqAuto_3.24.25
+2025-03-25 09:58:10,850 - INFO - Set focus to main window
+2025-03-25 09:58:10,851 - INFO - Pressing Ctrl+N...
+2025-03-25 09:58:11,010 - INFO - Waiting for Browse For Folder dialog...
+2025-03-25 09:58:12,593 - INFO - Falling back to generic dialog detection...

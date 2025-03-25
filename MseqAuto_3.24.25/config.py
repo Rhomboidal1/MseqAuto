@@ -22,6 +22,9 @@ class MseqConfig:
         
     MSEQ_PATH = r"C:\DNA\Mseq4\bin"
     MSEQ_EXECUTABLE = r"j.exe -jprofile mseq.ijl"
+
+    # Check for already zipped files
+    ZIP_EXTENSION = '.zip'
     
     # Network drives - these are mapped differently in file dialogs
     NETWORK_DRIVES = {

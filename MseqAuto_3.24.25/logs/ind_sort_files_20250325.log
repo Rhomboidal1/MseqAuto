@@ -1,0 +1,2063 @@
+2025-03-25 09:43:37,782 - INFO - Starting IND sort files...
+2025-03-25 09:43:37,783 - INFO - Config loaded
+2025-03-25 09:43:37,784 - INFO - FileSystemDAO initialized
+2025-03-25 09:43:37,795 - INFO - Folder processor initialized
+2025-03-25 09:43:37,802 - INFO - Running batch file: P:\generate-data-sorting-key-file.bat
+2025-03-25 09:43:38,697 - INFO - Batch file completed successfully
+2025-03-25 09:43:50,961 - INFO - Using folder: P:/Data/03.25.25
+2025-03-25 09:43:50,965 - INFO - Found 3 I numbers and 3 BioI folders
+2025-03-25 09:43:50,965 - INFO - Finding most recent I number from Data/Individuals
+2025-03-25 09:43:50,998 - INFO - Getting files from last 5 days
+2025-03-25 09:43:51,117 - INFO - Filtering I numbers greater than 21893
+2025-03-25 09:43:51,118 - INFO - Including files from last 12 hours
+2025-03-25 09:43:51,198 - INFO - Using recent I numbers: ['21896', '21898', '21897', '21896', '21894']
+2025-03-25 09:43:51,415 - INFO - Order key loaded
+2025-03-25 09:43:51,444 - INFO - Found 96 reinjects
+2025-03-25 09:43:51,445 - INFO - Processing folder 1/3: 2025-03-25_BioI-21896_1
+2025-03-25 09:43:51,446 - INFO - Processing folder: P:/Data/03.25.25\2025-03-25_BioI-21896_1
+2025-03-25 09:43:51,450 - INFO - Created new BioI folder: P:/Data/03.25.25\BioI-21896
+2025-03-25 09:43:51,453 - INFO - Found 96 .ab1 files in folder
+2025-03-25 09:43:51,455 - INFO - Identified control file: {12A}_Water_T7Promoter.ab1
+2025-03-25 09:43:51,455 - INFO - Identified control file: {12B}_Water_SP6Promoter.ab1
+2025-03-25 09:43:51,456 - INFO - Identified control file: {12C}_Water_M13F-20.ab1
+2025-03-25 09:43:51,457 - INFO - Identified control file: {12D}_Water_M13R-27.ab1
+2025-03-25 09:43:51,457 - INFO - Identified control file: {12E}_pGEM_T7Promoter.ab1
+2025-03-25 09:43:51,458 - INFO - Identified control file: {12F}_pGEM_SP6Promoter.ab1
+2025-03-25 09:43:51,459 - INFO - Identified control file: {12G}_pGEM_M13F-20.ab1
+2025-03-25 09:43:51,459 - INFO - Identified control file: {12H}_pGEM_M13R-27.ab1
+2025-03-25 09:43:51,460 - INFO - Classified 0 PCR numbers, 8 controls, 0 blanks, 88 customer files
+2025-03-25 09:43:51,461 - INFO - No blank files were identified in this folder
+2025-03-25 09:43:51,461 - INFO - Processing 8 control files
+2025-03-25 09:43:51,471 - INFO - Moved control file {12A}_Water_T7Promoter.ab1 to P:/Data/03.25.25\BioI-21896\Controls
+2025-03-25 09:43:51,476 - INFO - Moved control file {12B}_Water_SP6Promoter.ab1 to P:/Data/03.25.25\BioI-21896\Controls
+2025-03-25 09:43:51,482 - INFO - Moved control file {12C}_Water_M13F-20.ab1 to P:/Data/03.25.25\BioI-21896\Controls
+2025-03-25 09:43:51,488 - INFO - Moved control file {12D}_Water_M13R-27.ab1 to P:/Data/03.25.25\BioI-21896\Controls
+2025-03-25 09:43:51,493 - INFO - Moved control file {12E}_pGEM_T7Promoter.ab1 to P:/Data/03.25.25\BioI-21896\Controls
+2025-03-25 09:43:51,499 - INFO - Moved control file {12F}_pGEM_SP6Promoter.ab1 to P:/Data/03.25.25\BioI-21896\Controls
+2025-03-25 09:43:51,504 - INFO - Moved control file {12G}_pGEM_M13F-20.ab1 to P:/Data/03.25.25\BioI-21896\Controls
+2025-03-25 09:43:51,510 - INFO - Moved control file {12H}_pGEM_M13R-27.ab1 to P:/Data/03.25.25\BioI-21896\Controls
+2025-03-25 09:43:51,510 - INFO - Processing 88 customer files
+2025-03-25 09:43:51,529 - INFO - Built order key index with 1407 unique entries
+2025-03-25 09:43:51,530 - INFO - Processing customer file: {01A}A1_27F.ab1
+2025-03-25 09:43:51,531 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,532 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,533 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,533 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,534 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,537 - INFO - Created order folder: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,538 - INFO - Is reinject: False
+2025-03-25 09:43:51,544 - INFO - File moved to main folder
+2025-03-25 09:43:51,544 - INFO - Processing customer file: {01B}A2_27F.ab1
+2025-03-25 09:43:51,545 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,545 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,546 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,546 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,547 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,548 - INFO - Is reinject: False
+2025-03-25 09:43:51,553 - INFO - File moved to main folder
+2025-03-25 09:43:51,554 - INFO - Processing customer file: {01C}A3_27F.ab1
+2025-03-25 09:43:51,554 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,555 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,556 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,556 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,557 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,558 - INFO - Is reinject: False
+2025-03-25 09:43:51,562 - INFO - File moved to main folder
+2025-03-25 09:43:51,562 - INFO - Processing customer file: {01D}A4_27F.ab1
+2025-03-25 09:43:51,563 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,563 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,564 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,566 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,566 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,567 - INFO - Is reinject: False
+2025-03-25 09:43:51,571 - INFO - File moved to main folder
+2025-03-25 09:43:51,572 - INFO - Processing customer file: {01E}A5_27F.ab1
+2025-03-25 09:43:51,573 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,573 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,574 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,574 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,575 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,576 - INFO - Is reinject: False
+2025-03-25 09:43:51,581 - INFO - File moved to main folder
+2025-03-25 09:43:51,582 - INFO - Processing customer file: {01F}A6_27F.ab1
+2025-03-25 09:43:51,582 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,583 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,584 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,584 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,585 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,586 - INFO - Is reinject: False
+2025-03-25 09:43:51,591 - INFO - File moved to main folder
+2025-03-25 09:43:51,591 - INFO - Processing customer file: {01G}A7_27F.ab1
+2025-03-25 09:43:51,592 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,592 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,593 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,594 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,594 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,595 - INFO - Is reinject: False
+2025-03-25 09:43:51,600 - INFO - File moved to main folder
+2025-03-25 09:43:51,601 - INFO - Processing customer file: {01H}A8_27F.ab1
+2025-03-25 09:43:51,601 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,602 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,602 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,603 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,604 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,605 - INFO - Is reinject: False
+2025-03-25 09:43:51,609 - INFO - File moved to main folder
+2025-03-25 09:43:51,610 - INFO - Processing customer file: {02A}C1_27F.ab1
+2025-03-25 09:43:51,610 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,611 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,612 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,612 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,613 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,614 - INFO - Is reinject: False
+2025-03-25 09:43:51,619 - INFO - File moved to main folder
+2025-03-25 09:43:51,620 - INFO - Processing customer file: {02B}C2_27F.ab1
+2025-03-25 09:43:51,620 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,621 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,622 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,622 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,623 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,624 - INFO - Is reinject: False
+2025-03-25 09:43:51,633 - INFO - File moved to main folder
+2025-03-25 09:43:51,633 - INFO - Processing customer file: {02C}C3_27F.ab1
+2025-03-25 09:43:51,634 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,634 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,635 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,636 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,638 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,639 - INFO - Is reinject: False
+2025-03-25 09:43:51,645 - INFO - File moved to main folder
+2025-03-25 09:43:51,645 - INFO - Processing customer file: {02D}C4_27F.ab1
+2025-03-25 09:43:51,648 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,649 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,650 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,650 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,651 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,652 - INFO - Is reinject: False
+2025-03-25 09:43:51,656 - INFO - File moved to main folder
+2025-03-25 09:43:51,657 - INFO - Processing customer file: {02E}C5_27F.ab1
+2025-03-25 09:43:51,657 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,659 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,660 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,660 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,662 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,663 - INFO - Is reinject: False
+2025-03-25 09:43:51,668 - INFO - File moved to main folder
+2025-03-25 09:43:51,668 - INFO - Processing customer file: {02F}C6_27F.ab1
+2025-03-25 09:43:51,669 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,671 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,673 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,674 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,674 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,675 - INFO - Is reinject: False
+2025-03-25 09:43:51,680 - INFO - File moved to main folder
+2025-03-25 09:43:51,680 - INFO - Processing customer file: {02G}C7_27F.ab1
+2025-03-25 09:43:51,681 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,681 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,683 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,684 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,686 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,687 - INFO - Is reinject: False
+2025-03-25 09:43:51,691 - INFO - File moved to main folder
+2025-03-25 09:43:51,692 - INFO - Processing customer file: {02H}C8_27F.ab1
+2025-03-25 09:43:51,699 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,704 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,705 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,705 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,706 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,707 - INFO - Is reinject: False
+2025-03-25 09:43:51,712 - INFO - File moved to main folder
+2025-03-25 09:43:51,713 - INFO - Processing customer file: {03A}E1_27F.ab1
+2025-03-25 09:43:51,714 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,714 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,716 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,716 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,717 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,719 - INFO - Is reinject: False
+2025-03-25 09:43:51,723 - INFO - File moved to main folder
+2025-03-25 09:43:51,724 - INFO - Processing customer file: {03B}E2_27F.ab1
+2025-03-25 09:43:51,725 - INFO - Target order folder: BioI-21896_Slinger_147892
+2025-03-25 09:43:51,725 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,726 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,727 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,728 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Slinger_147892
+2025-03-25 09:43:51,728 - INFO - Is reinject: False
+2025-03-25 09:43:51,733 - INFO - File moved to main folder
+2025-03-25 09:43:51,733 - INFO - Processing customer file: {03C}38_B6572_pB40-LS_2x1_PLA_Kseq_F{5_25}.ab1
+2025-03-25 09:43:51,735 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,735 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,736 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,737 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,737 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,739 - INFO - Created order folder: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,740 - INFO - Is reinject: True
+2025-03-25 09:43:51,747 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,749 - INFO - Processing customer file: {03D}38_B6575_pB40-LS_2x1_PLA_Kseq_F{5_25}.ab1
+2025-03-25 09:43:51,749 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,750 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,750 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,751 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,751 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,752 - INFO - Is reinject: True
+2025-03-25 09:43:51,757 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,758 - INFO - Processing customer file: {03E}38_B6577_pB40-LS_2x1_PLA_Kseq_F{5_25}.ab1
+2025-03-25 09:43:51,759 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,759 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,760 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,760 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,761 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,762 - INFO - Is reinject: True
+2025-03-25 09:43:51,766 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,766 - INFO - Processing customer file: {03F}38_B6582_pB40-LS_2x1_PLA_Kseq_F{5_25}.ab1
+2025-03-25 09:43:51,766 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,767 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,767 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,768 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,768 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,769 - INFO - Is reinject: True
+2025-03-25 09:43:51,774 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,774 - INFO - Processing customer file: {03G}38_B6583_pB40-LS_2x1_PLA_Kseq_F{5_25}.ab1
+2025-03-25 09:43:51,775 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,776 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,776 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,777 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,777 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,778 - INFO - Is reinject: True
+2025-03-25 09:43:51,783 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,783 - INFO - Processing customer file: {03H}38_B6572_pB40-LS_2x1_PLA_Kseq_R{5_25}.ab1
+2025-03-25 09:43:51,784 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,785 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,785 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,786 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,787 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,788 - INFO - Is reinject: True
+2025-03-25 09:43:51,792 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,793 - INFO - Processing customer file: {04A}38_B6575_pB40-LS_2x1_PLA_Kseq_R{5_25}.ab1
+2025-03-25 09:43:51,794 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,795 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,796 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,796 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,797 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,798 - INFO - Is reinject: True
+2025-03-25 09:43:51,802 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,803 - INFO - Processing customer file: {04B}38_B6577_pB40-LS_2x1_PLA_Kseq_R{5_25}.ab1
+2025-03-25 09:43:51,803 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,822 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,824 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,825 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,826 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,828 - INFO - Is reinject: True
+2025-03-25 09:43:51,834 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,835 - INFO - Processing customer file: {04C}38_B6582_pB40-LS_2x1_PLA_Kseq_R{5_25}.ab1
+2025-03-25 09:43:51,836 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,836 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,836 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,837 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,838 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,840 - INFO - Is reinject: True
+2025-03-25 09:43:51,845 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,846 - INFO - Processing customer file: {04D}38_B6583_pB40-LS_2x1_PLA_Kseq_R{5_25}.ab1
+2025-03-25 09:43:51,846 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,847 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,848 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,849 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,850 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,851 - INFO - Is reinject: True
+2025-03-25 09:43:51,859 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,859 - INFO - Processing customer file: {04E}38_B6572_pB40-LS_2x1_PLA_30-46{5_25}.ab1
+2025-03-25 09:43:51,860 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,860 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,861 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,862 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,863 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,864 - INFO - Is reinject: True
+2025-03-25 09:43:51,868 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,869 - INFO - Processing customer file: {04F}38_B6575_pB40-LS_2x1_PLA_30-46{5_25}.ab1
+2025-03-25 09:43:51,870 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,870 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,871 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,871 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,872 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,873 - INFO - Is reinject: True
+2025-03-25 09:43:51,878 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,880 - INFO - Processing customer file: {04G}38_B6577_pB40-LS_2x1_PLA_30-46{5_25}.ab1
+2025-03-25 09:43:51,881 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,882 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,882 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,883 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,884 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,885 - INFO - Is reinject: True
+2025-03-25 09:43:51,890 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,890 - INFO - Processing customer file: {04H}38_B6582_pB40-LS_2x1_PLA_30-46{5_25}.ab1
+2025-03-25 09:43:51,891 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,891 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,893 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,894 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,894 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,895 - INFO - Is reinject: True
+2025-03-25 09:43:51,901 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,902 - INFO - Processing customer file: {05A}38_B6583_pB40-LS_2x1_PLA_30-46{5_25}.ab1
+2025-03-25 09:43:51,902 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,902 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,904 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,904 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,905 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,906 - INFO - Is reinject: True
+2025-03-25 09:43:51,911 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,912 - INFO - Processing customer file: {05B}38_B6572_pB40-LS_2x1_PLA_69-78{5_25}.ab1
+2025-03-25 09:43:51,912 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,913 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,914 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,914 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,915 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,916 - INFO - Is reinject: False
+2025-03-25 09:43:51,921 - INFO - File moved to main folder
+2025-03-25 09:43:51,921 - INFO - Processing customer file: {05C}38_B6575_pB40-LS_2x1_PLA_69-78{5_25}.ab1
+2025-03-25 09:43:51,922 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,923 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,924 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,924 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,926 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,927 - INFO - Is reinject: False
+2025-03-25 09:43:51,946 - INFO - File moved to main folder
+2025-03-25 09:43:51,947 - INFO - Processing customer file: {05D}38_B6577_pB40-LS_2x1_PLA_69-78{5_25}.ab1
+2025-03-25 09:43:51,947 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,948 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,949 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,949 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,950 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,951 - INFO - Is reinject: False
+2025-03-25 09:43:51,957 - INFO - File moved to main folder
+2025-03-25 09:43:51,958 - INFO - Processing customer file: {05E}38_B6582_pB40-LS_2x1_PLA_69-78{5_25}.ab1
+2025-03-25 09:43:51,958 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,959 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,960 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,961 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,961 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,963 - INFO - Is reinject: False
+2025-03-25 09:43:51,967 - INFO - File moved to main folder
+2025-03-25 09:43:51,968 - INFO - Processing customer file: {05F}38_B6583_pB40-LS_2x1_PLA_69-78{5_25}.ab1
+2025-03-25 09:43:51,969 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,969 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,970 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,971 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,972 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,973 - INFO - Is reinject: True
+2025-03-25 09:43:51,978 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:51,979 - INFO - Processing customer file: {05G}38_B6572_pB40-LS_2x1_PLA_106-20{5_25}.ab1
+2025-03-25 09:43:51,980 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,980 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,981 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,981 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,982 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,983 - INFO - Is reinject: False
+2025-03-25 09:43:51,988 - INFO - File moved to main folder
+2025-03-25 09:43:51,988 - INFO - Processing customer file: {05H}38_B6575_pB40-LS_2x1_PLA_106-20{5_25}.ab1
+2025-03-25 09:43:51,989 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,989 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,990 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:51,991 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:51,992 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,992 - INFO - Is reinject: False
+2025-03-25 09:43:51,997 - INFO - File moved to main folder
+2025-03-25 09:43:51,997 - INFO - Processing customer file: {06A}38_B6577_pB40-LS_2x1_PLA_106-20{5_25}.ab1
+2025-03-25 09:43:51,998 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:51,998 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:51,999 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,000 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,000 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,001 - INFO - Is reinject: True
+2025-03-25 09:43:52,006 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,008 - INFO - Processing customer file: {06B}38_B6582_pB40-LS_2x1_PLA_106-20{5_25}.ab1
+2025-03-25 09:43:52,008 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,010 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,011 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,011 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,012 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,013 - INFO - Is reinject: True
+2025-03-25 09:43:52,016 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,018 - INFO - Processing customer file: {06C}38_B6583_pB40-LS_2x1_PLA_106-20{5_25}.ab1
+2025-03-25 09:43:52,018 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,019 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,019 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,020 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,021 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,022 - INFO - Is reinject: False
+2025-03-25 09:43:52,026 - INFO - File moved to main folder
+2025-03-25 09:43:52,027 - INFO - Processing customer file: {06D}38_B6572_pB40-LS_2x1_PLA_126-72{5_25}.ab1
+2025-03-25 09:43:52,027 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,028 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,029 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,029 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,030 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,030 - INFO - Is reinject: False
+2025-03-25 09:43:52,035 - INFO - File moved to main folder
+2025-03-25 09:43:52,039 - INFO - Processing customer file: {06E}38_B6575_pB40-LS_2x1_PLA_126-72{5_25}.ab1
+2025-03-25 09:43:52,039 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,040 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,041 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,042 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,042 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,045 - INFO - Is reinject: False
+2025-03-25 09:43:52,050 - INFO - File moved to main folder
+2025-03-25 09:43:52,051 - INFO - Processing customer file: {06F}38_B6577_pB40-LS_2x1_PLA_126-72{5_25}.ab1
+2025-03-25 09:43:52,052 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,053 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,053 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,054 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,055 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,056 - INFO - Is reinject: False
+2025-03-25 09:43:52,069 - INFO - File moved to main folder
+2025-03-25 09:43:52,069 - INFO - Processing customer file: {06G}38_B6582_pB40-LS_2x1_PLA_126-72{5_25}.ab1
+2025-03-25 09:43:52,070 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,071 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,071 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,072 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,073 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,074 - INFO - Is reinject: False
+2025-03-25 09:43:52,080 - INFO - File moved to main folder
+2025-03-25 09:43:52,080 - INFO - Processing customer file: {06H}38_B6583_pB40-LS_2x1_PLA_126-72{5_25}.ab1
+2025-03-25 09:43:52,081 - INFO - Target order folder: BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,081 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,082 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,082 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,083 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147906
+2025-03-25 09:43:52,084 - INFO - Is reinject: False
+2025-03-25 09:43:52,090 - INFO - File moved to main folder
+2025-03-25 09:43:52,092 - INFO - Processing customer file: {07A}4_036_KseqF{5_25}.ab1
+2025-03-25 09:43:52,092 - INFO - Target order folder: BioI-21896_Kaufman_147910
+2025-03-25 09:43:52,093 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,094 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,094 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,095 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147910
+2025-03-25 09:43:52,097 - INFO - Created order folder: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147910
+2025-03-25 09:43:52,098 - INFO - Is reinject: False
+2025-03-25 09:43:52,103 - INFO - File moved to main folder
+2025-03-25 09:43:52,103 - INFO - Processing customer file: {07B}56_035_KseqF{5_25}.ab1
+2025-03-25 09:43:52,104 - INFO - Target order folder: BioI-21896_Kaufman_147910
+2025-03-25 09:43:52,104 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,106 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,106 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,107 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147910
+2025-03-25 09:43:52,108 - INFO - Is reinject: False
+2025-03-25 09:43:52,113 - INFO - File moved to main folder
+2025-03-25 09:43:52,114 - INFO - Processing customer file: {07C}4_036_KseqR{5_25}.ab1
+2025-03-25 09:43:52,114 - INFO - Target order folder: BioI-21896_Kaufman_147910
+2025-03-25 09:43:52,115 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,116 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,116 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,117 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147910
+2025-03-25 09:43:52,118 - INFO - Is reinject: False
+2025-03-25 09:43:52,123 - INFO - File moved to main folder
+2025-03-25 09:43:52,124 - INFO - Processing customer file: {07D}56_035_KseqR{5_25}.ab1
+2025-03-25 09:43:52,124 - INFO - Target order folder: BioI-21896_Kaufman_147910
+2025-03-25 09:43:52,125 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,126 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,127 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,127 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147910
+2025-03-25 09:43:52,128 - INFO - Is reinject: False
+2025-03-25 09:43:52,134 - INFO - File moved to main folder
+2025-03-25 09:43:52,134 - INFO - Processing customer file: {07E}56_033_KseqF{5_25}.ab1
+2025-03-25 09:43:52,136 - INFO - Target order folder: BioI-21896_Kaufman_147889
+2025-03-25 09:43:52,137 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,139 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,139 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,140 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147889
+2025-03-25 09:43:52,143 - INFO - Created order folder: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147889
+2025-03-25 09:43:52,144 - INFO - Is reinject: False
+2025-03-25 09:43:52,149 - INFO - File moved to main folder
+2025-03-25 09:43:52,149 - INFO - Processing customer file: {07F}31_004_KseqF{5_25}.ab1
+2025-03-25 09:43:52,150 - INFO - Target order folder: BioI-21896_Kaufman_147889
+2025-03-25 09:43:52,150 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,151 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,152 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,152 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147889
+2025-03-25 09:43:52,153 - INFO - Is reinject: False
+2025-03-25 09:43:52,158 - INFO - File moved to main folder
+2025-03-25 09:43:52,159 - INFO - Processing customer file: {07G}56_033_KseqR{5_25}.ab1
+2025-03-25 09:43:52,159 - INFO - Target order folder: BioI-21896_Kaufman_147889
+2025-03-25 09:43:52,160 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,161 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,161 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,162 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147889
+2025-03-25 09:43:52,162 - INFO - Is reinject: False
+2025-03-25 09:43:52,167 - INFO - File moved to main folder
+2025-03-25 09:43:52,167 - INFO - Processing customer file: {07H}31_004_KseqR{5_25}.ab1
+2025-03-25 09:43:52,168 - INFO - Target order folder: BioI-21896_Kaufman_147889
+2025-03-25 09:43:52,169 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,169 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,170 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,171 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147889
+2025-03-25 09:43:52,172 - INFO - Is reinject: False
+2025-03-25 09:43:52,176 - INFO - File moved to main folder
+2025-03-25 09:43:52,176 - INFO - Processing customer file: {08A}C1_4_KseqF{5_25}.ab1
+2025-03-25 09:43:52,177 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,178 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,179 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,179 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,180 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,192 - INFO - Created order folder: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,193 - INFO - Is reinject: False
+2025-03-25 09:43:52,198 - INFO - File moved to main folder
+2025-03-25 09:43:52,199 - INFO - Processing customer file: {08B}C1_23_KseqF{5_25}.ab1
+2025-03-25 09:43:52,199 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,200 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,201 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,201 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,202 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,203 - INFO - Is reinject: False
+2025-03-25 09:43:52,208 - INFO - File moved to main folder
+2025-03-25 09:43:52,208 - INFO - Processing customer file: {08C}C1_29_KseqF{5_25}.ab1
+2025-03-25 09:43:52,209 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,209 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,210 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,211 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,212 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,213 - INFO - Is reinject: False
+2025-03-25 09:43:52,217 - INFO - File moved to main folder
+2025-03-25 09:43:52,218 - INFO - Processing customer file: {08D}C1_31_KseqF{5_25}.ab1
+2025-03-25 09:43:52,219 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,219 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,220 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,220 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,221 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,222 - INFO - Is reinject: False
+2025-03-25 09:43:52,226 - INFO - File moved to main folder
+2025-03-25 09:43:52,226 - INFO - Processing customer file: {08E}C1_54_KseqF{5_25}.ab1
+2025-03-25 09:43:52,227 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,227 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,228 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,229 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,229 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,230 - INFO - Is reinject: False
+2025-03-25 09:43:52,234 - INFO - File moved to main folder
+2025-03-25 09:43:52,234 - INFO - Processing customer file: {08F}C1_140_KseqF{5_25}.ab1
+2025-03-25 09:43:52,235 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,238 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,240 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,242 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,243 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,244 - INFO - Is reinject: False
+2025-03-25 09:43:52,250 - INFO - File moved to main folder
+2025-03-25 09:43:52,250 - INFO - Processing customer file: {08G}C1_5_KseqF{5_25}.ab1
+2025-03-25 09:43:52,251 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,252 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,253 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,253 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,254 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,255 - INFO - Is reinject: False
+2025-03-25 09:43:52,260 - INFO - File moved to main folder
+2025-03-25 09:43:52,261 - INFO - Processing customer file: {08H}C2_29_KseqF{5_25}.ab1
+2025-03-25 09:43:52,262 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,262 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,264 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,264 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,265 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,266 - INFO - Is reinject: False
+2025-03-25 09:43:52,271 - INFO - File moved to main folder
+2025-03-25 09:43:52,271 - INFO - Processing customer file: {09A}C1_4_KseqR{5_25}.ab1
+2025-03-25 09:43:52,273 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,273 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,274 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,275 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,276 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,277 - INFO - Is reinject: False
+2025-03-25 09:43:52,282 - INFO - File moved to main folder
+2025-03-25 09:43:52,282 - INFO - Processing customer file: {09B}C1_23_KseqR{5_25}.ab1
+2025-03-25 09:43:52,283 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,283 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,285 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,285 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,286 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,287 - INFO - Is reinject: False
+2025-03-25 09:43:52,292 - INFO - File moved to main folder
+2025-03-25 09:43:52,292 - INFO - Processing customer file: {09C}C1_29_KseqR{5_25}.ab1
+2025-03-25 09:43:52,293 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,293 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,296 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,296 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,297 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,298 - INFO - Is reinject: False
+2025-03-25 09:43:52,302 - INFO - File moved to main folder
+2025-03-25 09:43:52,302 - INFO - Processing customer file: {09D}C1_31_KseqR{5_25}.ab1
+2025-03-25 09:43:52,303 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,304 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,305 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,305 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,306 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,307 - INFO - Is reinject: False
+2025-03-25 09:43:52,312 - INFO - File moved to main folder
+2025-03-25 09:43:52,312 - INFO - Processing customer file: {09E}C1_54_KseqR{5_25}.ab1
+2025-03-25 09:43:52,313 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,313 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,314 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,315 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,316 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,316 - INFO - Is reinject: False
+2025-03-25 09:43:52,321 - INFO - File moved to main folder
+2025-03-25 09:43:52,322 - INFO - Processing customer file: {09F}C1_140_KseqR{5_25}.ab1
+2025-03-25 09:43:52,322 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,323 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,325 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,325 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,326 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,327 - INFO - Is reinject: False
+2025-03-25 09:43:52,332 - INFO - File moved to main folder
+2025-03-25 09:43:52,332 - INFO - Processing customer file: {09G}C1_5_KseqR{5_25}.ab1
+2025-03-25 09:43:52,333 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,333 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,334 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,335 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,336 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,337 - INFO - Is reinject: False
+2025-03-25 09:43:52,341 - INFO - File moved to main folder
+2025-03-25 09:43:52,342 - INFO - Processing customer file: {09H}C2_29_KseqR{5_25}.ab1
+2025-03-25 09:43:52,342 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,343 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,344 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,344 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,344 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,345 - INFO - Is reinject: False
+2025-03-25 09:43:52,350 - INFO - File moved to main folder
+2025-03-25 09:43:52,350 - INFO - Processing customer file: {10A}C2_31_KseqF{5_25}.ab1
+2025-03-25 09:43:52,351 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,351 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,352 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,352 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,353 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,354 - INFO - Is reinject: False
+2025-03-25 09:43:52,359 - INFO - File moved to main folder
+2025-03-25 09:43:52,359 - INFO - Processing customer file: {10B}C2_31_KseqR{5_25}.ab1
+2025-03-25 09:43:52,360 - INFO - Target order folder: BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,360 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,360 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,361 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,362 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147899
+2025-03-25 09:43:52,363 - INFO - Is reinject: False
+2025-03-25 09:43:52,367 - INFO - File moved to main folder
+2025-03-25 09:43:52,367 - INFO - Processing customer file: {10C}12a_Tet.ab1
+2025-03-25 09:43:52,368 - INFO - Target order folder: BioI-21896_Rey_147894
+2025-03-25 09:43:52,368 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,369 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,370 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,370 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Rey_147894
+2025-03-25 09:43:52,373 - INFO - Created order folder: P:/Data/03.25.25\BioI-21896\BioI-21896_Rey_147894
+2025-03-25 09:43:52,374 - INFO - Is reinject: False
+2025-03-25 09:43:52,378 - INFO - File moved to main folder
+2025-03-25 09:43:52,380 - INFO - Processing customer file: {10D}12b_Tet.ab1
+2025-03-25 09:43:52,380 - INFO - Target order folder: BioI-21896_Rey_147894
+2025-03-25 09:43:52,380 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,381 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,381 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,382 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Rey_147894
+2025-03-25 09:43:52,383 - INFO - Is reinject: False
+2025-03-25 09:43:52,387 - INFO - File moved to main folder
+2025-03-25 09:43:52,388 - INFO - Processing customer file: {10E}12c_Tet.ab1
+2025-03-25 09:43:52,388 - INFO - Target order folder: BioI-21896_Rey_147894
+2025-03-25 09:43:52,389 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,389 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,389 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,390 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Rey_147894
+2025-03-25 09:43:52,391 - INFO - Is reinject: True
+2025-03-25 09:43:52,397 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,398 - INFO - Processing customer file: {10F}13a_Sac.ab1
+2025-03-25 09:43:52,398 - INFO - Target order folder: BioI-21896_Rey_147894
+2025-03-25 09:43:52,399 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,399 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,400 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,401 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Rey_147894
+2025-03-25 09:43:52,402 - INFO - Is reinject: False
+2025-03-25 09:43:52,406 - INFO - File moved to main folder
+2025-03-25 09:43:52,406 - INFO - Processing customer file: {10G}13b_Sac.ab1
+2025-03-25 09:43:52,407 - INFO - Target order folder: BioI-21896_Rey_147894
+2025-03-25 09:43:52,407 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,408 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,409 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,409 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Rey_147894
+2025-03-25 09:43:52,410 - INFO - Is reinject: False
+2025-03-25 09:43:52,414 - INFO - File moved to main folder
+2025-03-25 09:43:52,415 - INFO - Processing customer file: {10H}13c_Sac.ab1
+2025-03-25 09:43:52,415 - INFO - Target order folder: BioI-21896_Rey_147894
+2025-03-25 09:43:52,416 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,416 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,417 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,417 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Rey_147894
+2025-03-25 09:43:52,418 - INFO - Is reinject: False
+2025-03-25 09:43:52,423 - INFO - File moved to main folder
+2025-03-25 09:43:52,423 - INFO - Processing customer file: {11A}CD3_AMP_1256.F{5_25}.ab1
+2025-03-25 09:43:52,424 - INFO - Target order folder: BioI-21896_Kaufman_147881
+2025-03-25 09:43:52,424 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,424 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,425 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,426 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147881
+2025-03-25 09:43:52,428 - INFO - Created order folder: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147881
+2025-03-25 09:43:52,429 - INFO - Is reinject: True
+2025-03-25 09:43:52,439 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,439 - INFO - Processing customer file: {11B}CD3_KAN_1256.F{5_25}.ab1
+2025-03-25 09:43:52,440 - INFO - Target order folder: BioI-21896_Kaufman_147881
+2025-03-25 09:43:52,440 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,441 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,443 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,444 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147881
+2025-03-25 09:43:52,445 - INFO - Is reinject: True
+2025-03-25 09:43:52,450 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,451 - INFO - Processing customer file: {11C}CD3_AMP_1997.F{5_25}.ab1
+2025-03-25 09:43:52,451 - INFO - Target order folder: BioI-21896_Kaufman_147881
+2025-03-25 09:43:52,452 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,453 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,454 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,455 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147881
+2025-03-25 09:43:52,456 - INFO - Is reinject: True
+2025-03-25 09:43:52,463 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,464 - INFO - Processing customer file: {11D}CD3_KAN_1997.F{5_25}.ab1
+2025-03-25 09:43:52,464 - INFO - Target order folder: BioI-21896_Kaufman_147881
+2025-03-25 09:43:52,465 - INFO - Finding destination for I number: 21896
+2025-03-25 09:43:52,466 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,468 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,469 - INFO - Order folder path: P:/Data/03.25.25\BioI-21896\BioI-21896_Kaufman_147881
+2025-03-25 09:43:52,470 - INFO - Is reinject: False
+2025-03-25 09:43:52,476 - INFO - File moved to main folder
+2025-03-25 09:43:52,476 - INFO - Processing customer file: {11E}DNAP9448_Kseq_F{BioI-21893}.ab1
+2025-03-25 09:43:52,477 - INFO - Target order folder: BioI-21893_Pulukkunat_147875
+2025-03-25 09:43:52,478 - INFO - Finding destination for I number: 21893
+2025-03-25 09:43:52,479 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,479 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,485 - INFO - Created BioI folder: P:/Data/03.25.25\BioI-21893
+2025-03-25 09:43:52,485 - INFO - Order folder path: P:/Data/03.25.25\BioI-21893\BioI-21893_Pulukkunat_147875
+2025-03-25 09:43:52,487 - INFO - Created order folder: P:/Data/03.25.25\BioI-21893\BioI-21893_Pulukkunat_147875
+2025-03-25 09:43:52,488 - INFO - Is reinject: False
+2025-03-25 09:43:52,494 - INFO - File moved to main folder
+2025-03-25 09:43:52,495 - INFO - Processing customer file: {11F}DNAP9448_Kseq_R{BioI-21893}.ab1
+2025-03-25 09:43:52,495 - INFO - Target order folder: BioI-21893_Pulukkunat_147875
+2025-03-25 09:43:52,496 - INFO - Finding destination for I number: 21893
+2025-03-25 09:43:52,497 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,498 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,498 - INFO - Order folder path: P:/Data/03.25.25\BioI-21893\BioI-21893_Pulukkunat_147875
+2025-03-25 09:43:52,500 - INFO - Is reinject: False
+2025-03-25 09:43:52,506 - INFO - File moved to main folder
+2025-03-25 09:43:52,507 - INFO - Processing customer file: {11G}DNAP9449_Kseq_F{BioI-21893}.ab1
+2025-03-25 09:43:52,507 - INFO - Target order folder: BioI-21893_Pulukkunat_147875
+2025-03-25 09:43:52,508 - INFO - Finding destination for I number: 21893
+2025-03-25 09:43:52,509 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,510 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,510 - INFO - Order folder path: P:/Data/03.25.25\BioI-21893\BioI-21893_Pulukkunat_147875
+2025-03-25 09:43:52,511 - INFO - Is reinject: False
+2025-03-25 09:43:52,517 - INFO - File moved to main folder
+2025-03-25 09:43:52,517 - INFO - Processing customer file: {11H}DNAP9449_Kseq_R{BioI-21893}.ab1
+2025-03-25 09:43:52,518 - INFO - Target order folder: BioI-21893_Pulukkunat_147875
+2025-03-25 09:43:52,518 - INFO - Finding destination for I number: 21893
+2025-03-25 09:43:52,519 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,519 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,520 - INFO - Order folder path: P:/Data/03.25.25\BioI-21893\BioI-21893_Pulukkunat_147875
+2025-03-25 09:43:52,521 - INFO - Is reinject: False
+2025-03-25 09:43:52,533 - INFO - File moved to main folder
+2025-03-25 09:43:52,537 - INFO - Deleted empty original folder: P:/Data/03.25.25\2025-03-25_BioI-21896_1
+2025-03-25 09:43:52,538 - INFO - Processing folder 2/3: 2025-03-25_BioI-21897_1
+2025-03-25 09:43:52,538 - INFO - Processing folder: P:/Data/03.25.25\2025-03-25_BioI-21897_1
+2025-03-25 09:43:52,562 - INFO - Created new BioI folder: P:/Data/03.25.25\BioI-21897
+2025-03-25 09:43:52,565 - INFO - Found 96 .ab1 files in folder
+2025-03-25 09:43:52,566 - INFO - Identified control file: {01A}_pGEM_T7Promoter.ab1
+2025-03-25 09:43:52,566 - INFO - Identified control file: {01B}_pGEM_SP6Promoter.ab1
+2025-03-25 09:43:52,567 - INFO - Identified control file: {01C}_pGEM_M13F-20.ab1
+2025-03-25 09:43:52,568 - INFO - Identified control file: {01D}_pGEM_M13R-27.ab1
+2025-03-25 09:43:52,569 - INFO - Identified control file: {01E}_Water_T7Promoter.ab1
+2025-03-25 09:43:52,569 - INFO - Identified control file: {01F}_Water_SP6Promoter.ab1
+2025-03-25 09:43:52,570 - INFO - Identified control file: {01G}_Water_M13F-20.ab1
+2025-03-25 09:43:52,571 - INFO - Identified control file: {01H}_Water_M13R-27.ab1
+2025-03-25 09:43:52,572 - INFO - Classified 5 PCR numbers, 8 controls, 0 blanks, 55 customer files
+2025-03-25 09:43:52,573 - INFO - No blank files were identified in this folder
+2025-03-25 09:43:52,574 - INFO - Processing 6 files for PCR number 2937
+2025-03-25 09:43:52,574 - INFO - Processing PCR file: {08H}G500776(F2R)_250bp_Mecom-7MDF2{PCR2937exp7}.ab1 with PCR Number: 2937
+2025-03-25 09:43:52,577 - INFO - PCR file normalized name: G500776(F2R)_250bp_Mecom-7MDF2
+2025-03-25 09:43:52,577 - INFO - File moved to main folder
+2025-03-25 09:43:52,583 - INFO - Processing PCR file: {09A}G500776(F2R)_250bp_Mecom-7MDR{PCR2937exp7}.ab1 with PCR Number: 2937
+2025-03-25 09:43:52,586 - INFO - PCR file normalized name: G500776(F2R)_250bp_Mecom-7MDR
+2025-03-25 09:43:52,587 - INFO - File moved to main folder
+2025-03-25 09:43:52,591 - INFO - Processing PCR file: {09B}G500776(F2R)_425bp_Mecom-7MDF2{PCR2937exp7}.ab1 with PCR Number: 2937
+2025-03-25 09:43:52,593 - INFO - PCR file normalized name: G500776(F2R)_425bp_Mecom-7MDF2
+2025-03-25 09:43:52,594 - INFO - File moved to main folder
+2025-03-25 09:43:52,598 - INFO - Processing PCR file: {09C}G500776(F2R)_425bp_Mecom-7MDR{PCR2937exp7}.ab1 with PCR Number: 2937
+2025-03-25 09:43:52,600 - INFO - PCR file normalized name: G500776(F2R)_425bp_Mecom-7MDR
+2025-03-25 09:43:52,601 - INFO - File moved to main folder
+2025-03-25 09:43:52,605 - INFO - Processing PCR file: {09D}G500776(F2R)_700bp_Mecom-7MDF2{PCR2937exp7}.ab1 with PCR Number: 2937
+2025-03-25 09:43:52,608 - INFO - PCR file normalized name: G500776(F2R)_700bp_Mecom-7MDF2
+2025-03-25 09:43:52,609 - INFO - File moved to main folder
+2025-03-25 09:43:52,613 - INFO - Processing PCR file: {09E}G500776(F2R)_700bp_Mecom-7MDR{PCR2937exp7}.ab1 with PCR Number: 2937
+2025-03-25 09:43:52,616 - INFO - PCR file normalized name: G500776(F2R)_700bp_Mecom-7MDR
+2025-03-25 09:43:52,616 - INFO - File moved to main folder
+2025-03-25 09:43:52,621 - INFO - Processing 4 files for PCR number 2942
+2025-03-25 09:43:52,621 - INFO - Processing PCR file: {09F}G153712(FR2)_225bp_Fads2-2KOR2{PCR2942exp4}.ab1 with PCR Number: 2942
+2025-03-25 09:43:52,624 - INFO - PCR file normalized name: G153712(FR2)_225bp_Fads2-2KOR2
+2025-03-25 09:43:52,625 - INFO - Found PCR file in reinject list: G153712(FR2)_225bp_Fads2-2KOR2
+2025-03-25 09:43:52,629 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,634 - INFO - Processing PCR file: {09G}G153712(FR2)_225bp_Fads2-2KOF{PCR2942exp4}.ab1 with PCR Number: 2942
+2025-03-25 09:43:52,637 - INFO - PCR file normalized name: G153712(FR2)_225bp_Fads2-2KOF
+2025-03-25 09:43:52,637 - INFO - File moved to main folder
+2025-03-25 09:43:52,642 - INFO - Processing PCR file: {09H}G153712(FR2)_325bp_Fads2-2KOR2{PCR2942exp4}.ab1 with PCR Number: 2942
+2025-03-25 09:43:52,644 - INFO - PCR file normalized name: G153712(FR2)_325bp_Fads2-2KOR2
+2025-03-25 09:43:52,646 - INFO - File moved to main folder
+2025-03-25 09:43:52,654 - INFO - Processing PCR file: {10A}G153712(FR2)_325bp_Fads2-2KOF{PCR2942exp4}.ab1 with PCR Number: 2942
+2025-03-25 09:43:52,655 - INFO - PCR file normalized name: G153712(FR2)_325bp_Fads2-2KOF
+2025-03-25 09:43:52,656 - INFO - File moved to main folder
+2025-03-25 09:43:52,661 - INFO - Processing 4 files for PCR number 2953
+2025-03-25 09:43:52,662 - INFO - Processing PCR file: {10B}G500832(FR)_650bp_Cox10-13primeF{PCR2953exp1}.ab1 with PCR Number: 2953
+2025-03-25 09:43:52,665 - INFO - PCR file normalized name: G500832(FR)_650bp_Cox10-13primeF
+2025-03-25 09:43:52,666 - INFO - File moved to main folder
+2025-03-25 09:43:52,672 - INFO - Processing PCR file: {10C}G500832(FR)_650bp_Cox10-13primeR{PCR2953exp1}.ab1 with PCR Number: 2953
+2025-03-25 09:43:52,675 - INFO - PCR file normalized name: G500832(FR)_650bp_Cox10-13primeR
+2025-03-25 09:43:52,675 - INFO - File moved to main folder
+2025-03-25 09:43:52,680 - INFO - Processing PCR file: {10D}G500813_550bp_Wnt4-3FLF{PCR2953exp1}.ab1 with PCR Number: 2953
+2025-03-25 09:43:52,683 - INFO - PCR file normalized name: G500813_550bp_Wnt4-3FLF
+2025-03-25 09:43:52,684 - INFO - File moved to main folder
+2025-03-25 09:43:52,688 - INFO - Processing PCR file: {10E}G500813_550bp_Wnt4-3FLR{PCR2953exp1}.ab1 with PCR Number: 2953
+2025-03-25 09:43:52,691 - INFO - PCR file normalized name: G500813_550bp_Wnt4-3FLR
+2025-03-25 09:43:52,693 - INFO - File moved to main folder
+2025-03-25 09:43:52,699 - INFO - Processing 17 files for PCR number 2956
+2025-03-25 09:43:52,700 - INFO - Processing PCR file: {10F}G500834(FR)_175bp_Hapln2-2FLF{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,702 - INFO - PCR file normalized name: G500834(FR)_175bp_Hapln2-2FLF
+2025-03-25 09:43:52,704 - INFO - Found PCR file in reinject list: G500834(FR)_175bp_Hapln2-2FLF
+2025-03-25 09:43:52,707 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,714 - INFO - Processing PCR file: {10G}G500834(FR)_175bp_Hapln2-2FLR{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,717 - INFO - PCR file normalized name: G500834(FR)_175bp_Hapln2-2FLR
+2025-03-25 09:43:52,718 - INFO - File moved to main folder
+2025-03-25 09:43:52,734 - INFO - Processing PCR file: {10H}G500834(FR)_250bp_Hapln2-2FLF{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,743 - INFO - PCR file normalized name: G500834(FR)_250bp_Hapln2-2FLF
+2025-03-25 09:43:52,743 - INFO - File moved to main folder
+2025-03-25 09:43:52,747 - INFO - Processing PCR file: {11A}G500834(FR)_250bp_Hapln2-2FLR{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,751 - INFO - PCR file normalized name: G500834(FR)_250bp_Hapln2-2FLR
+2025-03-25 09:43:52,751 - INFO - Found PCR file in reinject list: G500834(FR)_250bp_Hapln2-2FLR
+2025-03-25 09:43:52,751 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,756 - INFO - Processing PCR file: {11B}G500834(F2R2)_200bp_Hapln2-2FLF2{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,758 - INFO - PCR file normalized name: G500834(F2R2)_200bp_Hapln2-2FLF2
+2025-03-25 09:43:52,759 - INFO - Found PCR file in reinject list: G500834(F2R2)_200bp_Hapln2-2FLF2
+2025-03-25 09:43:52,760 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,765 - INFO - Processing PCR file: {11C}G500834(F2R2)_200bp_Hapln2-2FLR2{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,767 - INFO - PCR file normalized name: G500834(F2R2)_200bp_Hapln2-2FLR2
+2025-03-25 09:43:52,768 - INFO - Found PCR file in reinject list: G500834(F2R2)_200bp_Hapln2-2FLR2
+2025-03-25 09:43:52,768 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,796 - INFO - Processing PCR file: {11D}G500834(F2R2)_275bp_Hapln2-2FLF2{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,801 - INFO - PCR file normalized name: G500834(F2R2)_275bp_Hapln2-2FLF2
+2025-03-25 09:43:52,802 - INFO - File moved to main folder
+2025-03-25 09:43:52,807 - INFO - Processing PCR file: {11E}G500834(F2R2)_275bp_Hapln2-2FLR2{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,811 - INFO - PCR file normalized name: G500834(F2R2)_275bp_Hapln2-2FLR2
+2025-03-25 09:43:52,812 - INFO - File moved to main folder
+2025-03-25 09:43:52,816 - INFO - Processing PCR file: {11F}G500835_750bp_Cd7-3KOF{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,820 - INFO - PCR file normalized name: G500835_750bp_Cd7-3KOF
+2025-03-25 09:43:52,821 - INFO - File moved to main folder
+2025-03-25 09:43:52,826 - INFO - Processing PCR file: {11G}G500835_750bp_Cd7-3KOR{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,829 - INFO - PCR file normalized name: G500835_750bp_Cd7-3KOR
+2025-03-25 09:43:52,830 - INFO - File moved to main folder
+2025-03-25 09:43:52,834 - INFO - Processing PCR file: {11H}G500835_750bp_Cd7-3KOF2{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,836 - INFO - PCR file normalized name: G500835_750bp_Cd7-3KOF2
+2025-03-25 09:43:52,837 - INFO - File moved to main folder
+2025-03-25 09:43:52,841 - INFO - Processing PCR file: {12A}G500830_275bp_Aicda-14FLF{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,844 - INFO - PCR file normalized name: G500830_275bp_Aicda-14FLF
+2025-03-25 09:43:52,844 - INFO - File moved to main folder
+2025-03-25 09:43:52,848 - INFO - Processing PCR file: {12B}G500830_275bp_Aicda-14FLR{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,858 - INFO - PCR file normalized name: G500830_275bp_Aicda-14FLR
+2025-03-25 09:43:52,859 - INFO - Found PCR file in reinject list: G500830_275bp_Aicda-14FLR
+2025-03-25 09:43:52,860 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,864 - INFO - Processing PCR file: {12C}G500830_325bp_Aicda-14FLF{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,867 - INFO - PCR file normalized name: G500830_325bp_Aicda-14FLF
+2025-03-25 09:43:52,868 - INFO - File moved to main folder
+2025-03-25 09:43:52,872 - INFO - Processing PCR file: {12D}G500830_325bp_Aicda-14FLR{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,876 - INFO - PCR file normalized name: G500830_325bp_Aicda-14FLR
+2025-03-25 09:43:52,876 - INFO - File moved to main folder
+2025-03-25 09:43:52,884 - INFO - Processing PCR file: {12E}G500830_375bp_Aicda-14FLF{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,886 - INFO - PCR file normalized name: G500830_375bp_Aicda-14FLF
+2025-03-25 09:43:52,887 - INFO - File moved to main folder
+2025-03-25 09:43:52,892 - INFO - Processing PCR file: {12F}G500830_375bp_Aicda-14FLR{PCR2956exp1}.ab1 with PCR Number: 2956
+2025-03-25 09:43:52,894 - INFO - PCR file normalized name: G500830_375bp_Aicda-14FLR
+2025-03-25 09:43:52,895 - INFO - File moved to main folder
+2025-03-25 09:43:52,900 - INFO - Processing 2 files for PCR number 2945
+2025-03-25 09:43:52,900 - INFO - Processing PCR file: {12G}G153905_325bp_Vangl1-2FLF{PCR2945exp1}.ab1 with PCR Number: 2945
+2025-03-25 09:43:52,904 - INFO - PCR file normalized name: G153905_325bp_Vangl1-2FLF
+2025-03-25 09:43:52,904 - INFO - File moved to main folder
+2025-03-25 09:43:52,909 - INFO - Processing PCR file: {12H}G153905_325bp_Vangl1-2FLR{PCR2945exp1}.ab1 with PCR Number: 2945
+2025-03-25 09:43:52,911 - INFO - PCR file normalized name: G153905_325bp_Vangl1-2FLR
+2025-03-25 09:43:52,912 - INFO - File moved to main folder
+2025-03-25 09:43:52,917 - INFO - Processing 8 control files
+2025-03-25 09:43:52,925 - INFO - Moved control file {01A}_pGEM_T7Promoter.ab1 to P:/Data/03.25.25\BioI-21897\Controls
+2025-03-25 09:43:52,930 - INFO - Moved control file {01B}_pGEM_SP6Promoter.ab1 to P:/Data/03.25.25\BioI-21897\Controls
+2025-03-25 09:43:52,934 - INFO - Moved control file {01C}_pGEM_M13F-20.ab1 to P:/Data/03.25.25\BioI-21897\Controls
+2025-03-25 09:43:52,939 - INFO - Moved control file {01D}_pGEM_M13R-27.ab1 to P:/Data/03.25.25\BioI-21897\Controls
+2025-03-25 09:43:52,947 - INFO - Moved control file {01E}_Water_T7Promoter.ab1 to P:/Data/03.25.25\BioI-21897\Controls
+2025-03-25 09:43:52,953 - INFO - Moved control file {01F}_Water_SP6Promoter.ab1 to P:/Data/03.25.25\BioI-21897\Controls
+2025-03-25 09:43:52,957 - INFO - Moved control file {01G}_Water_M13F-20.ab1 to P:/Data/03.25.25\BioI-21897\Controls
+2025-03-25 09:43:52,965 - INFO - Moved control file {01H}_Water_M13R-27.ab1 to P:/Data/03.25.25\BioI-21897\Controls
+2025-03-25 09:43:52,966 - INFO - Processing 55 customer files
+2025-03-25 09:43:52,966 - INFO - Processing customer file: {02A}S3E1_1396_1396_Premixed.ab1
+2025-03-25 09:43:52,967 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:52,967 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:52,968 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,968 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,969 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:52,971 - INFO - Created order folder: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:52,972 - INFO - Is reinject: True
+2025-03-25 09:43:52,980 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:52,981 - INFO - Processing customer file: {02B}S3E2_1396_1396_Premixed.ab1
+2025-03-25 09:43:52,981 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:52,982 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:52,983 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,983 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,984 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:52,985 - INFO - Is reinject: False
+2025-03-25 09:43:52,989 - INFO - File moved to main folder
+2025-03-25 09:43:52,989 - INFO - Processing customer file: {02C}S3F1_1396_1396_Premixed.ab1
+2025-03-25 09:43:52,990 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:52,990 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:52,992 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:52,992 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:52,992 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:52,994 - INFO - Is reinject: False
+2025-03-25 09:43:52,998 - INFO - File moved to main folder
+2025-03-25 09:43:52,998 - INFO - Processing customer file: {02D}S3F2_1396_1396_Premixed.ab1
+2025-03-25 09:43:52,999 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:52,999 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,000 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,000 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,000 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,002 - INFO - Is reinject: False
+2025-03-25 09:43:53,006 - INFO - File moved to main folder
+2025-03-25 09:43:53,007 - INFO - Processing customer file: {02E}S3G1_1396_1396_Premixed.ab1
+2025-03-25 09:43:53,007 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,007 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,008 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,009 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,009 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,010 - INFO - Is reinject: False
+2025-03-25 09:43:53,014 - INFO - File moved to main folder
+2025-03-25 09:43:53,015 - INFO - Processing customer file: {02F}S3G2_1396_1396_Premixed.ab1
+2025-03-25 09:43:53,015 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,016 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,016 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,017 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,018 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,019 - INFO - Is reinject: False
+2025-03-25 09:43:53,023 - INFO - File moved to main folder
+2025-03-25 09:43:53,023 - INFO - Processing customer file: {02G}S4F1_1396_1396_Premixed.ab1
+2025-03-25 09:43:53,024 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,024 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,024 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,025 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,026 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,026 - INFO - Is reinject: False
+2025-03-25 09:43:53,031 - INFO - File moved to main folder
+2025-03-25 09:43:53,031 - INFO - Processing customer file: {02H}S4F2_1396_1396_Premixed.ab1
+2025-03-25 09:43:53,032 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,032 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,034 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,034 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,035 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,036 - INFO - Is reinject: False
+2025-03-25 09:43:53,040 - INFO - File moved to main folder
+2025-03-25 09:43:53,041 - INFO - Processing customer file: {03A}S4G1_1396_1396_Premixed.ab1
+2025-03-25 09:43:53,041 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,042 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,042 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,043 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,043 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,044 - INFO - Is reinject: False
+2025-03-25 09:43:53,049 - INFO - File moved to main folder
+2025-03-25 09:43:53,049 - INFO - Processing customer file: {03B}S4G2_1396_1396_Premixed.ab1
+2025-03-25 09:43:53,049 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,050 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,051 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,051 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,052 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,053 - INFO - Is reinject: False
+2025-03-25 09:43:53,058 - INFO - File moved to main folder
+2025-03-25 09:43:53,059 - INFO - Processing customer file: {03C}S4H1_1396_1396_Premixed.ab1
+2025-03-25 09:43:53,060 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,060 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,061 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,061 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,062 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,063 - INFO - Is reinject: False
+2025-03-25 09:43:53,069 - INFO - File moved to main folder
+2025-03-25 09:43:53,070 - INFO - Processing customer file: {03D}S4H2_1396_1396_Premixed.ab1
+2025-03-25 09:43:53,070 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,071 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,071 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,072 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,073 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,074 - INFO - Is reinject: False
+2025-03-25 09:43:53,080 - INFO - File moved to main folder
+2025-03-25 09:43:53,081 - INFO - Processing customer file: {03E}S3E1_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,081 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,082 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,083 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,084 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,085 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,086 - INFO - Is reinject: False
+2025-03-25 09:43:53,091 - INFO - File moved to main folder
+2025-03-25 09:43:53,091 - INFO - Processing customer file: {03F}S3E2_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,092 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,093 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,094 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,094 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,094 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,095 - INFO - Is reinject: False
+2025-03-25 09:43:53,100 - INFO - File moved to main folder
+2025-03-25 09:43:53,101 - INFO - Processing customer file: {03G}S3F1_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,101 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,102 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,103 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,103 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,104 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,105 - INFO - Is reinject: False
+2025-03-25 09:43:53,110 - INFO - File moved to main folder
+2025-03-25 09:43:53,110 - INFO - Processing customer file: {03H}S3F2_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,111 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,111 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,113 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,113 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,114 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,115 - INFO - Is reinject: False
+2025-03-25 09:43:53,119 - INFO - File moved to main folder
+2025-03-25 09:43:53,120 - INFO - Processing customer file: {04A}S3G1_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,121 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,121 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,123 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,123 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,124 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,125 - INFO - Is reinject: False
+2025-03-25 09:43:53,128 - INFO - File moved to main folder
+2025-03-25 09:43:53,129 - INFO - Processing customer file: {04B}S3G2_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,130 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,130 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,131 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,131 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,132 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,133 - INFO - Is reinject: False
+2025-03-25 09:43:53,139 - INFO - File moved to main folder
+2025-03-25 09:43:53,140 - INFO - Processing customer file: {04C}S4F1_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,141 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,141 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,142 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,143 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,144 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,145 - INFO - Is reinject: False
+2025-03-25 09:43:53,150 - INFO - File moved to main folder
+2025-03-25 09:43:53,151 - INFO - Processing customer file: {04D}S4F2_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,151 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,152 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,153 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,154 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,155 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,157 - INFO - Is reinject: False
+2025-03-25 09:43:53,161 - INFO - File moved to main folder
+2025-03-25 09:43:53,162 - INFO - Processing customer file: {04E}S4G1_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,163 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,163 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,164 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,165 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,165 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,166 - INFO - Is reinject: False
+2025-03-25 09:43:53,170 - INFO - File moved to main folder
+2025-03-25 09:43:53,171 - INFO - Processing customer file: {04F}S4G2_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,171 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,172 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,173 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,173 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,174 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,175 - INFO - Is reinject: False
+2025-03-25 09:43:53,180 - INFO - File moved to main folder
+2025-03-25 09:43:53,180 - INFO - Processing customer file: {04G}S4H1_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,181 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,181 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,182 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,183 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,183 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,184 - INFO - Is reinject: False
+2025-03-25 09:43:53,188 - INFO - File moved to main folder
+2025-03-25 09:43:53,189 - INFO - Processing customer file: {04H}S4H2_1792_1792_Premixed.ab1
+2025-03-25 09:43:53,189 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,190 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,191 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,192 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,192 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:53,193 - INFO - Is reinject: False
+2025-03-25 09:43:53,198 - INFO - File moved to main folder
+2025-03-25 09:43:53,198 - INFO - Processing customer file: {05A}XH_pXH096-1_M13-fwd_Premixed.ab1
+2025-03-25 09:43:53,199 - INFO - Target order folder: BioI-21897_Wang_147882
+2025-03-25 09:43:53,199 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,200 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,201 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,201 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Wang_147882
+2025-03-25 09:43:53,204 - INFO - Created order folder: P:/Data/03.25.25\BioI-21897\BioI-21897_Wang_147882
+2025-03-25 09:43:53,205 - INFO - Is reinject: False
+2025-03-25 09:43:53,210 - INFO - File moved to main folder
+2025-03-25 09:43:53,210 - INFO - Processing customer file: {05B}XH_pXH097-1_oHW579f_Premixed.ab1
+2025-03-25 09:43:53,211 - INFO - Target order folder: BioI-21897_Wang_147882
+2025-03-25 09:43:53,211 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,212 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,213 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,213 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Wang_147882
+2025-03-25 09:43:53,214 - INFO - Is reinject: False
+2025-03-25 09:43:53,220 - INFO - File moved to main folder
+2025-03-25 09:43:53,220 - INFO - Processing customer file: {05C}XH_pXH098-1_oHW579f_Premixed.ab1
+2025-03-25 09:43:53,221 - INFO - Target order folder: BioI-21897_Wang_147882
+2025-03-25 09:43:53,221 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,221 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,222 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,222 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Wang_147882
+2025-03-25 09:43:53,223 - INFO - Is reinject: False
+2025-03-25 09:43:53,228 - INFO - File moved to main folder
+2025-03-25 09:43:53,228 - INFO - Processing customer file: {05D}1252_1580.ab1
+2025-03-25 09:43:53,228 - INFO - Target order folder: BioI-21897_Freitag_147900
+2025-03-25 09:43:53,229 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,229 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,230 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,231 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Freitag_147900
+2025-03-25 09:43:53,233 - INFO - Created order folder: P:/Data/03.25.25\BioI-21897\BioI-21897_Freitag_147900
+2025-03-25 09:43:53,234 - INFO - Is reinject: False
+2025-03-25 09:43:53,239 - INFO - File moved to main folder
+2025-03-25 09:43:53,239 - INFO - Processing customer file: {05E}1252_2435.ab1
+2025-03-25 09:43:53,240 - INFO - Target order folder: BioI-21897_Freitag_147900
+2025-03-25 09:43:53,240 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,241 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,241 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,242 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Freitag_147900
+2025-03-25 09:43:53,243 - INFO - Is reinject: False
+2025-03-25 09:43:53,247 - INFO - File moved to main folder
+2025-03-25 09:43:53,248 - INFO - Processing customer file: {05F}1_JA027_Premixed.ab1
+2025-03-25 09:43:53,248 - INFO - Target order folder: BioI-21897_Behera_147913
+2025-03-25 09:43:53,248 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,249 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,250 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,250 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Behera_147913
+2025-03-25 09:43:53,253 - INFO - Created order folder: P:/Data/03.25.25\BioI-21897\BioI-21897_Behera_147913
+2025-03-25 09:43:53,254 - INFO - Is reinject: False
+2025-03-25 09:43:53,259 - INFO - File moved to main folder
+2025-03-25 09:43:53,259 - INFO - Processing customer file: {05G}2_TW2167_Premixed.ab1
+2025-03-25 09:43:53,260 - INFO - Target order folder: BioI-21897_Behera_147913
+2025-03-25 09:43:53,260 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,261 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,261 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,262 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Behera_147913
+2025-03-25 09:43:53,263 - INFO - Is reinject: False
+2025-03-25 09:43:53,268 - INFO - File moved to main folder
+2025-03-25 09:43:53,268 - INFO - Processing customer file: {05H}B_Premixed.ab1
+2025-03-25 09:43:53,269 - INFO - Target order folder: BioI-21897_Flood_147907
+2025-03-25 09:43:53,269 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,270 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,272 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,273 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Flood_147907
+2025-03-25 09:43:53,275 - INFO - Created order folder: P:/Data/03.25.25\BioI-21897\BioI-21897_Flood_147907
+2025-03-25 09:43:53,276 - INFO - Is reinject: False
+2025-03-25 09:43:53,281 - INFO - File moved to main folder
+2025-03-25 09:43:53,282 - INFO - Processing customer file: {06A}C_Premixed.ab1
+2025-03-25 09:43:53,284 - INFO - Target order folder: BioI-21897_Flood_147907
+2025-03-25 09:43:53,285 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,286 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,287 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,287 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Flood_147907
+2025-03-25 09:43:53,288 - INFO - Is reinject: False
+2025-03-25 09:43:53,295 - INFO - File moved to main folder
+2025-03-25 09:43:53,296 - INFO - Processing customer file: {06B}D_Premixed.ab1
+2025-03-25 09:43:53,297 - INFO - Target order folder: BioI-21897_Flood_147907
+2025-03-25 09:43:53,297 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,298 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,298 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,299 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Flood_147907
+2025-03-25 09:43:53,300 - INFO - Is reinject: False
+2025-03-25 09:43:53,304 - INFO - File moved to main folder
+2025-03-25 09:43:53,305 - INFO - Processing customer file: {06C}E_Premixed.ab1
+2025-03-25 09:43:53,305 - INFO - Target order folder: BioI-21897_Flood_147907
+2025-03-25 09:43:53,306 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,307 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,307 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,308 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Flood_147907
+2025-03-25 09:43:53,309 - INFO - Is reinject: False
+2025-03-25 09:43:53,314 - INFO - File moved to main folder
+2025-03-25 09:43:53,314 - INFO - Processing customer file: {06D}dggtd1337_C1_P165_Premixed.ab1
+2025-03-25 09:43:53,315 - INFO - Target order folder: BioI-21897_Gregory_147905
+2025-03-25 09:43:53,315 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,317 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,317 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,318 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Gregory_147905
+2025-03-25 09:43:53,321 - INFO - Created order folder: P:/Data/03.25.25\BioI-21897\BioI-21897_Gregory_147905
+2025-03-25 09:43:53,322 - INFO - Is reinject: True
+2025-03-25 09:43:53,330 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,331 - INFO - Processing customer file: {06E}dggtd1337_C1.1_P166_Premixed.ab1
+2025-03-25 09:43:53,332 - INFO - Target order folder: BioI-21897_Gregory_147905
+2025-03-25 09:43:53,332 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,333 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,335 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,336 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Gregory_147905
+2025-03-25 09:43:53,337 - INFO - Is reinject: True
+2025-03-25 09:43:53,342 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,342 - INFO - Processing customer file: {06F}d3376_C1_SP1_Premixed.ab1
+2025-03-25 09:43:53,343 - INFO - Target order folder: BioI-21897_Gregory_147905
+2025-03-25 09:43:53,343 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,344 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,345 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,346 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Gregory_147905
+2025-03-25 09:43:53,347 - INFO - Is reinject: False
+2025-03-25 09:43:53,352 - INFO - File moved to main folder
+2025-03-25 09:43:53,352 - INFO - Processing customer file: {06G}d3376_C1.2_SP2_Premixed.ab1
+2025-03-25 09:43:53,353 - INFO - Target order folder: BioI-21897_Gregory_147905
+2025-03-25 09:43:53,353 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,354 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,355 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,355 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Gregory_147905
+2025-03-25 09:43:53,356 - INFO - Is reinject: True
+2025-03-25 09:43:53,360 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,361 - INFO - Processing customer file: {06H}pLY109c-2_LY0265_Premixed.ab1
+2025-03-25 09:43:53,361 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:53,362 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,363 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,364 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,364 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:53,367 - INFO - Created order folder: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:53,368 - INFO - Is reinject: False
+2025-03-25 09:43:53,373 - INFO - File moved to main folder
+2025-03-25 09:43:53,374 - INFO - Processing customer file: {07A}pLY111c-2_LY0265_Premixed.ab1
+2025-03-25 09:43:53,374 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:53,376 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,376 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,377 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,378 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:53,379 - INFO - Is reinject: False
+2025-03-25 09:43:53,383 - INFO - File moved to main folder
+2025-03-25 09:43:53,383 - INFO - Processing customer file: {07B}pLY112c-2_LY0265_Premixed.ab1
+2025-03-25 09:43:53,384 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:53,384 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,388 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,389 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,389 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:53,390 - INFO - Is reinject: False
+2025-03-25 09:43:53,394 - INFO - File moved to main folder
+2025-03-25 09:43:53,394 - INFO - Processing customer file: {07C}pLY109k-2_LY0265_Premixed.ab1
+2025-03-25 09:43:53,395 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:53,395 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,396 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,397 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,398 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:53,399 - INFO - Is reinject: False
+2025-03-25 09:43:53,403 - INFO - File moved to main folder
+2025-03-25 09:43:53,403 - INFO - Processing customer file: {07D}pLY111k-2_LY0265_Premixed.ab1
+2025-03-25 09:43:53,404 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:53,404 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,405 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,406 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,406 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:53,407 - INFO - Is reinject: False
+2025-03-25 09:43:53,412 - INFO - File moved to main folder
+2025-03-25 09:43:53,412 - INFO - Processing customer file: {07E}pLY112k-2_LY0265_Premixed.ab1
+2025-03-25 09:43:53,413 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:53,413 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,414 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,414 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,415 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:53,415 - INFO - Is reinject: False
+2025-03-25 09:43:53,420 - INFO - File moved to main folder
+2025-03-25 09:43:53,420 - INFO - Processing customer file: {07F}Hbaa1.2WT-A1832_A1832_Premixed.ab1
+2025-03-25 09:43:53,421 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:53,421 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,422 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,423 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,424 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,426 - INFO - Created order folder: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,428 - INFO - Is reinject: True
+2025-03-25 09:43:53,434 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,435 - INFO - Processing customer file: {07G}HbaaWT-3p-A981_A981_Premixed.ab1
+2025-03-25 09:43:53,436 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:53,436 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,437 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,437 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,438 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,439 - INFO - Is reinject: True
+2025-03-25 09:43:53,443 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,444 - INFO - Processing customer file: {07H}Hbaa1.2WT-A984_A984_Premixed.ab1
+2025-03-25 09:43:53,445 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:53,445 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,446 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,447 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,447 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,448 - INFO - Is reinject: True
+2025-03-25 09:43:53,452 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,453 - INFO - Processing customer file: {08A}Hbaa1.2WT-5p-A981_A981_Premixed.ab1
+2025-03-25 09:43:53,453 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:53,454 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,454 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,455 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,456 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,456 - INFO - Is reinject: False
+2025-03-25 09:43:53,461 - INFO - File moved to main folder
+2025-03-25 09:43:53,462 - INFO - Processing customer file: {08B}Hbaa1.2ModHomo-A984_A984_Premixed.ab1
+2025-03-25 09:43:53,462 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:53,463 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,463 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,464 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,464 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,465 - INFO - Is reinject: True
+2025-03-25 09:43:53,471 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,471 - INFO - Processing customer file: {08C}Hbaa1.2ModHomo-5p-A981_A981_Premixed.ab1
+2025-03-25 09:43:53,472 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:53,472 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,473 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,474 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,475 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,475 - INFO - Is reinject: True
+2025-03-25 09:43:53,481 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,481 - INFO - Processing customer file: {08D}Hbaa1.2ModHomo-A979_A979_Premixed.ab1
+2025-03-25 09:43:53,482 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:53,482 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,483 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,484 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,485 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,486 - INFO - Is reinject: True
+2025-03-25 09:43:53,501 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,502 - INFO - Processing customer file: {08E}Hbaa1.2ModHomo-A983_A983_Premixed.ab1
+2025-03-25 09:43:53,503 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:53,504 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,505 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,506 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,507 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,508 - INFO - Is reinject: True
+2025-03-25 09:43:53,515 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,516 - INFO - Processing customer file: {08F}Hbaa1.2ModHomo-A513_A513_Premixed.ab1
+2025-03-25 09:43:53,516 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:53,517 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,518 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,518 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,519 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,520 - INFO - Is reinject: True
+2025-03-25 09:43:53,527 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,528 - INFO - Processing customer file: {08G}Hbaa1.2ModHomo-3p-A981_A981_Premixed.ab1
+2025-03-25 09:43:53,529 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:53,529 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:53,530 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,531 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,532 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:53,533 - INFO - Is reinject: True
+2025-03-25 09:43:53,544 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:53,550 - INFO - Deleted empty original folder: P:/Data/03.25.25\2025-03-25_BioI-21897_1
+2025-03-25 09:43:53,551 - INFO - Processing folder 3/3: 2025-03-25_BioI-21898_1
+2025-03-25 09:43:53,551 - INFO - Processing folder: P:/Data/03.25.25\2025-03-25_BioI-21898_1
+2025-03-25 09:43:53,554 - INFO - Created new BioI folder: P:/Data/03.25.25\BioI-21898
+2025-03-25 09:43:53,559 - INFO - Found 96 .ab1 files in folder
+2025-03-25 09:43:53,560 - INFO - Identified control file: {02A}_pGEM_T7Promoter.ab1
+2025-03-25 09:43:53,561 - INFO - Identified control file: {02B}_pGEM_SP6Promoter.ab1
+2025-03-25 09:43:53,561 - INFO - Identified control file: {02C}_pGEM_M13F-20.ab1
+2025-03-25 09:43:53,562 - INFO - Identified control file: {02D}_pGEM_M13R-27.ab1
+2025-03-25 09:43:53,562 - INFO - Identified control file: {02E}_Water_T7Promoter.ab1
+2025-03-25 09:43:53,563 - INFO - Identified control file: {02F}_Water_SP6Promoter.ab1
+2025-03-25 09:43:53,563 - INFO - Identified control file: {02G}_Water_M13F-20.ab1
+2025-03-25 09:43:53,564 - INFO - Identified control file: {02H}_Water_M13R-27.ab1
+2025-03-25 09:43:53,565 - INFO - Identified blank file: {03H}.ab1
+2025-03-25 09:43:53,566 - INFO - Identified blank file: {05H}.ab1
+2025-03-25 09:43:53,567 - INFO - Classified 0 PCR numbers, 8 controls, 2 blanks, 86 customer files
+2025-03-25 09:43:53,568 - INFO - Blank files identified:
+2025-03-25 09:43:53,568 - INFO -   - {03H}.ab1
+2025-03-25 09:43:53,569 - INFO -   - {05H}.ab1
+2025-03-25 09:43:53,569 - INFO - Processing 8 control files
+2025-03-25 09:43:53,578 - INFO - Moved control file {02A}_pGEM_T7Promoter.ab1 to P:/Data/03.25.25\BioI-21898\Controls
+2025-03-25 09:43:53,583 - INFO - Moved control file {02B}_pGEM_SP6Promoter.ab1 to P:/Data/03.25.25\BioI-21898\Controls
+2025-03-25 09:43:53,589 - INFO - Moved control file {02C}_pGEM_M13F-20.ab1 to P:/Data/03.25.25\BioI-21898\Controls
+2025-03-25 09:43:53,594 - INFO - Moved control file {02D}_pGEM_M13R-27.ab1 to P:/Data/03.25.25\BioI-21898\Controls
+2025-03-25 09:43:53,598 - INFO - Moved control file {02E}_Water_T7Promoter.ab1 to P:/Data/03.25.25\BioI-21898\Controls
+2025-03-25 09:43:53,603 - INFO - Moved control file {02F}_Water_SP6Promoter.ab1 to P:/Data/03.25.25\BioI-21898\Controls
+2025-03-25 09:43:53,608 - INFO - Moved control file {02G}_Water_M13F-20.ab1 to P:/Data/03.25.25\BioI-21898\Controls
+2025-03-25 09:43:53,614 - INFO - Moved control file {02H}_Water_M13R-27.ab1 to P:/Data/03.25.25\BioI-21898\Controls
+2025-03-25 09:43:53,614 - INFO - Processing 2 blank files
+2025-03-25 09:43:53,620 - INFO - Moved blank file {03H}.ab1 to P:/Data/03.25.25\BioI-21898\Blank
+2025-03-25 09:43:53,625 - INFO - Moved blank file {05H}.ab1 to P:/Data/03.25.25\BioI-21898\Blank
+2025-03-25 09:43:53,625 - INFO - Processing 86 customer files
+2025-03-25 09:43:53,626 - INFO - Processing customer file: {01A}HP641_T7Promoter.ab1
+2025-03-25 09:43:53,626 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,626 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,627 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,628 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,628 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,632 - INFO - Created order folder: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,632 - INFO - Is reinject: False
+2025-03-25 09:43:53,637 - INFO - File moved to main folder
+2025-03-25 09:43:53,638 - INFO - Processing customer file: {01B}HP642_T7Promoter.ab1
+2025-03-25 09:43:53,638 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,639 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,640 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,641 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,641 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,642 - INFO - Is reinject: False
+2025-03-25 09:43:53,646 - INFO - File moved to main folder
+2025-03-25 09:43:53,647 - INFO - Processing customer file: {01C}HP643_T7Promoter.ab1
+2025-03-25 09:43:53,647 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,648 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,649 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,649 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,650 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,651 - INFO - Is reinject: False
+2025-03-25 09:43:53,655 - INFO - File moved to main folder
+2025-03-25 09:43:53,656 - INFO - Processing customer file: {01D}HP644_T7Promoter.ab1
+2025-03-25 09:43:53,656 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,656 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,658 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,658 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,659 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,660 - INFO - Is reinject: False
+2025-03-25 09:43:53,664 - INFO - File moved to main folder
+2025-03-25 09:43:53,664 - INFO - Processing customer file: {01E}HP641_T7Terminator.ab1
+2025-03-25 09:43:53,665 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,665 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,665 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,666 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,667 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,667 - INFO - Is reinject: False
+2025-03-25 09:43:53,677 - INFO - File moved to main folder
+2025-03-25 09:43:53,678 - INFO - Processing customer file: {01F}HP642_T7Terminator.ab1
+2025-03-25 09:43:53,679 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,679 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,680 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,680 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,681 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,683 - INFO - Is reinject: False
+2025-03-25 09:43:53,688 - INFO - File moved to main folder
+2025-03-25 09:43:53,688 - INFO - Processing customer file: {01G}HP643_T7Terminator.ab1
+2025-03-25 09:43:53,689 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,689 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,690 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,691 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,692 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,693 - INFO - Is reinject: False
+2025-03-25 09:43:53,698 - INFO - File moved to main folder
+2025-03-25 09:43:53,698 - INFO - Processing customer file: {01H}HP644_T7Terminator.ab1
+2025-03-25 09:43:53,699 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,699 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,700 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,701 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,702 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,702 - INFO - Is reinject: False
+2025-03-25 09:43:53,707 - INFO - File moved to main folder
+2025-03-25 09:43:53,708 - INFO - Processing customer file: {03A}seqA_primer_R.ab1
+2025-03-25 09:43:53,709 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:53,709 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,710 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,710 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,712 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:53,731 - INFO - Created order folder: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:53,732 - INFO - Is reinject: False
+2025-03-25 09:43:53,739 - INFO - File moved to main folder
+2025-03-25 09:43:53,740 - INFO - Processing customer file: {03B}seqB_primer_R.ab1
+2025-03-25 09:43:53,740 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:53,741 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,741 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,743 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,744 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:53,745 - INFO - Is reinject: False
+2025-03-25 09:43:53,749 - INFO - File moved to main folder
+2025-03-25 09:43:53,750 - INFO - Processing customer file: {03C}seqC_primer_R.ab1
+2025-03-25 09:43:53,750 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:53,751 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,752 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,752 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,752 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:53,754 - INFO - Is reinject: False
+2025-03-25 09:43:53,759 - INFO - File moved to main folder
+2025-03-25 09:43:53,759 - INFO - Processing customer file: {03D}seqD_primer_R.ab1
+2025-03-25 09:43:53,761 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:53,761 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,762 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,762 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,763 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:53,764 - INFO - Is reinject: False
+2025-03-25 09:43:53,771 - INFO - File moved to main folder
+2025-03-25 09:43:53,771 - INFO - Processing customer file: {03E}seqG_primer_R.ab1
+2025-03-25 09:43:53,772 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:53,772 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,773 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,774 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,774 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:53,775 - INFO - Is reinject: False
+2025-03-25 09:43:53,780 - INFO - File moved to main folder
+2025-03-25 09:43:53,781 - INFO - Processing customer file: {03F}seqi_primer_R.ab1
+2025-03-25 09:43:53,781 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:53,782 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,782 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,783 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,783 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:53,784 - INFO - Is reinject: False
+2025-03-25 09:43:53,789 - INFO - File moved to main folder
+2025-03-25 09:43:53,789 - INFO - Processing customer file: {03G}pEM265_H3.1_K56Q_11_T7Terminator{BioI-21888}.ab1
+2025-03-25 09:43:53,790 - INFO - Target order folder: BioI-21888_Morrison_147832
+2025-03-25 09:43:53,790 - INFO - Finding destination for I number: 21888
+2025-03-25 09:43:53,792 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,792 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,795 - INFO - Created BioI folder: P:/Data/03.25.25\BioI-21888
+2025-03-25 09:43:53,795 - INFO - Order folder path: P:/Data/03.25.25\BioI-21888\BioI-21888_Morrison_147832
+2025-03-25 09:43:53,799 - INFO - Created order folder: P:/Data/03.25.25\BioI-21888\BioI-21888_Morrison_147832
+2025-03-25 09:43:53,799 - INFO - Is reinject: False
+2025-03-25 09:43:53,805 - INFO - File moved to main folder
+2025-03-25 09:43:53,805 - INFO - Processing customer file: {04A}{01A}HP641_T7Promoter{2_28}.ab1
+2025-03-25 09:43:53,806 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,807 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,808 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,809 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,810 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,811 - INFO - Is reinject: False
+2025-03-25 09:43:53,821 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:53,822 - INFO - Processing customer file: {04B}{01B}HP642_T7Promoter{2_28}.ab1
+2025-03-25 09:43:53,822 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,823 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,824 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,824 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,825 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,826 - INFO - Is reinject: False
+2025-03-25 09:43:53,833 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:53,834 - INFO - Processing customer file: {04C}{01C}HP643_T7Promoter{2_28}.ab1
+2025-03-25 09:43:53,844 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,848 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,856 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,857 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,861 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,862 - INFO - Is reinject: False
+2025-03-25 09:43:53,875 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:53,876 - INFO - Processing customer file: {04D}{01D}HP644_T7Promoter{2_28}.ab1
+2025-03-25 09:43:53,880 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,885 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,887 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,888 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,890 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,894 - INFO - Is reinject: False
+2025-03-25 09:43:53,908 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:53,910 - INFO - Processing customer file: {04E}{01E}HP641_T7Terminator{2_28}.ab1
+2025-03-25 09:43:53,911 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,912 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,915 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,916 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,917 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,920 - INFO - Is reinject: False
+2025-03-25 09:43:53,934 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:53,937 - INFO - Processing customer file: {04F}{01F}HP642_T7Terminator{2_28}.ab1
+2025-03-25 09:43:53,937 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,938 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,941 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,943 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,945 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,949 - INFO - Is reinject: False
+2025-03-25 09:43:53,958 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:53,959 - INFO - Processing customer file: {04G}{01G}HP643_T7Terminator{2_28}.ab1
+2025-03-25 09:43:53,960 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,961 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,962 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:53,964 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:53,966 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:53,968 - INFO - Is reinject: False
+2025-03-25 09:43:53,983 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:53,984 - INFO - Processing customer file: {04H}{01H}HP644_T7Terminator{2_28}.ab1
+2025-03-25 09:43:53,985 - INFO - Target order folder: BioI-21898_Weeks_147887
+2025-03-25 09:43:53,985 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:53,987 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,000 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,001 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Weeks_147887
+2025-03-25 09:43:54,001 - INFO - Is reinject: False
+2025-03-25 09:43:54,011 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,012 - INFO - Processing customer file: {05A}{03A}seqA_primer_R{2_28}.ab1
+2025-03-25 09:43:54,013 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:54,015 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:54,026 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,028 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,029 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:54,031 - INFO - Is reinject: False
+2025-03-25 09:43:54,080 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,081 - INFO - Processing customer file: {05B}{03B}seqB_primer_R{2_28}.ab1
+2025-03-25 09:43:54,082 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:54,084 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:54,085 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,087 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,092 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:54,094 - INFO - Is reinject: False
+2025-03-25 09:43:54,107 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,108 - INFO - Processing customer file: {05C}{03C}seqC_primer_R{2_28}.ab1
+2025-03-25 09:43:54,109 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:54,110 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:54,112 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,113 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,115 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:54,117 - INFO - Is reinject: False
+2025-03-25 09:43:54,127 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,128 - INFO - Processing customer file: {05D}{03D}seqD_primer_R{2_28}.ab1
+2025-03-25 09:43:54,129 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:54,132 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:54,136 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,137 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,140 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:54,143 - INFO - Is reinject: False
+2025-03-25 09:43:54,155 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,158 - INFO - Processing customer file: {05E}{03E}seqG_primer_R{2_28}.ab1
+2025-03-25 09:43:54,159 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:54,160 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:54,162 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,162 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,164 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:54,166 - INFO - Is reinject: False
+2025-03-25 09:43:54,184 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,185 - INFO - Processing customer file: {05F}{03F}seqi_primer_R{2_28}.ab1
+2025-03-25 09:43:54,186 - INFO - Target order folder: BioI-21898_Rey_147911
+2025-03-25 09:43:54,187 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:54,188 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,191 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,192 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Rey_147911
+2025-03-25 09:43:54,193 - INFO - Is reinject: False
+2025-03-25 09:43:54,199 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,200 - INFO - Processing customer file: {05G}{03G}pEM265_H3.1_K56Q_11_T7Terminator{BioI-21888}{2_28}.ab1
+2025-03-25 09:43:54,200 - INFO - Target order folder: BioI-21888_Morrison_147832
+2025-03-25 09:43:54,208 - INFO - Finding destination for I number: 21888
+2025-03-25 09:43:54,209 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,211 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,213 - INFO - Order folder path: P:/Data/03.25.25\BioI-21888\BioI-21888_Morrison_147832
+2025-03-25 09:43:54,214 - INFO - Is reinject: False
+2025-03-25 09:43:54,226 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,227 - INFO - Processing customer file: {06A}{02A}S3E1_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,228 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,228 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,229 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,230 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,232 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,233 - INFO - Is reinject: True
+2025-03-25 09:43:54,240 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:54,241 - INFO - Processing customer file: {06B}{02B}S3E2_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,242 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,243 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,243 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,244 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,245 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,245 - INFO - Is reinject: False
+2025-03-25 09:43:54,251 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,251 - INFO - Processing customer file: {06C}{02C}S3F1_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,252 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,252 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,253 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,253 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,254 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,255 - INFO - Is reinject: False
+2025-03-25 09:43:54,259 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,260 - INFO - Processing customer file: {06D}{02D}S3F2_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,261 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,262 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,262 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,262 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,264 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,265 - INFO - Is reinject: False
+2025-03-25 09:43:54,270 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,271 - INFO - Processing customer file: {06E}{02E}S3G1_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,271 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,272 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,273 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,273 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,274 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,275 - INFO - Is reinject: False
+2025-03-25 09:43:54,280 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,282 - INFO - Processing customer file: {06F}{02F}S3G2_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,283 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,284 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,284 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,285 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,286 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,286 - INFO - Is reinject: False
+2025-03-25 09:43:54,295 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,296 - INFO - Processing customer file: {06G}{02G}S4F1_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,296 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,297 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,298 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,298 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,299 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,301 - INFO - Is reinject: False
+2025-03-25 09:43:54,306 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,306 - INFO - Processing customer file: {06H}{02H}S4F2_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,307 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,307 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,309 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,314 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,315 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,316 - INFO - Is reinject: False
+2025-03-25 09:43:54,320 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,321 - INFO - Processing customer file: {07A}{03A}S4G1_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,322 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,322 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,324 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,324 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,325 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,326 - INFO - Is reinject: False
+2025-03-25 09:43:54,331 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,331 - INFO - Processing customer file: {07B}{03B}S4G2_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,332 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,332 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,333 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,334 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,335 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,336 - INFO - Is reinject: False
+2025-03-25 09:43:54,344 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,344 - INFO - Processing customer file: {07C}{03C}S4H1_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,345 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,348 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,350 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,351 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,352 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,354 - INFO - Is reinject: False
+2025-03-25 09:43:54,361 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,362 - INFO - Processing customer file: {07D}{03D}S4H2_1396_1396_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,362 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,363 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,364 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,367 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,369 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,370 - INFO - Is reinject: False
+2025-03-25 09:43:54,379 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,380 - INFO - Processing customer file: {07E}{03E}S3E1_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,381 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,381 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,383 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,383 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,384 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,385 - INFO - Is reinject: False
+2025-03-25 09:43:54,396 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,406 - INFO - Processing customer file: {07F}{03F}S3E2_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,407 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,407 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,409 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,409 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,410 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,411 - INFO - Is reinject: False
+2025-03-25 09:43:54,417 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,417 - INFO - Processing customer file: {07G}{03G}S3F1_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,419 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,419 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,420 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,420 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,421 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,422 - INFO - Is reinject: False
+2025-03-25 09:43:54,427 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,428 - INFO - Processing customer file: {07H}{03H}S3F2_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,429 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,429 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,430 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,431 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,431 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,433 - INFO - Is reinject: False
+2025-03-25 09:43:54,439 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,440 - INFO - Processing customer file: {08A}{04A}S3G1_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,441 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,443 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,455 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,456 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,457 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,457 - INFO - Is reinject: False
+2025-03-25 09:43:54,464 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,465 - INFO - Processing customer file: {08B}{04B}S3G2_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,465 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,465 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,466 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,467 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,468 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,469 - INFO - Is reinject: False
+2025-03-25 09:43:54,474 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,475 - INFO - Processing customer file: {08C}{04C}S4F1_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,475 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,476 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,477 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,477 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,478 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,479 - INFO - Is reinject: False
+2025-03-25 09:43:54,484 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,484 - INFO - Processing customer file: {08D}{04D}S4F2_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,485 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,486 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,486 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,487 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,487 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,488 - INFO - Is reinject: False
+2025-03-25 09:43:54,493 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,496 - INFO - Processing customer file: {08E}{04E}S4G1_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,497 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,504 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,506 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,506 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,507 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,508 - INFO - Is reinject: False
+2025-03-25 09:43:54,515 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,515 - INFO - Processing customer file: {08F}{04F}S4G2_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,518 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,519 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,522 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,522 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,525 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,526 - INFO - Is reinject: False
+2025-03-25 09:43:54,537 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,537 - INFO - Processing customer file: {08G}{04G}S4H1_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,538 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,538 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,540 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,540 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,541 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,543 - INFO - Is reinject: False
+2025-03-25 09:43:54,557 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,564 - INFO - Processing customer file: {08H}{04H}S4H2_1792_1792_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,565 - INFO - Target order folder: BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,567 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,569 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,569 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,570 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Neugebauer_147908
+2025-03-25 09:43:54,572 - INFO - Is reinject: False
+2025-03-25 09:43:54,586 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,587 - INFO - Processing customer file: {09A}{05A}XH_pXH096-1_M13-fwd_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,588 - INFO - Target order folder: BioI-21897_Wang_147882
+2025-03-25 09:43:54,589 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,589 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,591 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,592 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Wang_147882
+2025-03-25 09:43:54,594 - INFO - Is reinject: False
+2025-03-25 09:43:54,603 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,605 - INFO - Processing customer file: {09B}{05B}XH_pXH097-1_oHW579f_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,605 - INFO - Target order folder: BioI-21897_Wang_147882
+2025-03-25 09:43:54,606 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,607 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,607 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,608 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Wang_147882
+2025-03-25 09:43:54,609 - INFO - Is reinject: False
+2025-03-25 09:43:54,615 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,616 - INFO - Processing customer file: {09C}{05C}XH_pXH098-1_oHW579f_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,616 - INFO - Target order folder: BioI-21897_Wang_147882
+2025-03-25 09:43:54,617 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,618 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,618 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,619 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Wang_147882
+2025-03-25 09:43:54,620 - INFO - Is reinject: False
+2025-03-25 09:43:54,625 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,625 - INFO - Processing customer file: {09D}{05D}1252_1580{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,626 - INFO - Target order folder: BioI-21897_Freitag_147900
+2025-03-25 09:43:54,626 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,628 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,629 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,629 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Freitag_147900
+2025-03-25 09:43:54,630 - INFO - Is reinject: False
+2025-03-25 09:43:54,638 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,638 - INFO - Processing customer file: {09E}{05E}1252_2435{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,639 - INFO - Target order folder: BioI-21897_Freitag_147900
+2025-03-25 09:43:54,639 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,641 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,641 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,642 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Freitag_147900
+2025-03-25 09:43:54,643 - INFO - Is reinject: False
+2025-03-25 09:43:54,648 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,649 - INFO - Processing customer file: {09F}{05F}1_JA027_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,649 - INFO - Target order folder: BioI-21897_Behera_147913
+2025-03-25 09:43:54,650 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,651 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,651 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,652 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Behera_147913
+2025-03-25 09:43:54,653 - INFO - Is reinject: False
+2025-03-25 09:43:54,663 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,663 - INFO - Processing customer file: {09G}{05G}2_TW2167_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,664 - INFO - Target order folder: BioI-21897_Behera_147913
+2025-03-25 09:43:54,664 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,665 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,665 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,666 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Behera_147913
+2025-03-25 09:43:54,667 - INFO - Is reinject: False
+2025-03-25 09:43:54,673 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,674 - INFO - Processing customer file: {09H}{05H}B_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,674 - INFO - Target order folder: BioI-21897_Flood_147907
+2025-03-25 09:43:54,675 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,676 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,676 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,677 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Flood_147907
+2025-03-25 09:43:54,678 - INFO - Is reinject: False
+2025-03-25 09:43:54,687 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,688 - INFO - Processing customer file: {10A}{06A}C_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,688 - INFO - Target order folder: BioI-21897_Flood_147907
+2025-03-25 09:43:54,689 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,692 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,693 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,696 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Flood_147907
+2025-03-25 09:43:54,698 - INFO - Is reinject: False
+2025-03-25 09:43:54,707 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,707 - INFO - Processing customer file: {10B}{06B}D_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,707 - INFO - Target order folder: BioI-21897_Flood_147907
+2025-03-25 09:43:54,709 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,710 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,711 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,712 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Flood_147907
+2025-03-25 09:43:54,714 - INFO - Is reinject: False
+2025-03-25 09:43:54,718 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,719 - INFO - Processing customer file: {10C}{06C}E_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,720 - INFO - Target order folder: BioI-21897_Flood_147907
+2025-03-25 09:43:54,721 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,724 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,724 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,727 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Flood_147907
+2025-03-25 09:43:54,728 - INFO - Is reinject: False
+2025-03-25 09:43:54,748 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,752 - INFO - Processing customer file: {10D}{06D}dggtd1337_C1_P165_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,753 - INFO - Target order folder: BioI-21897_Gregory_147905
+2025-03-25 09:43:54,754 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,755 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,756 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,759 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Gregory_147905
+2025-03-25 09:43:54,760 - INFO - Is reinject: True
+2025-03-25 09:43:54,769 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:54,773 - INFO - Processing customer file: {10E}{06E}dggtd1337_C1.1_P166_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,774 - INFO - Target order folder: BioI-21897_Gregory_147905
+2025-03-25 09:43:54,775 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,776 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,778 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,779 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Gregory_147905
+2025-03-25 09:43:54,780 - INFO - Is reinject: True
+2025-03-25 09:43:54,791 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:54,792 - INFO - Processing customer file: {10F}{06F}d3376_C1_SP1_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,794 - INFO - Target order folder: BioI-21897_Gregory_147905
+2025-03-25 09:43:54,794 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,796 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,796 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,797 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Gregory_147905
+2025-03-25 09:43:54,798 - INFO - Is reinject: False
+2025-03-25 09:43:54,805 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,805 - INFO - Processing customer file: {10G}{06G}d3376_C1.2_SP2_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,806 - INFO - Target order folder: BioI-21897_Gregory_147905
+2025-03-25 09:43:54,807 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,807 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,809 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,809 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Gregory_147905
+2025-03-25 09:43:54,811 - INFO - Is reinject: True
+2025-03-25 09:43:54,830 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:54,831 - INFO - Processing customer file: {10H}{06H}pLY109c-2_LY0265_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,831 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:54,832 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,832 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,833 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,834 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:54,835 - INFO - Is reinject: False
+2025-03-25 09:43:54,847 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,848 - INFO - Processing customer file: {11A}{07A}pLY111c-2_LY0265_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,849 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:54,850 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,851 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,851 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,852 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:54,853 - INFO - Is reinject: False
+2025-03-25 09:43:54,863 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,863 - INFO - Processing customer file: {11B}{07B}pLY112c-2_LY0265_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,867 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:54,869 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,871 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,871 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,872 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:54,874 - INFO - Is reinject: False
+2025-03-25 09:43:54,884 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,885 - INFO - Processing customer file: {11C}{07C}pLY109k-2_LY0265_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,886 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:54,886 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,891 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,891 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,893 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:54,894 - INFO - Is reinject: False
+2025-03-25 09:43:54,902 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,903 - INFO - Processing customer file: {11D}{07D}pLY111k-2_LY0265_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,903 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:54,904 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,905 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,906 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,906 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:54,908 - INFO - Is reinject: False
+2025-03-25 09:43:54,915 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,915 - INFO - Processing customer file: {11E}{07E}pLY112k-2_LY0265_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,916 - INFO - Target order folder: BioI-21897_Yang_147901
+2025-03-25 09:43:54,917 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,918 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,918 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,919 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Yang_147901
+2025-03-25 09:43:54,920 - INFO - Is reinject: False
+2025-03-25 09:43:54,925 - INFO - File already exists, moved to alternate injections
+2025-03-25 09:43:54,927 - INFO - Processing customer file: {11F}{07F}Hbaa1.2WT-A1832_A1832_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,927 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:54,928 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,929 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,930 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,930 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:54,931 - INFO - Is reinject: True
+2025-03-25 09:43:54,936 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:54,937 - INFO - Processing customer file: {11G}{07G}HbaaWT-3p-A981_A981_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,938 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:54,939 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,939 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,940 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,941 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:54,942 - INFO - Is reinject: True
+2025-03-25 09:43:54,948 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:54,948 - INFO - Processing customer file: {11H}{07H}Hbaa1.2WT-A984_A984_Premixed{2_28}{BioI-21897}.ab1
+2025-03-25 09:43:54,949 - INFO - Target order folder: BioI-21897_Kang_147912
+2025-03-25 09:43:54,949 - INFO - Finding destination for I number: 21897
+2025-03-25 09:43:54,951 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,951 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,952 - INFO - Order folder path: P:/Data/03.25.25\BioI-21897\BioI-21897_Kang_147912
+2025-03-25 09:43:54,954 - INFO - Is reinject: True
+2025-03-25 09:43:54,962 - INFO - Reinject moved to alternate injections
+2025-03-25 09:43:54,963 - INFO - Processing customer file: {12A}1_IFI6_pCAGrev_RTI{5_5}.ab1
+2025-03-25 09:43:54,963 - INFO - Target order folder: BioI-21898_Jalbut_147915
+2025-03-25 09:43:54,965 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:54,966 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,967 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,968 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Jalbut_147915
+2025-03-25 09:43:54,970 - INFO - Created order folder: P:/Data/03.25.25\BioI-21898\BioI-21898_Jalbut_147915
+2025-03-25 09:43:54,971 - INFO - Is reinject: False
+2025-03-25 09:43:54,979 - INFO - File moved to main folder
+2025-03-25 09:43:54,979 - INFO - Processing customer file: {12B}2_RTI{5_5}.ab1
+2025-03-25 09:43:54,980 - INFO - Target order folder: BioI-21898_Jalbut_147915
+2025-03-25 09:43:54,980 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:54,981 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,982 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,982 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Jalbut_147915
+2025-03-25 09:43:54,983 - INFO - Is reinject: False
+2025-03-25 09:43:54,989 - INFO - File moved to main folder
+2025-03-25 09:43:54,990 - INFO - Processing customer file: {12C}3_RTI{5_5}.ab1
+2025-03-25 09:43:54,990 - INFO - Target order folder: BioI-21898_Jalbut_147915
+2025-03-25 09:43:54,991 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:54,992 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:54,993 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:54,994 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Jalbut_147915
+2025-03-25 09:43:54,995 - INFO - Is reinject: False
+2025-03-25 09:43:55,000 - INFO - File moved to main folder
+2025-03-25 09:43:55,001 - INFO - Processing customer file: {12D}4_RTI{5_5}.ab1
+2025-03-25 09:43:55,002 - INFO - Target order folder: BioI-21898_Jalbut_147915
+2025-03-25 09:43:55,002 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:55,003 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:55,004 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:55,004 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Jalbut_147915
+2025-03-25 09:43:55,005 - INFO - Is reinject: False
+2025-03-25 09:43:55,009 - INFO - File moved to main folder
+2025-03-25 09:43:55,010 - INFO - Processing customer file: {12E}5_IFI30_RTI{5_5}.ab1
+2025-03-25 09:43:55,010 - INFO - Target order folder: BioI-21898_Jalbut_147915
+2025-03-25 09:43:55,010 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:55,011 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:55,012 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:55,012 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Jalbut_147915
+2025-03-25 09:43:55,013 - INFO - Is reinject: False
+2025-03-25 09:43:55,018 - INFO - File moved to main folder
+2025-03-25 09:43:55,019 - INFO - Processing customer file: {12F}6_RTI{5_5}.ab1
+2025-03-25 09:43:55,019 - INFO - Target order folder: BioI-21898_Jalbut_147915
+2025-03-25 09:43:55,020 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:55,021 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:55,021 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:55,022 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Jalbut_147915
+2025-03-25 09:43:55,023 - INFO - Is reinject: False
+2025-03-25 09:43:55,026 - INFO - File moved to main folder
+2025-03-25 09:43:55,027 - INFO - Processing customer file: {12G}7_RTI{5_5}.ab1
+2025-03-25 09:43:55,027 - INFO - Target order folder: BioI-21898_Jalbut_147915
+2025-03-25 09:43:55,028 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:55,029 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:55,030 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:55,030 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Jalbut_147915
+2025-03-25 09:43:55,032 - INFO - Is reinject: False
+2025-03-25 09:43:55,036 - INFO - File moved to main folder
+2025-03-25 09:43:55,037 - INFO - Processing customer file: {12H}8_RTI{5_5}.ab1
+2025-03-25 09:43:55,037 - INFO - Target order folder: BioI-21898_Jalbut_147915
+2025-03-25 09:43:55,038 - INFO - Finding destination for I number: 21898
+2025-03-25 09:43:55,038 - INFO - Using user-selected folder: P:/Data/03.25.25
+2025-03-25 09:43:55,039 - INFO - Parent folder: P:/Data/03.25.25
+2025-03-25 09:43:55,039 - INFO - Order folder path: P:/Data/03.25.25\BioI-21898\BioI-21898_Jalbut_147915
+2025-03-25 09:43:55,040 - INFO - Is reinject: False
+2025-03-25 09:43:55,051 - INFO - File moved to main folder
+2025-03-25 09:43:55,054 - INFO - Deleted empty original folder: P:/Data/03.25.25\2025-03-25_BioI-21898_1
+2025-03-25 09:43:55,055 - INFO - All folders processed

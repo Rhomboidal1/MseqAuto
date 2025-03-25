@@ -1,0 +1,14 @@
+2025-03-25 09:55:37,907 - INFO - Starting IND auto mSeq...
+2025-03-25 09:55:37,910 - INFO - Config loaded
+2025-03-25 09:55:37,911 - INFO - FileSystemDAO initialized
+2025-03-25 09:55:37,960 - INFO - UI Automation initialized
+2025-03-25 09:55:37,961 - INFO - Folder processor initialized
+2025-03-25 09:55:37,961 - INFO - Running batch file: P:\generate-data-sorting-key-file.bat
+2025-03-25 09:55:39,320 - INFO - Batch file completed successfully
+2025-03-25 09:56:14,113 - INFO - Starting IND auto mSeq...
+2025-03-25 09:56:14,117 - INFO - Config loaded
+2025-03-25 09:56:14,121 - INFO - FileSystemDAO initialized
+2025-03-25 09:56:14,122 - INFO - UI Automation initialized
+2025-03-25 09:56:14,123 - INFO - Folder processor initialized
+2025-03-25 09:56:14,124 - INFO - Running batch file: P:\generate-data-sorting-key-file.bat
+2025-03-25 09:56:14,958 - INFO - Batch file completed successfully
