@@ -313,7 +313,7 @@ class FileSystemDAO:
         else:
             cutoff_date = current_date - timedelta(days=1)  # Default to 1 day
         
-        cutoff_timestamp = cutoff_date.timestamp()
+        # cutoff_timestamp = cutoff_date.timestamp()
         
         # Collect recent files from all specified paths
         file_info_list = []

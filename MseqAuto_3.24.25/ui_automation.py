@@ -5,6 +5,7 @@ import platform
 from pywinauto import Application, timings
 from pywinauto.keyboard import send_keys
 from pywinauto.findwindows import ElementNotFoundError, ElementAmbiguousError
+import win32api
 
 class MseqAutomation:
     def __init__(self, config):
@@ -107,7 +108,7 @@ class MseqAutomation:
             # Click to ensure focus
             item.click_input()
             
-            # Try Page Down a couple times to see more items
+            # Try Page Down a couple of times to see more items
             for i in range(3):
                 send_keys('{PGDN}')
                 time.sleep(0.3)
@@ -117,7 +118,7 @@ class MseqAutomation:
         except Exception as e:
             logger.warning(f"Error while scrolling: {e}")
             return False
-    
+
     def _ensure_dialog_visible(self, dialog):
         """Make sure dialog is visible and positioned correctly"""
         try:
@@ -125,16 +126,15 @@ class MseqAutomation:
             if dialog.exists() and dialog.rectangle().width() > 0:
                 # Dialog is visible, no action needed
                 return True
-            
+
             # Try to set focus and move if needed
             dialog.set_focus()
-            
+
             # Get screen dimensions
             try:
-                import win32api
                 screen_width = win32api.GetSystemMetrics(0)
                 screen_height = win32api.GetSystemMetrics(1)
-                
+
                 # Reposition dialog if it's offscreen
                 rect = dialog.rectangle()
                 if rect.left < 0 or rect.top < 0 or rect.right > screen_width or rect.bottom > screen_height:
@@ -142,7 +142,7 @@ class MseqAutomation:
             except ImportError:
                 # Fall back if win32api isn't available
                 dialog.set_focus()
-                
+
             return True
         except Exception as e:
             print(f"Error ensuring dialog visibility: {e}")
@@ -377,7 +377,7 @@ class MseqAutomation:
                                     logger.info(f"Found This PC by name: {child.text()}")
                                     break
                         
-                        # If Documents is the target and we can find it directly
+                        # If Documents is the target, and if we can find it directly
                         if "Documents" in path and path.endswith("Documents"):
                             for child in desktop_children:
                                 if "Document" in child.text():
