@@ -1,12 +1,9 @@
 # ind_sort_files.py
 import os
-import sys
-import tkinter as tk
-from tkinter import filedialog
 import subprocess
-import re
-from datetime import datetime, timedelta
-import numpy as np
+import tkinter as tk
+from datetime import datetime
+from tkinter import filedialog
 
 from config import MseqConfig
 from file_system_dao import FileSystemDAO
@@ -54,7 +51,7 @@ def get_folder_from_user():
         print("No folder selected")
         return None
 
-def get_recent_inumbers(file_dao, config, logger):
+def get_recent_inumbers(file_dao, logger):
     """Get list of recent I numbers to process based on order key"""
     paths = ['G:\\Lab\\Spreadsheets\\Individual Uploaded to ABI', 'G:\\Lab\\Spreadsheets']
     
@@ -124,7 +121,7 @@ def main():
     logger.info(f"Found {len(i_numbers)} I numbers and {len(bio_folders)} BioI folders")
     
     # Get recent I numbers for order key filtering
-    recent_inumbers = get_recent_inumbers(file_dao, config, logger)
+    recent_inumbers = get_recent_inumbers(file_dao, logger)
     logger.info(f"Using recent I numbers: {recent_inumbers}")
     
     # Load order key and adjust characters
