@@ -10,6 +10,9 @@ class FolderProcessor:
         self.config = config
         self.logger = logger
         self.order_key_index = None  # Will be populated when needed
+        # Add these lines to initialize the attributes
+        self.reinject_list = []
+        self.raw_reinject_list = []
 
     def build_order_key_index(self, order_key):
         """Build lookup index for faster order key searches"""
@@ -30,7 +33,7 @@ class FolderProcessor:
 
         self.logger(f"Built order key index with {len(self.order_key_index)} unique entries")
 
-    def sort_customer_file(self, file_path, order_key, recent_inumbers):
+    def sort_customer_file(self, file_path, order_key):
         """Sort a customer file based on order key using the index"""
         # Build index if not already done
         if self.order_key_index is None:
@@ -124,7 +127,7 @@ class FolderProcessor:
         # If no matching folder found, return the day data path
         return os.path.dirname(base_path)
 
-    def _get_destination_for_order_by_inum(self, i_num, current_folder=None):
+    def _get_destination_for_order_by_inum(self, i_num):
         """
         Get the parent folder path for an order based on I number
         
@@ -288,7 +291,7 @@ class FolderProcessor:
         else:
             self.logger(f"mSeq NOT completed: {os.path.basename(pcr_folder)}")
 
-    def sort_ind_folder(self, folder_path, reinject_list, order_key, recent_inumbers):
+    def sort_ind_folder(self, folder_path, reinject_list, order_key):
         """Sort all files in a BioI folder using batch processing"""
         self.logger(f"Processing folder: {folder_path}")
 
@@ -417,7 +420,7 @@ class FolderProcessor:
                 self.build_order_key_index(order_key)
 
             for file_path in customer_files:
-                self.sort_customer_file(file_path, order_key, recent_inumbers)
+                self.sort_customer_file(file_path, order_key)
 
         # Enhanced cleanup: Check if the original folder is empty or can be safely deleted
         try:
@@ -505,6 +508,10 @@ class FolderProcessor:
                 # Non-standard item
                 self.logger(f"Found non-standard item in folder: {item}")
                 moved_all = False
+        if moved_all:
+            self.logger("Successfully moved all special folders to new location")
+        else:
+            self.logger("Some items could not be moved to the new location")
 
         # Refresh contents one more time after all operations
         remaining_items = self.file_dao.get_directory_contents(original_folder, refresh=True)
