@@ -140,7 +140,7 @@ def main():
     # Process each BioI folder
     for i, folder in enumerate(bio_folders):
         logger.info(f"Processing folder {i+1}/{len(bio_folders)}: {os.path.basename(folder)}")
-        processor.sort_ind_folder(folder, reinject_list, order_key, recent_inumbers)
+        processor.sort_ind_folder(folder, reinject_list, order_key)
     
     logger.info("All folders processed")
     print("All done!")

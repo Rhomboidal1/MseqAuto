@@ -96,6 +96,19 @@ class FolderProcessor:
 
         return order_folder_path
 
+    def get_order_folders(self, bio_folder):
+        """Get order folders within a BioI folder"""
+        order_folders = []
+
+        for item in os.listdir(bio_folder):
+            item_path = os.path.join(bio_folder, item)
+            if os.path.isdir(item_path):
+                if re.search(r'bioi-\d+_.+_\d+', item.lower()) and not re.search('reinject', item.lower()):
+                    # If item looks like an order folder BioI-20000_YoMama_123456 and not a reinject folder
+                    order_folders.append(item_path)
+
+        return order_folders
+
     def get_destination_for_order(self, order_folder, base_path):
         """Determine the correct destination for an order folder"""
         folder_name = os.path.basename(order_folder)
@@ -968,6 +981,45 @@ class FolderProcessor:
 
         return was_mseqed, has_braces, has_ab1_files
 
+    def zip_order_folder(self, folder_path, include_txt=True):
+        """
+        Zip the contents of an order folder
+
+        Args:
+            folder_path (str): Path to the order folder
+            include_txt (bool): Whether to include text files in zip
+
+        Returns:
+            str: Path to created zip file, or None if failed
+        """
+        try:
+            folder_name = os.path.basename(folder_path)
+            zip_filename = f"{folder_name}.zip"
+            zip_path = os.path.join(folder_path, zip_filename)
+
+            # Determine which files to include
+            file_extensions = ['.ab1']
+            if include_txt:
+                file_extensions.extend(self.config.TEXT_FILES)
+
+            # Create zip file
+            self.logger(f"Creating zip file: {zip_filename}")
+            success = self.file_dao.zip_files(
+                source_folder=folder_path,
+                zip_path=zip_path,
+                file_extensions=file_extensions,
+                exclude_extensions=None
+            )
+
+            if success:
+                self.logger(f"Successfully created zip file: {zip_path}")
+                return zip_path
+            else:
+                self.logger(f"Failed to create zip file: {zip_path}")
+                return None
+        except Exception as e:
+            self.logger(f"Error creating zip file for {folder_path}: {e}")
+            return None
 
     def find_zip_file(self, folder_path):
         """Find zip file in a folder"""
@@ -984,7 +1036,6 @@ class FolderProcessor:
                 return worksheet.cell(row=row, column=8).value
         return None
 
-
     def validate_zip_contents(self, zip_path, i_number, order_number, order_key):
         """
         Validate zip file contents against order key
@@ -999,6 +1050,7 @@ class FolderProcessor:
             dict: Validation results
         """
         import zipfile
+        import numpy as np
 
         # Results to return
         validation_result = {
@@ -1014,12 +1066,24 @@ class FolderProcessor:
 
         # Get expected files from order key for this order
         order_items = []
-        for entry in order_key:
-            if entry[0] == i_number and entry[2] == order_number:
-                # Get raw name and adjusted name
-                raw_name = entry[3]
+
+        # Handle NumPy array properly
+        if isinstance(order_key, np.ndarray):
+            # Use NumPy's boolean indexing for efficient filtering
+            mask = (order_key[:, 0] == i_number) & (order_key[:, 2] == order_number)
+            matching_rows = order_key[mask]
+
+            for row in matching_rows:
+                raw_name = row[3]
                 adjusted_name = self.file_dao.normalize_filename(raw_name)
                 order_items.append({'raw_name': raw_name, 'adjusted_name': adjusted_name})
+        else:
+            # Fallback for non-NumPy arrays
+            for entry in order_key:
+                if entry[0] == i_number and entry[2] == order_number:
+                    raw_name = entry[3]
+                    adjusted_name = self.file_dao.normalize_filename(raw_name)
+                    order_items.append({'raw_name': raw_name, 'adjusted_name': adjusted_name})
 
         validation_result['expected_count'] = len(order_items)
 
@@ -1028,7 +1092,7 @@ class FolderProcessor:
             zip_contents = zip_ref.namelist()
 
         # Check for text files
-        txt_extensions = [ext.lower() for ext in self.config.TEXT_FILES]
+        txt_extensions = self.config.TEXT_FILES
 
         for item in zip_contents:
             for ext in txt_extensions:
@@ -1038,12 +1102,14 @@ class FolderProcessor:
                     break
 
         # Check for matches
+        zip_contents_to_check = list(zip_contents)  # Create a copy to modify safely
+
         for order_item in order_items:
             adjusted_name = order_item['adjusted_name']
             raw_name = order_item['raw_name']
 
             found_match = False
-            for zip_item in zip_contents[:]:  # Make a copy to avoid modification issues
+            for zip_item in zip_contents_to_check[:]:  # Iterate over a copy
                 if zip_item.endswith('.ab1'):
                     # Remove braces and extension for comparison
                     clean_zip_item = re.sub(r'{.*?}', '', zip_item)[:-4]  # Remove .ab1
@@ -1055,7 +1121,7 @@ class FolderProcessor:
                         })
                         validation_result['match_count'] += 1
                         found_match = True
-                        zip_contents.remove(zip_item)  # Remove to avoid duplicates
+                        zip_contents_to_check.remove(zip_item)  # Remove to avoid duplicates
                         break
 
             if not found_match:
@@ -1065,7 +1131,7 @@ class FolderProcessor:
                 validation_result['mismatch_count'] += 1
 
         # Remaining unmatched AB1 files in zip
-        for item in zip_contents:
+        for item in zip_contents_to_check:
             if item.endswith('.ab1'):
                 validation_result['mismatches_in_zip'].append(item)
                 validation_result['mismatch_count'] += 1
