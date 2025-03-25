@@ -1,0 +1,7 @@
+pywinauto>=0.6.8
+numpy>=1.20.0
+openpyxl>=3.0.7
+pylightxl>=1.60
+pywin32>=300
+psutil>=5.9.0
+pyinstaller>=5.7.0

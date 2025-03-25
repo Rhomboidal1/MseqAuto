@@ -1,0 +1,21 @@
+2025-03-25 17:19:31,303 - INFO - Starting debug script
+2025-03-25 17:19:31,304 - INFO - Calling get_folder_from_user
+2025-03-25 17:19:31,305 - INFO - Entering get_folder_from_user
+2025-03-25 17:19:31,305 - INFO - Creating Tk root window
+2025-03-25 17:19:31,416 - INFO - Root window created
+2025-03-25 17:19:31,416 - INFO - Withdrawing root window
+2025-03-25 17:19:31,417 - INFO - Root window withdrawn
+2025-03-25 17:19:31,418 - INFO - Current thread: MainThread
+2025-03-25 17:19:31,418 - INFO - Is main thread: True
+2025-03-25 17:19:31,419 - INFO - Tk state: withdrawn
+2025-03-25 17:19:31,420 - INFO - About to call filedialog.askdirectory
+2025-03-25 17:19:31,921 - INFO - Tk geometry: 1x1+0+0
+2025-03-25 17:19:31,926 - INFO - Watchdog thread started
+2025-03-25 17:19:32,928 - INFO - Watchdog: waiting for dialog... (1s)
+2025-03-25 17:19:33,929 - INFO - Watchdog: waiting for dialog... (2s)
+2025-03-25 17:19:34,841 - INFO - filedialog.askdirectory completed
+2025-03-25 17:19:34,842 - INFO - Destroying root window
+2025-03-25 17:19:34,848 - INFO - Root window destroyed
+2025-03-25 17:19:34,849 - INFO - Selected folder: P:/Data/03.25.25/IND Not Ready
+2025-03-25 17:19:34,852 - INFO - Function returned
+2025-03-25 17:19:34,852 - INFO - Success: P:/Data/03.25.25/IND Not Ready

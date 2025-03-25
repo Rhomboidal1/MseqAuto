@@ -1,0 +1,32 @@
+Desktop
+	Home
+	Gallery
+	Desktop
+	Documents
+	Pictures
+	tyler - functionalbio (Microsoft OneDrive) (Expanded by default when Browse For Folder dialog box is open
+		Apps
+		Desktop
+		Documents (initially highlighted)
+		Microsoft Teams Chat Files
+		Pictures
+		Whiteboards
+	functionalbio (synced sharepoint drive)
+	Downloads
+	Music
+	Videos
+	Tyler Rudig
+	This PC
+		Windows (C:)
+		DVD RW Drive (D:)
+		Data (G:)
+		Tyler (\\w2k16\users) (H:)
+		data (\\abi-instrument) (L:)
+		data (\\scorpio) (N:)
+		ABISync (P:)
+		data (\\abi-right) (R:)
+	Libraries
+	DVD RW Drive (D:)
+	Network
+	Control Panel
+	Recycle Bin
