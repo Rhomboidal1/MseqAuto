@@ -9,7 +9,6 @@ from file_system_dao import FileSystemDAO
 from folder_processor import FolderProcessor
 from ui_automation import MseqAutomation
 import re
-import time
 from logger import setup_logger
 
 # Check for 32-bit Python requirement - gracefully fallback if not available
