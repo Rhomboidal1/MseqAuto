@@ -671,6 +671,15 @@ class FolderProcessor:
 
         return i_numbers, bioi_folders
 
+    def get_order_number_from_folder_name(self, folder_path):
+        """Extract order number from folder name"""
+        folder_name = os.path.basename(folder_path)
+        match = re.search(r'_\d+$', folder_name)
+        if match:
+            order_number = re.search(r'\d+', match.group(0)).group(0)
+            return order_number
+        return None
+
     def get_reinject_list(self, i_numbers, reinject_path=None):
         """Get list of reactions that are reinjects - optimized version"""
         import re
@@ -959,6 +968,109 @@ class FolderProcessor:
 
         return was_mseqed, has_braces, has_ab1_files
 
+
+    def find_zip_file(self, folder_path):
+        """Find zip file in a folder"""
+        for item in os.listdir(folder_path):
+            if item.endswith('.zip') and os.path.isfile(os.path.join(folder_path, item)):
+                return os.path.join(folder_path, item)
+        return None
+
+
+    def get_zip_mod_time(self, worksheet, order_number):
+        """Get the modification time of a zip file from the summary worksheet"""
+        for row in range(2, worksheet.max_row + 1):
+            if worksheet.cell(row=row, column=2).value == order_number:
+                return worksheet.cell(row=row, column=8).value
+        return None
+
+
+    def validate_zip_contents(self, zip_path, i_number, order_number, order_key):
+        """
+        Validate zip file contents against order key
+
+        Args:
+            zip_path (str): Path to the zip file
+            i_number (str): I number
+            order_number (str): Order number
+            order_key (array): Order key data
+
+        Returns:
+            dict: Validation results
+        """
+        import zipfile
+
+        # Results to return
+        validation_result = {
+            'match_count': 0,
+            'mismatch_count': 0,
+            'txt_count': 0,
+            'expected_count': 0,
+            'matches': [],
+            'mismatches_in_zip': [],
+            'mismatches_in_order': [],
+            'txt_files': []
+        }
+
+        # Get expected files from order key for this order
+        order_items = []
+        for entry in order_key:
+            if entry[0] == i_number and entry[2] == order_number:
+                # Get raw name and adjusted name
+                raw_name = entry[3]
+                adjusted_name = self.file_dao.normalize_filename(raw_name)
+                order_items.append({'raw_name': raw_name, 'adjusted_name': adjusted_name})
+
+        validation_result['expected_count'] = len(order_items)
+
+        # Get actual files from zip
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_contents = zip_ref.namelist()
+
+        # Check for text files
+        txt_extensions = [ext.lower() for ext in self.config.TEXT_FILES]
+
+        for item in zip_contents:
+            for ext in txt_extensions:
+                if item.endswith(ext):
+                    validation_result['txt_count'] += 1
+                    validation_result['txt_files'].append(ext)
+                    break
+
+        # Check for matches
+        for order_item in order_items:
+            adjusted_name = order_item['adjusted_name']
+            raw_name = order_item['raw_name']
+
+            found_match = False
+            for zip_item in zip_contents[:]:  # Make a copy to avoid modification issues
+                if zip_item.endswith('.ab1'):
+                    # Remove braces and extension for comparison
+                    clean_zip_item = re.sub(r'{.*?}', '', zip_item)[:-4]  # Remove .ab1
+
+                    if clean_zip_item == adjusted_name:
+                        validation_result['matches'].append({
+                            'raw_name': raw_name,
+                            'file_name': zip_item
+                        })
+                        validation_result['match_count'] += 1
+                        found_match = True
+                        zip_contents.remove(zip_item)  # Remove to avoid duplicates
+                        break
+
+            if not found_match:
+                validation_result['mismatches_in_order'].append({
+                    'raw_name': raw_name
+                })
+                validation_result['mismatch_count'] += 1
+
+        # Remaining unmatched AB1 files in zip
+        for item in zip_contents:
+            if item.endswith('.ab1'):
+                validation_result['mismatches_in_zip'].append(item)
+                validation_result['mismatch_count'] += 1
+
+        return validation_result
 
 if __name__ == "__main__":
     # Simple test if run directly
