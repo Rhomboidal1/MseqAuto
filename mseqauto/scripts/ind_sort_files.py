@@ -2,6 +2,7 @@
 import os
 import subprocess
 import tkinter as tk
+import sys
 from datetime import datetime
 from tkinter import filedialog
 
@@ -9,7 +10,7 @@ from mseqauto.core import FileSystemDAO, FolderProcessor
 from mseqauto.utils import setup_logger
 from mseqauto.config import MseqConfig
 
-'''# Check for 32-bit Python requirement - gracefully fallback if not available
+# Check for 32-bit Python requirement - gracefully fallback if not available
 if sys.maxsize > 2**32:
     # Path to 32-bit Python
     py32_path = MseqConfig.PYTHON32_PATH
@@ -24,7 +25,7 @@ if sys.maxsize > 2**32:
         sys.exit(0)
     else:
         print("32-bit Python not specified or same as current interpreter")
-        print("Continuing with current Python interpreter")'''
+        print("Continuing with current Python interpreter")
 
 def get_folder_from_user():
     """Get folder selection from user using a simple approach"""
