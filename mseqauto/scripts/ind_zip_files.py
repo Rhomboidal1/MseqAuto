@@ -5,20 +5,9 @@ import sys
 import tkinter as tk
 from tkinter import filedialog
 
-from mseqauto.core import FileSystemDAO, FolderProcessor
+from mseqauto.core import FileSystemDAO, FolderProcessor, OSCompatibilityManager
 from mseqauto.utils import setup_logger
 from mseqauto.config import MseqConfig
-
-# Check for 32-bit Python requirement
-if sys.maxsize > 2**32:
-    py32_path = MseqConfig.PYTHON32_PATH
-    if os.path.exists(py32_path) and py32_path != sys.executable:
-        script_path = os.path.abspath(__file__)
-        subprocess.run([py32_path, script_path])
-        sys.exit(0)
-    else:
-        print("32-bit Python not specified or same as current interpreter")
-        print("Continuing with current Python interpreter")
 
 def get_folder_from_user():
     """Get folder selection from user"""
@@ -42,7 +31,13 @@ def main():
     # Setup logger
     logger = setup_logger("ind_zip_files")
     logger.info("Starting IND zip files...")
-    
+
+    # Immediately check for 32-bit Python requirements
+    OSCompatibilityManager.py32_check(
+        script_path=__file__,
+        logger=logger
+    )
+
     # Initialize components
     config = MseqConfig()
     logger.info("Config loaded")

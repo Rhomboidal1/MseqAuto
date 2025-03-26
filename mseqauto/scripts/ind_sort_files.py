@@ -6,50 +6,19 @@ import sys
 from datetime import datetime
 from tkinter import filedialog
 
-from mseqauto.core import FileSystemDAO, FolderProcessor
-from mseqauto.utils import setup_logger
-from mseqauto.config import MseqConfig
-
-# Check for 32-bit Python requirement - gracefully fallback if not available
-if sys.maxsize > 2**32:
-    # Path to 32-bit Python
-    py32_path = MseqConfig.PYTHON32_PATH
-    
-    # Only relaunch if we have a different 32-bit Python
-    if os.path.exists(py32_path) and py32_path != sys.executable:
-        # Get the full path of the current script
-        script_path = os.path.abspath(__file__)
-        
-        # Re-run this script with 32-bit Python and exit current process
-        subprocess.run([py32_path, script_path])
-        sys.exit(0)
-    else:
-        print("32-bit Python not specified or same as current interpreter")
-        print("Continuing with current Python interpreter")
-
 def get_folder_from_user():
-    """Get folder selection from user using a simple approach"""
     print("Opening folder selection dialog...")
-    
-    # Create and immediately withdraw (hide) the root window
     root = tk.Tk()
     root.withdraw()
+    root.update()  # Add this line - force an update
     
-    # Show a directory selection dialog
     folder_path = filedialog.askdirectory(
         title="Select today's data folder to sort",
         mustexist=True
     )
     
-    # Destroy the root window
     root.destroy()
-    
-    if folder_path:
-        print(f"Selected folder: {folder_path}")
-        return folder_path
-    else:
-        print("No folder selected")
-        return None
+    return folder_path
 
 def get_recent_inumbers(file_dao, logger):
     """Get list of recent I numbers to process based on order key"""
@@ -81,8 +50,27 @@ def get_recent_inumbers(file_dao, logger):
     return [i for i in final_inums if i]  # Filter out None values
 
 def main():
+    # Get folder path first before any package imports
+    data_folder = get_folder_from_user()
+    
+    if not data_folder:
+        print("No folder selected, exiting")
+        return
+
+    # ONLY NOW import package modules
+    from mseqauto.config import MseqConfig
+    from mseqauto.core import FileSystemDAO, FolderProcessor, OSCompatibilityManager
+    from mseqauto.utils import setup_logger
+    
     # Setup logger
     logger = setup_logger("ind_sort_files")
+
+    # Immediately check for 32-bit Python requirements
+    OSCompatibilityManager.py32_check(
+        script_path=__file__,
+        logger=logger
+    )
+
     logger.info("Starting IND sort files...")
     
     # Initialize components

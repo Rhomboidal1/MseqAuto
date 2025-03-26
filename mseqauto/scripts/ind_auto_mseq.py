@@ -8,28 +8,45 @@ import re
 from mseqauto.utils import setup_logger
 
 # Basic imports first
+from mseqauto.core import OSCompatibilityManager
 from mseqauto.config import MseqConfig
 
+OSCompatibilityManager.py32_check(
+    script_path=__file__,
+    logger=logger if 'logger' in locals() else None
+)
 
 def get_folder_from_user():
-    """Get folder selection from user using a simple approach"""
-    print("Opening folder selection dialog...")
+    """Get folder selection from user with OS-specific handling"""
+    logger = setup_logger("ind_auto_mseq")
+    logger.info("Opening folder selection dialog...")
 
+    # Create and immediately withdraw (hide) the root window
     root = tk.Tk()
     root.withdraw()
 
+    # Get OS-specific timeout for dialog operation
+    dialog_timeout = OSCompatibilityManager.get_timeout("window_appear")
+
+    # On Windows 11, we might need additional setup for dialogs
+    if OSCompatibilityManager.is_windows_11():
+        # Process any pending UI events for better dialog initialization
+        root.update()
+
+    # Show a directory selection dialog
     folder_path = filedialog.askdirectory(
         title="Select today's data folder to mseq orders",
         mustexist=True
     )
 
+    # Destroy the root window
     root.destroy()
 
     if folder_path:
-        print(f"Selected folder: {folder_path}")
+        logger.info(f"Selected folder: {folder_path}")
         return folder_path
     else:
-        print("No folder selected")
+        logger.error("No folder selected")
         return None
 
 
@@ -37,6 +54,9 @@ def main():
     # Setup logger
     logger = setup_logger("ind_auto_mseq")
     logger.info("Starting IND auto mSeq...")
+
+    # Log OS environment information
+    OSCompatibilityManager.log_environment_info(logger)
 
     # Select folder FIRST, before any complex imports
     logger.info("About to select folder...")
@@ -54,26 +74,31 @@ def main():
     logger.info("Initializing components...")
     config = MseqConfig()
 
-    # Optimize timeouts for faster operation
-    config.TIMEOUTS = {
-        "browse_dialog": 3,  # Reduced from 10
-        "preferences": 2,  # Reduced from 8
-        "copy_files": 2,  # Reduced from 8
-        "error_window": 3,  # Reduced from 20
-        "call_bases": 3,  # Reduced from 15
-        "process_completion": 15,  # Reduced from 60
-        "read_info": 2  # Reduced from 8
-    }
-    logger.info("Config loaded with optimized timeouts")
+    # Use OS compatibility manager for timeouts instead of hardcoding them
+    # This replaces the hardcoded timeout overrides that were here before
+    logger.info("Using OS-specific timeouts")
 
     from mseqauto.core import FileSystemDAO
     file_dao = FileSystemDAO(config)
     logger.info("FileSystemDAO initialized")
 
     from mseqauto.core import MseqAutomation
+    ui_automation = MseqAutomation(config)
+    logger.info("UI Automation initialized with OS-specific settings")
 
-    # Patch the UI Automation class to optimize tree navigation speed
-    import types
+    from mseqauto.core import FolderProcessor
+    processor = FolderProcessor(file_dao, ui_automation, config, logger=logger.info)
+    logger.info("Folder processor initialized")
+
+    # Run batch file to generate order key
+    try:
+        logger.info(f"Running batch file: {config.BATCH_FILE_PATH}")
+        subprocess.run(config.BATCH_FILE_PATH, shell=True, check=True)
+        logger.info("Batch file completed successfully")
+    except subprocess.CalledProcessError:
+        logger.error(f"Batch file {config.BATCH_FILE_PATH} failed to run")
+        print(f"Error: Batch file {config.BATCH_FILE_PATH} failed to run")
+        return
 
     def faster_navigate_folder_tree(self, dialog, path):
         """Patched method with faster navigation - no edit box attempt"""
@@ -365,9 +390,10 @@ def main():
             if completed:
                 return True
 
-            # Wait before checking again
-            time.sleep(interval)
-            elapsed += interval
+            # Get appropriate interval from the compatibility manager
+            wait_interval = OSCompatibilityManager.get_timeout("polling_interval", interval)
+            time.sleep(wait_interval)
+            elapsed += wait_interval  # Make sure to update elapsed with the actual wait time
 
         print(f"Warning: Timeout waiting for processing to complete for {folder_path}")
         print("This may be normal if the folder has already been processed or has special files")

@@ -8,5 +8,6 @@ file system operations, folder processing, and UI automation.
 from .file_system_dao import FileSystemDAO
 from .folder_processor import FolderProcessor
 from .ui_automation import MseqAutomation
+from .os_compatibility import OSCompatibilityManager
 
-__all__ = ['FileSystemDAO', 'FolderProcessor', 'MseqAutomation']
+__all__ = ['FileSystemDAO', 'FolderProcessor', 'MseqAutomation', 'OSCompatibilityManager']

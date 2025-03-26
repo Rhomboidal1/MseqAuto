@@ -37,14 +37,15 @@ class MseqConfig:
 
     # Timeouts for UI operations - extended for Windows 11
     TIMEOUTS = {
-        "browse_dialog": 10,  # Extended for Windows 11
-        "preferences": 8,  # Extended for Windows 11
-        "copy_files": 8,  # Extended for Windows 11
-        "error_window": 20,
-        "call_bases": 15,  # Extended for Windows 11
-        "process_completion": 60,  # Extended for Windows 11
-        "read_info": 8  # Extended for Windows 11
+        "browse_dialog": 3,  # Reduced from 10
+        "preferences": 2,  # Reduced from 8
+        "copy_files": 2,  # Reduced from 8
+        "error_window": 3,  # Reduced from 20
+        "call_bases": 3,  # Reduced from 15
+        "process_completion": 15,  # Reduced from 60
+        "read_info": 2  # Reduced from 8
     }
+
     CONTROLS = [
         '_pGEM_T7Promoter',
         '_pGEM_SP6Promoter',

@@ -1,13 +1,19 @@
 import os
 import time
 import platform
-from pywinauto import Application, timings
-from pywinauto.keyboard import send_keys
-from pywinauto.findwindows import ElementNotFoundError, ElementAmbiguousError
+import re
 import win32api
 from mseqauto.config import MseqConfig
+from mseqauto.core import OSCompatibilityManager
+
 
 config = MseqConfig()
+
+def _import_pywinauto():
+    global Application, timings, send_keys, ElementNotFoundError, ElementAmbiguousError
+    from pywinauto import Application, timings
+    from pywinauto.keyboard import send_keys
+    from pywinauto.findwindows import ElementNotFoundError, ElementAmbiguousError
 
 class MseqAutomation:
     def __init__(self, config):
@@ -17,11 +23,10 @@ class MseqAutomation:
         self.first_time_browsing = True
         
         # Detect Windows version
-        win_version = int(platform.version().split('.')[0])
-        win_build = int(platform.version().split('.')[2]) if len(platform.version().split('.')) > 2 else 0
-        self.is_win11 = win_version >= 10 and win_build >= 22000
-    
+        self.is_win11 = OSCompatibilityManager.is_windows_11()
+
     def connect_or_start_mseq(self):
+        _import_pywinauto()
         """Connect to existing mSeq or start a new instance"""
         try:
             self.app = Application(backend='win32').connect(title_re='Mseq*', timeout=1)
@@ -48,14 +53,12 @@ class MseqAutomation:
             self.main_window = self.app.window(title_re='mSeq*')
             
         return self.app, self.main_window
-    
+
     def wait_for_dialog(self, dialog_type):
         """Wait for a specific dialog to appear with Windows 11 compatibility"""
-        timeout = self.config.TIMEOUTS.get(dialog_type, 5)
-        # Add 2 seconds to timeout for Windows 11 to accommodate possible slower response
-        if hasattr(self, 'is_win11') and self.is_win11:
-            timeout += 2
-        
+        # Use the centralized timeout management
+        timeout = OSCompatibilityManager.get_timeout(dialog_type)
+
         if dialog_type == "browse_dialog":
             try:
                 return timings.wait_until(timeout=timeout, retry_interval=0.1, 
@@ -97,6 +100,8 @@ class MseqAutomation:
         """Scroll through the tree item to see more children"""
         import logging
         logger = logging.getLogger(__name__)
+        strategy = OSCompatibilityManager.get_dialog_strategy('browse_dialog')
+        click_location = strategy.get('click_location', 'center')
         try:
             from pywinauto.keyboard import send_keys
 
@@ -109,7 +114,11 @@ class MseqAutomation:
                 item.expand()
                 
             # Click to ensure focus
-            item.click_input()
+            if click_location == 'center':
+                item.click_input()
+            elif click_location == 'top_center':
+                rect = item.rectangle()
+                item.click_input(coords=(rect.width() // 2, 10))  # Click near top
             
             # Try Page Down a couple of times to see more items
             for i in range(3):
@@ -259,7 +268,15 @@ class MseqAutomation:
         """Navigate the folder tree in a file dialog with Windows 11 support"""
         import logging
         logger = logging.getLogger(__name__)
-        
+
+        # Get the dialog strategy for the current OS
+        strategy = OSCompatibilityManager.get_dialog_strategy('browse_dialog')
+
+        # Extract strategy parameters
+        extra_sleep = strategy.get('extra_sleep_after_click', 0)
+        click_location = strategy.get('click_location', 'center')
+        use_fallbacks = strategy.get('use_fallback_buttons', False)
+
         logger.info(f"Starting folder navigation to: {path}")
         dialog.set_focus()
         self._ensure_dialog_visible(dialog)
@@ -314,8 +331,18 @@ class MseqAutomation:
             
             # Click on Desktop to ensure it's selected
             dialog.set_focus()
-            desktop_item.click_input()
-            time.sleep(0.5)
+            if click_location == 'center':
+                desktop_item.click_input()
+            elif click_location == 'top_center':
+                rect = desktop_item.rectangle()
+                desktop_item.click_input(coords=(rect.width() // 2, 10))
+            else:
+                desktop_item.click_input()  # Default behavior
+
+            # Add extra sleep for animations if configured
+            if extra_sleep > 0:
+                time.sleep(extra_sleep)
+
             desktop_item.expand()
             time.sleep(1.0)  # Give extra time for expansion
             
@@ -378,7 +405,11 @@ class MseqAutomation:
             
             # Now that we found This PC, expand it to show the drives
             dialog.set_focus()
-            this_pc_item.click_input()
+            if click_location == 'center':
+                this_pc_item.click_input()
+            elif click_location == 'top_center':
+                rect = this_pc_item.rectangle()
+                this_pc_item.click_input(coords=(rect.width() // 2, 10))  # Click near top
             time.sleep(0.5)
             this_pc_item.expand()
             time.sleep(1.0)  # Give extra time for expansion
@@ -410,7 +441,11 @@ class MseqAutomation:
                     (mapped_name and mapped_name in drive_text)):
                     
                     dialog.set_focus()
-                    item.click_input()
+                    if click_location == 'center':
+                        item.click_input()
+                    elif click_location == 'top_center':
+                        rect = item.rectangle()
+                        item.click_input(coords=(rect.width() // 2, 10))  # Click near top
                     drive_item = item
                     time.sleep(0.5)
                     logger.info(f"Found drive match: {drive_text}")
@@ -435,7 +470,11 @@ class MseqAutomation:
                             (mapped_name and mapped_name in drive_text)):
                             
                             dialog.set_focus()
-                            item.click_input()
+                            if click_location == 'center':
+                                item.click_input()
+                            elif click_location == 'top_center':
+                                rect = item.rectangle()
+                                item.click_input(coords=(rect.width() // 2, 10))  # Click near top
                             drive_item = item
                             time.sleep(0.5)
                             logger.info(f"Found drive after scrolling: {drive_text}")
@@ -478,13 +517,25 @@ class MseqAutomation:
                 
                 # Look for exact folder match first
                 next_item = None
-                
+
                 for child in folder_children:
                     if child.text() == folder:  # Exact match
                         dialog.set_focus()
-                        child.click_input()
+                        if click_location == 'center':
+                            child.click_input()
+                        elif click_location == 'top_center':
+                            rect = child.rectangle()
+                            child.click_input(coords=(rect.width() // 2, 10))  # Click near top
+                        else:
+                            # Default fallback if click_location value is unexpected
+                            child.click_input()
+
                         next_item = child
                         time.sleep(0.5)
+                        # Add the extra sleep if configured for Windows 11
+                        if extra_sleep > 0:
+                            time.sleep(extra_sleep)
+
                         logger.info(f"Found exact match for folder: {folder}")
                         break
                 
@@ -493,10 +544,22 @@ class MseqAutomation:
                     for child in folder_children:
                         if folder.lower() in child.text().lower():  # Partial match
                             dialog.set_focus()
-                            child.click_input()
+                            if click_location == 'center':
+                                child.click_input()
+                            elif click_location == 'top_center':
+                                rect = child.rectangle()
+                                child.click_input(coords=(rect.width() // 2, 10))  # Click near top
+                            else:
+                                # Default fallback if click_location value is unexpected
+                                child.click_input()
+
                             next_item = child
                             time.sleep(0.5)
-                            logger.info(f"Found partial match for folder: {folder} -> {child.text()}")
+                            # Add the extra sleep if configured for Windows 11
+                            if extra_sleep > 0:
+                                time.sleep(extra_sleep)
+
+                            logger.info(f"Found partial match for folder: {folder}")
                             break
                 
                 # If still not found, try scrolling
@@ -522,9 +585,29 @@ class MseqAutomation:
                         logger.warning(f"Error after scrolling for folder: {e}")
                 
                 # If folder still not found, we can't continue
-                if not next_item:
-                    logger.error(f"Could not find folder '{folder}' even after scrolling")
-                    return False
+                if not next_item and use_fallbacks:
+                    logger.info(f"Using fallback methods to find folder: {folder}")
+
+                    # Fallback 1: Try with exact case-insensitive comparison
+                    for child in folder_children:
+                        if child.text().lower() == folder.lower():
+                            dialog.set_focus()
+                            child.click_input()
+                            next_item = child
+                            logger.info(f"Found folder using case-insensitive match: {child.text()}")
+                            break
+
+                    # Fallback 2: Try with relaxed character comparison (ignoring special chars)
+                    if not next_item:
+                        folder_simplified = re.sub(r'[^a-zA-Z0-9]', '', folder.lower())
+                        for child in folder_children:
+                            child_simplified = re.sub(r'[^a-zA-Z0-9]', '', child.text().lower())
+                            if folder_simplified in child_simplified:
+                                dialog.set_focus()
+                                child.click_input()
+                                next_item = child
+                                logger.info(f"Found folder using simplified match: {child.text()}")
+                                break
                 
                 # Update current item for next iteration
                 current_item = next_item

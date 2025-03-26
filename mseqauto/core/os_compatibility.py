@@ -3,8 +3,9 @@ import os
 import platform
 import logging
 import sys
+import subprocess
 from typing import Dict, Any, Optional
-
+from mseqauto.config import MseqConfig
 
 class OSCompatibilityManager:
     """
@@ -33,6 +34,7 @@ class OSCompatibilityManager:
         "navigation": 5,
         "window_appear": 2,
         "click_response": 1,
+        "polling_interval": 0.5
     }
 
     # Dialog behaviors - difference in Windows 11 dialog handling
@@ -53,6 +55,50 @@ class OSCompatibilityManager:
             },
         }
     }
+
+    @classmethod
+    def py32_check(cls, script_path=None, logger=None):
+        """
+        Check if running in 64-bit Python and restart in 32-bit if needed.
+
+        Args:
+            script_path: Path to the script to restart (must be provided)
+            logger: Optional logger for recording the outcome
+
+        Returns:
+            bool: True if check passed (no restart needed), False otherwise
+        """
+        import sys
+        import os
+        import subprocess
+
+        # No script path provided, can't restart properly
+        if not script_path:
+            if logger:
+                logger.warning("No script path provided for 32-bit Python check")
+            return False
+
+        # Check if running in 64-bit Python
+        if sys.maxsize > 2 ** 32:
+            # Path to 32-bit Python
+            from mseqauto.config import MseqConfig
+            py32_path = MseqConfig.PYTHON32_PATH
+
+            # Only relaunch if we have a different 32-bit Python
+            if os.path.exists(py32_path) and py32_path != sys.executable:
+                if logger:
+                    logger.info(f"Restarting with 32-bit Python: {py32_path}")
+
+                # Re-run the script with 32-bit Python and exit current process
+                subprocess.run([py32_path, script_path])
+                sys.exit(0)
+            else:
+                if logger:
+                    logger.info("32-bit Python not specified or same as current interpreter")
+                    logger.info("Continuing with current Python interpreter")
+
+        # If we get here, no restart was needed or possible
+        return True
 
     @classmethod
     def is_windows_11(cls) -> bool:
