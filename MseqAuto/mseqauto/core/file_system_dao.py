@@ -418,7 +418,7 @@ class FileSystemDAO:
 
 if __name__ == "__main__":
     # Simple test if run directly
-    from config import MseqConfig
+    from MseqAuto.mseqauto.config import MseqConfig
     config = MseqConfig()
     dao = FileSystemDAO(config)
     

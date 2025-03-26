@@ -6,7 +6,7 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import filedialog
 
-from config import MseqConfig
+from MseqAuto.mseqauto.config import MseqConfig
 from excel_dao import ExcelDAO
 from file_system_dao import FileSystemDAO
 from folder_processor import FolderProcessor

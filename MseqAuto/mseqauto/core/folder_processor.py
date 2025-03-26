@@ -1239,7 +1239,7 @@ class FolderProcessor:
 
 if __name__ == "__main__":
     # Simple test if run directly
-    from config import MseqConfig
+    from MseqAuto.mseqauto.config import MseqConfig
     from file_system_dao import FileSystemDAO
     from datetime import datetime
 

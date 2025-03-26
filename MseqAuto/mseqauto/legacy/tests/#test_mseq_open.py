@@ -4,7 +4,7 @@ import sys
 import getpass
 from pathlib import Path
 import platform
-from config import MseqConfig
+from MseqAuto.mseqauto.config import MseqConfig
 from file_system_dao import FileSystemDAO
 from folder_processor import FolderProcessor
 from ui_automation import MseqAutomation

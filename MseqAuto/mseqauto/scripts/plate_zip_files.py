@@ -6,7 +6,7 @@ from tkinter import filedialog
 import subprocess
 import re
 
-from config import MseqConfig
+from MseqAuto.mseqauto.config import MseqConfig
 from file_system_dao import FileSystemDAO
 from folder_processor import FolderProcessor
 from logger import setup_logger

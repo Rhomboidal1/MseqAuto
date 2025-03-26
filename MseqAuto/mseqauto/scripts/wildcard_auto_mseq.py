@@ -1,10 +1,10 @@
-# plate_auto_mseq.py
+# wildcard_auto_mseq.py
 import os
 import sys
 import tkinter as tk
 from tkinter import filedialog
 import subprocess
-from config import MseqConfig
+from MseqAuto.mseqauto.config import MseqConfig
 from file_system_dao import FileSystemDAO
 from folder_processor import FolderProcessor
 from ui_automation import MseqAutomation
@@ -38,7 +38,7 @@ def get_folder_from_user():
     
     # Show a directory selection dialog
     folder_path = filedialog.askdirectory(
-        title="Select a folder to process plates",
+        title="Select a folder to process",
         mustexist=True
     )
     
@@ -53,7 +53,7 @@ def get_folder_from_user():
         return None
 
 def main():
-    print("Starting plate auto mSeq...")
+    print("Starting wildcard auto mSeq...")
     
     # Initialize components
     config = MseqConfig()
@@ -65,42 +65,50 @@ def main():
     processor = FolderProcessor(file_dao, ui_automation, config)
     print("Folder processor initialized")
     
-    # Select folder 
+    # Select folder using a simple dialog approach
     data_folder = get_folder_from_user()
     
     if not data_folder:
-        print("No folder selected, exiting")
-        return
+        print("No folder selected, using fallback path")
+        # Fallback path - use Documents folder
+        from pathlib import Path
+        data_folder = str(Path.home() / "Documents")
     
     print(f"Using folder: {data_folder}")
     data_folder = re.sub(r'/', '\\\\', data_folder)
     
-    # Get all plate folders (starting with 'p')
-    plate_folders = file_dao.get_folders(data_folder, r'p\d+.+')
-    print(f"Found {len(plate_folders)} plate folders")
+    # Get all folders without filtering
+    print("Getting all folders...")
+    all_folders = file_dao.get_folders(data_folder)
+    print(f"Found {len(all_folders)} folders")
     
-    if len(plate_folders) == 0:
-        print("No plate folders found to process, exiting")
+    if len(all_folders) == 0:
+        print("No folders found to process, exiting")
         return
     
-    # List folders that will be processed
-    print("Plate folders to process:")
-    for i, folder in enumerate(plate_folders):
+    # List folders that will be processed (show only first 10 if there are many)
+    print("Folders to process:")
+    max_display = min(10, len(all_folders))
+    for i in range(max_display):
+        folder = all_folders[i]
         print(f"{i+1}. {os.path.basename(folder)}")
     
+    if len(all_folders) > max_display:
+        print(f"... and {len(all_folders) - max_display} more folders")
+    
     # Ask user to confirm before proceeding
-    confirmation = input("Proceed with processing these plate folders? (y/n): ")
+    confirmation = input("Proceed with processing these folders? (y/n): ")
     if confirmation.lower() != 'y':
         print("Cancelled by user")
         return
     
-    # Process each plate folder
-    for i, folder in enumerate(plate_folders):
-        print(f"Processing plate folder {i+1}/{len(plate_folders)}: {os.path.basename(folder)}")
-        processor.process_plate_folder(folder)
+    # Process each folder
+    for i, folder in enumerate(all_folders):
+        print(f"Processing folder {i+1}/{len(all_folders)}: {os.path.basename(folder)}")
+        processor.process_wildcard_folder(folder)
         
         # Add a short delay between folder processing
-        if i < len(plate_folders) - 1:
+        if i < len(all_folders) - 1:
             time.sleep(1)
     
     # Close mSeq application

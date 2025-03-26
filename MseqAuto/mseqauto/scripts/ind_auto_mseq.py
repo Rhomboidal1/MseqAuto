@@ -8,7 +8,7 @@ import re
 from logger import setup_logger
 
 # Basic imports first
-from config import MseqConfig
+from MseqAuto.mseqauto.config import MseqConfig
 
 
 def get_folder_from_user():

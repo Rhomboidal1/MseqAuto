@@ -8,7 +8,7 @@ import re
 from logger import setup_logger
 
 # Only import the necessary components - we'll add more later
-from config import MseqConfig
+from MseqAuto.mseqauto.config import MseqConfig
 from file_system_dao import FileSystemDAO
 
 
