@@ -5,11 +5,11 @@ import tkinter as tk
 from tkinter import filedialog
 import subprocess
 import re
-from logger import setup_logger
+from mseqauto.utils import logger, setup_logger
 
 # Only import the necessary components - we'll add more later
-from MseqAuto.mseqauto.config import MseqConfig
-from file_system_dao import FileSystemDAO
+from mseqauto.config import MseqConfig
+from mseqauto.core import FileSystemDAO
 
 
 # We'll add the other imports later
@@ -63,7 +63,7 @@ def main():
 
     # Now we'll add the UI automation
     logger.info("About to import UI automation...")
-    from ui_automation import MseqAutomation
+    from mseqauto.core import MseqAutomation
     logger.info("UI automation imported")
 
     ui_automation = MseqAutomation(config)
@@ -71,7 +71,7 @@ def main():
 
     # Finally add the folder processor
     logger.info("About to import Folder Processor...")
-    from folder_processor import FolderProcessor
+    from mseqauto.core import FolderProcessor
     logger.info("Folder processor imported")
 
     processor = FolderProcessor(file_dao, ui_automation, config, logger=logger.info)

@@ -5,6 +5,9 @@ from pywinauto import Application, timings
 from pywinauto.keyboard import send_keys
 from pywinauto.findwindows import ElementNotFoundError, ElementAmbiguousError
 import win32api
+from mseqauto.config import MseqConfig
+
+config = MseqConfig()
 
 class MseqAutomation:
     def __init__(self, config):
@@ -545,7 +548,7 @@ class MseqAutomation:
                 return False
                 
             # Check if there are any .ab1 files to process
-            ab1_files = [f for f in os.listdir(folder_path) if f.endswith('.ab1')]
+            ab1_files = [f for f in os.listdir(folder_path) if f.endswith(config.ABI_EXTENSION)]
             if not ab1_files:
                 print(f"No .ab1 files found in {folder_path}, skipping processing")
                 return False

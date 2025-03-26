@@ -1,7 +1,9 @@
 # folder_processor.py
 import os
 import re
+from mseqauto.config import MseqConfig
 
+config = MseqConfig()
 
 class FolderProcessor:
     def __init__(self, file_dao, ui_automation, config, logger=None):
@@ -285,7 +287,7 @@ class FolderProcessor:
                 continue
 
             order_number = self.get_order_number_from_folder_name(order_folder)
-            ab1_files = self.file_dao.get_files_by_extension(order_folder, '.ab1')
+            ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
 
             # Check order status
             was_mseqed, has_braces, has_ab1_files = self.check_order_status(order_folder)
@@ -312,7 +314,7 @@ class FolderProcessor:
         # Skip Andreev's orders for mSeq processing
         if self.config.ANDREEV_NAME in order_folder.lower():
             order_number = self.get_order_number_from_folder_name(order_folder)
-            ab1_files = self.file_dao.get_files_by_extension(order_folder, '.ab1')
+            ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
             expected_count = self._get_expected_file_count(order_number)
 
             # For Andreev's orders, just check if complete to move back if needed
@@ -325,7 +327,7 @@ class FolderProcessor:
             return
 
         order_number = self.get_order_number_from_folder_name(order_folder)
-        ab1_files = self.file_dao.get_files_by_extension(order_folder, '.ab1')
+        ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
 
         # Check order status
         was_mseqed, has_braces, has_ab1_files = self.check_order_status(order_folder)
@@ -375,7 +377,7 @@ class FolderProcessor:
         self.logger(f"Processing PCR folder: {os.path.basename(pcr_folder)}")
 
         for file in os.listdir(pcr_folder):
-            if file.endswith('.ab1'):
+            if file.endswith(config.ABI_EXTENSION):
                 # Clean the filename for matching with reinject list
                 clean_name = self.file_dao.standardize_filename_for_matching(file)
 
@@ -954,7 +956,7 @@ class FolderProcessor:
 
             # Print all .ab1 files
             log("\nAll .ab1 files:")
-            ab1_files = file_by_ext.get('.ab1', [])
+            ab1_files = file_by_ext.get(config.ABI_EXTENSION, [])
             for i, file_path in enumerate(ab1_files):
                 log(f"  {i + 1}. {os.path.relpath(file_path, folder_path)}")
 
@@ -993,7 +995,7 @@ class FolderProcessor:
 
                 # PCR normalization (with manual extension removal)
                 pcr_norm = self.file_dao.standardize_filename_for_matching(file_name)
-                if pcr_norm.endswith('.ab1'):
+                if pcr_norm.endswith(config.ABI_EXTENSION):
                     pcr_norm = pcr_norm[:-4]
                 log(f"PCR normalized: {pcr_norm}")
 
@@ -1073,7 +1075,7 @@ class FolderProcessor:
 
         # Check for .ab1 files and braces
         for item in folder_contents:
-            if item.endswith('.ab1'):
+            if item.endswith(config.ABI_EXTENSION):
                 has_ab1_files = True
                 if '{' in item or '}' in item:
                     has_braces = True
@@ -1097,7 +1099,7 @@ class FolderProcessor:
             zip_path = os.path.join(folder_path, zip_filename)
 
             # Determine which files to include
-            file_extensions = ['.ab1']
+            file_extensions = [config.ABI_EXTENSION]
             if include_txt:
                 file_extensions.extend(self.config.TEXT_FILES)
 
@@ -1209,7 +1211,7 @@ class FolderProcessor:
 
             found_match = False
             for zip_item in zip_contents_to_check[:]:  # Iterate over a copy
-                if zip_item.endswith('.ab1'):
+                if zip_item.endswith(config.ABI_EXTENSION):
                     # Remove braces and extension for comparison
                     clean_zip_item = re.sub(r'{.*?}', '', zip_item)[:-4]  # Remove .ab1
 
@@ -1231,7 +1233,7 @@ class FolderProcessor:
 
         # Remaining unmatched AB1 files in zip
         for item in zip_contents_to_check:
-            if item.endswith('.ab1'):
+            if item.endswith(config.ABI_EXTENSION):
                 validation_result['mismatches_in_zip'].append(item)
                 validation_result['mismatch_count'] += 1
 
@@ -1239,7 +1241,7 @@ class FolderProcessor:
 
 if __name__ == "__main__":
     # Simple test if run directly
-    from MseqAuto.mseqauto.config import MseqConfig
+    from mseqauto.config import MseqConfig
     from file_system_dao import FileSystemDAO
     from datetime import datetime
 

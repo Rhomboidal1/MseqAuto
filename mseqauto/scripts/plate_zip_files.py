@@ -6,10 +6,9 @@ from tkinter import filedialog
 import subprocess
 import re
 
-from MseqAuto.mseqauto.config import MseqConfig
-from file_system_dao import FileSystemDAO
-from folder_processor import FolderProcessor
-from logger import setup_logger
+from mseqauto.core import FileSystemDAO, FolderProcessor
+from mseqauto.utils import setup_logger
+from mseqauto.config import MseqConfig
 
 # Check for 32-bit Python requirement
 if sys.maxsize > 2**32:
@@ -92,11 +91,11 @@ def main():
         if has_fsa:
             # Zip FSA files only
             logger.info(f"Zipping FSA files in {os.path.basename(plate_folder)}")
-            zip_path = processor.zip_plate_folder(plate_folder, fsa_only=True)
+            zip_path = processor.zip_order_folder(plate_folder, fsa_only=True)
         else:
             # Zip AB1 and txt files
             logger.info(f"Zipping AB1 and txt files in {os.path.basename(plate_folder)}")
-            zip_path = processor.zip_plate_folder(plate_folder, fsa_only=False)
+            zip_path = processor.zip_order_folder(plate_folder, fsa_only=False)
         
         if zip_path:
             # Copy zip to dump folder

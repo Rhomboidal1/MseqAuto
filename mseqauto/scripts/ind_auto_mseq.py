@@ -5,10 +5,10 @@ import tkinter as tk
 from tkinter import filedialog
 import subprocess
 import re
-from logger import setup_logger
+from mseqauto.utils import setup_logger
 
 # Basic imports first
-from MseqAuto.mseqauto.config import MseqConfig
+from mseqauto.config import MseqConfig
 
 
 def get_folder_from_user():
@@ -66,11 +66,11 @@ def main():
     }
     logger.info("Config loaded with optimized timeouts")
 
-    from file_system_dao import FileSystemDAO
+    from mseqauto.core import FileSystemDAO
     file_dao = FileSystemDAO(config)
     logger.info("FileSystemDAO initialized")
 
-    from ui_automation import MseqAutomation
+    from mseqauto.core import MseqAutomation
 
     # Patch the UI Automation class to optimize tree navigation speed
     import types
@@ -379,7 +379,7 @@ def main():
     ui_automation = MseqAutomation(config)
     logger.info("UI Automation initialized with optimized functions")
 
-    from folder_processor import FolderProcessor
+    from mseqauto.core import  FolderProcessor
     processor = FolderProcessor(file_dao, ui_automation, config, logger=logger.info)
     logger.info("Folder processor initialized")
 

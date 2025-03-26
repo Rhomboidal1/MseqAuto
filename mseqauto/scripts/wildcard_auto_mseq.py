@@ -4,12 +4,12 @@ import sys
 import tkinter as tk
 from tkinter import filedialog
 import subprocess
-from MseqAuto.mseqauto.config import MseqConfig
-from file_system_dao import FileSystemDAO
-from folder_processor import FolderProcessor
-from ui_automation import MseqAutomation
 import re
 import time
+
+from mseqauto.core import FileSystemDAO, FolderProcessor
+from mseqauto.config import MseqConfig
+from mseqauto.core import MseqAutomation
 
 # Check for 32-bit Python requirement - gracefully fallback if not available
 if sys.maxsize > 2**32:

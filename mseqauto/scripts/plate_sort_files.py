@@ -6,10 +6,10 @@ from tkinter import filedialog
 import subprocess
 import re
 
-from MseqAuto.mseqauto.config import MseqConfig
-from file_system_dao import FileSystemDAO
-from folder_processor import FolderProcessor
-from logger import setup_logger
+from mseqauto.core import FileSystemDAO, FolderProcessor
+from mseqauto.utils import setup_logger
+from mseqauto.config import MseqConfig
+
 
 # Check for 32-bit Python requirement
 if sys.maxsize > 2**32:

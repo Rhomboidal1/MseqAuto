@@ -4,10 +4,9 @@ import sys
 import tkinter as tk
 from tkinter import filedialog
 import subprocess
-from MseqAuto.mseqauto.config import MseqConfig
-from file_system_dao import FileSystemDAO
-from folder_processor import FolderProcessor
-from ui_automation import MseqAutomation
+from mseqauto.core import FileSystemDAO, FolderProcessor
+from mseqauto.core import MseqAutomation
+from mseqauto.config import MseqConfig
 import re
 import time
 
