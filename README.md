@@ -104,3 +104,5 @@ pytest
 
 [MIT License](LICENSE)
 ```
+
+This format should display correctly in your repository with proper Markdown formatting and code blocks. It provides a clean overview of your project, its structure, and how to use it.
