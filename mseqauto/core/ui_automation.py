@@ -46,12 +46,13 @@ def _import_pywinauto():
 _import_pywinauto()
 
 class MseqAutomation:
-    def __init__(self, config):
+    def __init__(self, config, use_fast_navigation=False):
         self.config = config
         self.app = None
         self.main_window = None
         self.first_time_browsing = True
         self.logger = logging.getLogger(__name__)
+        self.use_fast_navigation = use_fast_navigation
 
         # Import pywinauto components if not already imported
         if Application is None:
@@ -332,295 +333,392 @@ class MseqAutomation:
             return None
 
     def navigate_folder_tree(self, dialog, path):
-        """Navigate folder tree with OS-specific optimizations"""
-        self.logger.info(f"Navigating to folder: {path}")
-        dialog.set_focus()
-        self._ensure_dialog_visible(dialog)
-
-        # Get tree view using the robust method
-        tree_view = self._get_tree_view(dialog)
-        if not tree_view:
-            self.logger.error("Could not find TreeView control")
-            return False
-
-        self.logger.debug("TreeView control found")
-
-        # Handle different path formats
-        if ":" in path:
-            # Path has a drive letter
-            parts = path.split("\\")
-            drive = parts[0]  # e.g., "P:"
-            folders = parts[1:] if len(parts) > 1 else []
-            self.logger.debug(f"Path parsed: Drive={drive}, Folders={folders}")
+        if self.use_fast_navigation:
+            return self._fast_navigate_folder_tree(dialog, path)
         else:
-            # Network path
-            parts = path.split("\\")
-            drive = "\\" + "\\".join(parts[:3])  # e.g., \\server\share
-            folders = parts[3:] if len(parts) > 3 else []
-            self.logger.debug(f"Network path parsed: Share={drive}, Folders={folders}")
-
-        # Enhanced navigation strategy for both Windows 10 and 11
-        try:
-            # Get all root items
-            try:
-                root_items = list(tree_view.roots())
-                self.logger.debug(f"Found {len(root_items)} root items in tree")
-            except Exception as e:
-                self.logger.error(f"Error getting tree roots: {e}")
-                return False
-
-            # Find Desktop in the root items
-            desktop_item = None
-            for item in root_items:
-                if "Desktop" in item.text():
-                    desktop_item = item
-                    self.logger.debug(f"Found Desktop: {item.text()}")
-                    break
-
-            if not desktop_item:
-                self.logger.error("Could not find Desktop root item in tree view")
-                return False
-
-            # Click on Desktop to ensure it's selected
+            """Navigate folder tree with OS-specific optimizations"""
+            self.logger.info(f"Navigating to folder: {path}")
             dialog.set_focus()
-            if click_location == 'center':
-                desktop_item.click_input()
-            elif click_location == 'top_center':
-                rect = desktop_item.rectangle()
-                desktop_item.click_input(coords=(rect.width() // 2, 10))  # Click near top
-            time.sleep(self.expand_delay)  # OS-optimized delay
-            desktop_item.expand()
-            time.sleep(self.expand_delay)  # OS-optimized delay
+            self._ensure_dialog_visible(dialog)
 
-            # Get the expanded Desktop children
-            desktop_children = []
+            # Get tree view using the robust method
+            tree_view = self._get_tree_view(dialog)
+            if not tree_view:
+                self.logger.error("Could not find TreeView control")
+                return False
+
+            self.logger.debug("TreeView control found")
+
+            # Handle different path formats
+            if ":" in path:
+                # Path has a drive letter
+                parts = path.split("\\")
+                drive = parts[0]  # e.g., "P:"
+                folders = parts[1:] if len(parts) > 1 else []
+                self.logger.debug(f"Path parsed: Drive={drive}, Folders={folders}")
+            else:
+                # Network path
+                parts = path.split("\\")
+                drive = "\\" + "\\".join(parts[:3])  # e.g., \\server\share
+                folders = parts[3:] if len(parts) > 3 else []
+                self.logger.debug(f"Network path parsed: Share={drive}, Folders={folders}")
+
+            # Enhanced navigation strategy for both Windows 10 and 11
             try:
-                desktop_children = list(desktop_item.children())
-                self.logger.debug(f"Desktop has {len(desktop_children)} children")
-            except Exception as e:
-                self.logger.warning(f"Error getting Desktop children: {e}")
-                # Try to scroll Desktop to see more items
-                if self._scroll_if_needed(desktop_item):
-                    try:
-                        desktop_children = list(desktop_item.children())
-                        self.logger.debug(f"After scrolling, Desktop has {len(desktop_children)} children")
-                    except Exception as e:
-                        self.logger.error(f"Error getting Desktop children after scrolling: {e}")
-                        return False
-                else:
+                # Get all root items
+                try:
+                    root_items = list(tree_view.roots())
+                    self.logger.debug(f"Found {len(root_items)} root items in tree")
+                except Exception as e:
+                    self.logger.error(f"Error getting tree roots: {e}")
                     return False
 
-            # For Windows 11, we need to find "This PC" in the Desktop children
-            this_pc_item = None
-
-            # Look for "This PC" by name (works in both Win10 and Win11)
-            for child in desktop_children:
-                if "PC" in child.text() or "Computer" in child.text():
-                    this_pc_item = child
-                    self.logger.debug(f"Found This PC by name: {child.text()}")
-                    break
-
-            # If This PC not found by name, try position-based approaches or scrolling
-            if not this_pc_item:
-                # Scrolling approach (works better in Windows 11)
-                self.logger.debug("This PC not found in visible items, scrolling to find more")
-                if self._scroll_if_needed(desktop_item):
-                    # Refresh children list after scrolling
-                    try:
-                        desktop_children = list(desktop_item.children())
-                        # Try again with the new list
-                        for child in desktop_children:
-                            if "PC" in child.text() or "Computer" in child.text():
-                                this_pc_item = child
-                                self.logger.debug(f"Found This PC after scrolling: {child.text()}")
-                                break
-                    except Exception as e:
-                        self.logger.warning(f"Error after scrolling: {e}")
-
-            # If This PC is still not found, try a positional approach as last resort
-            if not this_pc_item and len(desktop_children) > 3:
-                # Try positions that are common in Windows 10/11
-                for idx in [2, 3, 4, 8]:  # Common positions across Windows versions
-                    if idx < len(desktop_children):
-                        potential_item = desktop_children[idx]
-                        self.logger.debug(f"Trying positional This PC at index {idx}: {potential_item.text()}")
-                        this_pc_item = potential_item
+                # Find Desktop in the root items
+                desktop_item = None
+                for item in root_items:
+                    if "Desktop" in item.text():
+                        desktop_item = item
+                        self.logger.debug(f"Found Desktop: {item.text()}")
                         break
 
-            # If This PC is still not found, we can't continue
-            if not this_pc_item:
-                self.logger.error("Could not find This PC in Desktop children even after scrolling")
-                return False
-
-            # Now that we found This PC, expand it to show the drives
-            dialog.set_focus()
-            this_pc_item.click_input()
-            time.sleep(self.expand_delay)  # OS-optimized delay
-            this_pc_item.expand()
-            time.sleep(self.expand_delay)  # OS-optimized delay
-
-            # Get This PC's children (the drives)
-            drive_children = []
-            try:
-                drive_children = list(this_pc_item.children())
-                self.logger.debug(f"This PC has {len(drive_children)} children (drives)")
-            except Exception as e:
-                self.logger.warning(f"Error getting drives: {e}")
-                # Try to scroll to see more drives
-                if self._scroll_if_needed(this_pc_item):
-                    try:
-                        drive_children = list(this_pc_item.children())
-                        self.logger.debug(f"After scrolling, This PC has {len(drive_children)} children")
-                    except Exception as e:
-                        self.logger.error(f"Error getting drives after scrolling: {e}")
-                        return False
-                else:
+                if not desktop_item:
+                    self.logger.error("Could not find Desktop root item in tree view")
                     return False
 
-            # Look for our target drive
-            drive_item = None
-            mapped_name = self.config.NETWORK_DRIVES.get(drive, None)
-            self.logger.debug(f"Looking for drive '{drive}' or mapped name '{mapped_name}'")
-
-            # First pass: Look for exact match
-            for item in drive_children:
-                drive_text = item.text()
-                if (drive == drive_text or
-                        (mapped_name and mapped_name == drive_text) or
-                        (drive in drive_text) or
-                        (mapped_name and mapped_name in drive_text)):
-                    dialog.set_focus()
-                    item.click_input()
-                    drive_item = item
-                    time.sleep(self.expand_delay)  # OS-optimized delay
-                    self.logger.debug(f"Found drive match: {drive_text}")
-                    break
-
-            # If drive not found, scroll and try again
-            if not drive_item:
-                self.logger.debug("Drive not found in visible items, scrolling to find more")
-                if self._scroll_if_needed(this_pc_item):
-                    # Refresh list after scrolling
-                    try:
-                        drive_children = list(this_pc_item.children())
-
-                        # Try again with the new list
-                        for item in drive_children:
-                            drive_text = item.text()
-                            if (drive == drive_text or
-                                    (mapped_name and mapped_name == drive_text) or
-                                    (drive in drive_text) or
-                                    (mapped_name and mapped_name in drive_text)):
-                                dialog.set_focus()
-                                item.click_input()
-                                drive_item = item
-                                time.sleep(self.expand_delay)  # OS-optimized delay
-                                self.logger.debug(f"Found drive after scrolling: {drive_text}")
-                                break
-                    except Exception as e:
-                        self.logger.warning(f"Error after scrolling for drives: {e}")
-
-            # If drive is still not found, we can't continue
-            if not drive_item:
-                self.logger.error(f"Could not find drive '{drive}' in This PC children")
-                return False
-
-            # If we're only navigating to the drive level, we're done
-            if not folders:
-                self.logger.debug("Navigation to drive level completed successfully")
-                return True
-
-            # Navigate through each subfolder
-            current_item = drive_item
-
-            for i, folder in enumerate(folders):
-                self.logger.debug(f"Navigating to folder {i + 1}/{len(folders)}: {folder}")
-
-                # Expand current folder
-                current_item.expand()
+                # Click on Desktop to ensure it's selected
+                dialog.set_focus()
+                if click_location == 'center':
+                    desktop_item.click_input()
+                elif click_location == 'top_center':
+                    rect = desktop_item.rectangle()
+                    desktop_item.click_input(coords=(rect.width() // 2, 10))  # Click near top
+                time.sleep(self.expand_delay)  # OS-optimized delay
+                desktop_item.expand()
                 time.sleep(self.expand_delay)  # OS-optimized delay
 
-                # Get children of current folder
-                folder_children = []
+                # Get the expanded Desktop children
+                desktop_children = []
                 try:
-                    folder_children = list(current_item.children())
-                    self.logger.debug(f"Current folder has {len(folder_children)} children")
+                    desktop_children = list(desktop_item.children())
+                    self.logger.debug(f"Desktop has {len(desktop_children)} children")
                 except Exception as e:
-                    self.logger.warning(f"Error getting folder children: {e}")
-                    # Try to scroll to see more children
-                    if self._scroll_if_needed(current_item):
+                    self.logger.warning(f"Error getting Desktop children: {e}")
+                    # Try to scroll Desktop to see more items
+                    if self._scroll_if_needed(desktop_item):
                         try:
-                            folder_children = list(current_item.children())
-                            self.logger.debug(f"After scrolling, folder has {len(folder_children)} children")
+                            desktop_children = list(desktop_item.children())
+                            self.logger.debug(f"After scrolling, Desktop has {len(desktop_children)} children")
                         except Exception as e:
-                            self.logger.error(f"Error getting folder children after scrolling: {e}")
+                            self.logger.error(f"Error getting Desktop children after scrolling: {e}")
                             return False
                     else:
                         return False
 
-                # Look for exact folder match first
-                next_item = None
+                # For Windows 11, we need to find "This PC" in the Desktop children
+                this_pc_item = None
 
-                for child in folder_children:
-                    if child.text() == folder:  # Exact match
-                        dialog.set_focus()
-                        child.click_input()
-                        next_item = child
-                        time.sleep(self.expand_delay)  # OS-optimized delay
-                        self.logger.debug(f"Found exact match for folder: {folder}")
+                # Look for "This PC" by name (works in both Win10 and Win11)
+                for child in desktop_children:
+                    if "PC" in child.text() or "Computer" in child.text():
+                        this_pc_item = child
+                        self.logger.debug(f"Found This PC by name: {child.text()}")
                         break
 
-                # If exact match not found, try partial match
-                if not next_item:
+                # If This PC not found by name, try position-based approaches or scrolling
+                if not this_pc_item:
+                    # Scrolling approach (works better in Windows 11)
+                    self.logger.debug("This PC not found in visible items, scrolling to find more")
+                    if self._scroll_if_needed(desktop_item):
+                        # Refresh children list after scrolling
+                        try:
+                            desktop_children = list(desktop_item.children())
+                            # Try again with the new list
+                            for child in desktop_children:
+                                if "PC" in child.text() or "Computer" in child.text():
+                                    this_pc_item = child
+                                    self.logger.debug(f"Found This PC after scrolling: {child.text()}")
+                                    break
+                        except Exception as e:
+                            self.logger.warning(f"Error after scrolling: {e}")
+
+                # If This PC is still not found, try a positional approach as last resort
+                if not this_pc_item and len(desktop_children) > 3:
+                    # Try positions that are common in Windows 10/11
+                    for idx in [2, 3, 4, 8]:  # Common positions across Windows versions
+                        if idx < len(desktop_children):
+                            potential_item = desktop_children[idx]
+                            self.logger.debug(f"Trying positional This PC at index {idx}: {potential_item.text()}")
+                            this_pc_item = potential_item
+                            break
+
+                # If This PC is still not found, we can't continue
+                if not this_pc_item:
+                    self.logger.error("Could not find This PC in Desktop children even after scrolling")
+                    return False
+
+                # Now that we found This PC, expand it to show the drives
+                dialog.set_focus()
+                this_pc_item.click_input()
+                time.sleep(self.expand_delay)  # OS-optimized delay
+                this_pc_item.expand()
+                time.sleep(self.expand_delay)  # OS-optimized delay
+
+                # Get This PC's children (the drives)
+                drive_children = []
+                try:
+                    drive_children = list(this_pc_item.children())
+                    self.logger.debug(f"This PC has {len(drive_children)} children (drives)")
+                except Exception as e:
+                    self.logger.warning(f"Error getting drives: {e}")
+                    # Try to scroll to see more drives
+                    if self._scroll_if_needed(this_pc_item):
+                        try:
+                            drive_children = list(this_pc_item.children())
+                            self.logger.debug(f"After scrolling, This PC has {len(drive_children)} children")
+                        except Exception as e:
+                            self.logger.error(f"Error getting drives after scrolling: {e}")
+                            return False
+                    else:
+                        return False
+
+                # Look for our target drive
+                drive_item = None
+                mapped_name = self.config.NETWORK_DRIVES.get(drive, None)
+                self.logger.debug(f"Looking for drive '{drive}' or mapped name '{mapped_name}'")
+
+                # First pass: Look for exact match
+                for item in drive_children:
+                    drive_text = item.text()
+                    if (drive == drive_text or
+                            (mapped_name and mapped_name == drive_text) or
+                            (drive in drive_text) or
+                            (mapped_name and mapped_name in drive_text)):
+                        dialog.set_focus()
+                        item.click_input()
+                        drive_item = item
+                        time.sleep(self.expand_delay)  # OS-optimized delay
+                        self.logger.debug(f"Found drive match: {drive_text}")
+                        break
+
+                # If drive not found, scroll and try again
+                if not drive_item:
+                    self.logger.debug("Drive not found in visible items, scrolling to find more")
+                    if self._scroll_if_needed(this_pc_item):
+                        # Refresh list after scrolling
+                        try:
+                            drive_children = list(this_pc_item.children())
+
+                            # Try again with the new list
+                            for item in drive_children:
+                                drive_text = item.text()
+                                if (drive == drive_text or
+                                        (mapped_name and mapped_name == drive_text) or
+                                        (drive in drive_text) or
+                                        (mapped_name and mapped_name in drive_text)):
+                                    dialog.set_focus()
+                                    item.click_input()
+                                    drive_item = item
+                                    time.sleep(self.expand_delay)  # OS-optimized delay
+                                    self.logger.debug(f"Found drive after scrolling: {drive_text}")
+                                    break
+                        except Exception as e:
+                            self.logger.warning(f"Error after scrolling for drives: {e}")
+
+                # If drive is still not found, we can't continue
+                if not drive_item:
+                    self.logger.error(f"Could not find drive '{drive}' in This PC children")
+                    return False
+
+                # If we're only navigating to the drive level, we're done
+                if not folders:
+                    self.logger.debug("Navigation to drive level completed successfully")
+                    return True
+
+                # Navigate through each subfolder
+                current_item = drive_item
+
+                for i, folder in enumerate(folders):
+                    self.logger.debug(f"Navigating to folder {i + 1}/{len(folders)}: {folder}")
+
+                    # Expand current folder
+                    current_item.expand()
+                    time.sleep(self.expand_delay)  # OS-optimized delay
+
+                    # Get children of current folder
+                    folder_children = []
+                    try:
+                        folder_children = list(current_item.children())
+                        self.logger.debug(f"Current folder has {len(folder_children)} children")
+                    except Exception as e:
+                        self.logger.warning(f"Error getting folder children: {e}")
+                        # Try to scroll to see more children
+                        if self._scroll_if_needed(current_item):
+                            try:
+                                folder_children = list(current_item.children())
+                                self.logger.debug(f"After scrolling, folder has {len(folder_children)} children")
+                            except Exception as e:
+                                self.logger.error(f"Error getting folder children after scrolling: {e}")
+                                return False
+                        else:
+                            return False
+
+                    # Look for exact folder match first
+                    next_item = None
+
                     for child in folder_children:
-                        if folder.lower() in child.text().lower():  # Partial match
+                        if child.text() == folder:  # Exact match
                             dialog.set_focus()
                             child.click_input()
                             next_item = child
                             time.sleep(self.expand_delay)  # OS-optimized delay
-                            self.logger.debug(f"Found partial match for folder: {folder} -> {child.text()}")
+                            self.logger.debug(f"Found exact match for folder: {folder}")
                             break
 
-                # If still not found, try scrolling
-                if not next_item:
-                    self.logger.debug(f"Folder '{folder}' not found in visible items, scrolling to find more")
-                    if self._scroll_if_needed(current_item):
-                        # Refresh list after scrolling
-                        try:
-                            folder_children = list(current_item.children())
+                    # If exact match not found, try partial match
+                    if not next_item:
+                        for child in folder_children:
+                            if folder.lower() in child.text().lower():  # Partial match
+                                dialog.set_focus()
+                                child.click_input()
+                                next_item = child
+                                time.sleep(self.expand_delay)  # OS-optimized delay
+                                self.logger.debug(f"Found partial match for folder: {folder} -> {child.text()}")
+                                break
 
-                            # Try again after scrolling
-                            for child in folder_children:
-                                if child.text() == folder or folder.lower() in child.text().lower():
-                                    dialog.set_focus()
-                                    child.click_input()
-                                    next_item = child
-                                    time.sleep(self.expand_delay)  # OS-optimized delay
-                                    self.logger.debug(f"Found folder after scrolling: {child.text()}")
-                                    break
-                        except Exception as e:
-                            self.logger.warning(f"Error after scrolling for folder: {e}")
-                    else:
-                        self.logger.error(f"Could not find folder '{folder}' even after scrolling")
+                    # If still not found, try scrolling
+                    if not next_item:
+                        self.logger.debug(f"Folder '{folder}' not found in visible items, scrolling to find more")
+                        if self._scroll_if_needed(current_item):
+                            # Refresh list after scrolling
+                            try:
+                                folder_children = list(current_item.children())
+
+                                # Try again after scrolling
+                                for child in folder_children:
+                                    if child.text() == folder or folder.lower() in child.text().lower():
+                                        dialog.set_focus()
+                                        child.click_input()
+                                        next_item = child
+                                        time.sleep(self.expand_delay)  # OS-optimized delay
+                                        self.logger.debug(f"Found folder after scrolling: {child.text()}")
+                                        break
+                            except Exception as e:
+                                self.logger.warning(f"Error after scrolling for folder: {e}")
+                        else:
+                            self.logger.error(f"Could not find folder '{folder}' even after scrolling")
+                            return False
+
+                    # If folder still not found, we can't continue
+                    if not next_item:
+                        self.logger.error(f"Could not find folder '{folder}' in the current directory")
                         return False
 
-                # If folder still not found, we can't continue
-                if not next_item:
-                    self.logger.error(f"Could not find folder '{folder}' in the current directory")
+                    # Update current item for next iteration
+                    current_item = next_item
+
+                # Navigation completed successfully
+                self.logger.info("Navigation completed successfully")
+                return True
+
+            except Exception as e:
+                # Log the error but don't raise it - we want to continue even if navigation fails
+                self.logger.error(f"Error during folder navigation: {e}")
+                import traceback
+                self.logger.error(traceback.format_exc())
+                return False
+
+    def _fast_navigate_folder_tree(self, dialog, path):
+        """Patched method with faster navigation - no edit box attempt"""
+        import logging
+        logger = logging.getLogger(__name__)
+
+        logger.info(f"Fast navigation to: {path}")
+        dialog.set_focus()
+
+        # Get tree view
+        tree_view = self._get_tree_view(dialog)
+        if not tree_view:
+            logger.error("Could not find TreeView control")
+            return False
+
+        # Standard navigation with reduced delays
+        try:
+            # Parse the path
+            if ":" in path:
+                parts = path.split("\\")
+                drive = parts[0]
+                folders = parts[1:] if len(parts) > 1 else []
+            else:
+                parts = path.split("\\")
+                drive = "\\" + "\\".join(parts[:3])
+                folders = parts[3:] if len(parts) > 3 else []
+
+            # Find Desktop
+            for root_item in tree_view.roots():
+                if "Desktop" in root_item.text():
+                    desktop_item = root_item
+                    break
+            else:
+                try:
+                    desktop_item = tree_view.get_item('\\Desktop')
+                except:
+                    logger.error("Could not find Desktop")
                     return False
 
-                # Update current item for next iteration
-                current_item = next_item
+            # Find This PC
+            desktop_item.click_input()
+            desktop_item.expand()
 
-            # Navigation completed successfully
-            self.logger.info("Navigation completed successfully")
+            this_pc_item = None
+            for child in desktop_item.children():
+                if any(pc_name in child.text() for pc_name in ["PC", "Computer"]):
+                    this_pc_item = child
+                    break
+
+            if not this_pc_item:
+                logger.error("Could not find This PC")
+                return False
+
+            # Expand This PC
+            this_pc_item.click_input()
+            this_pc_item.expand()
+
+            # Find drive
+            drive_found = False
+            mapped_name = self.config.NETWORK_DRIVES.get(drive, None)
+
+            for item in this_pc_item.children():
+                drive_text = item.text()
+                if drive in drive_text or (mapped_name and mapped_name in drive_text):
+                    item.click_input()
+                    current_item = item
+                    drive_found = True
+                    break
+
+            if not drive_found:
+                logger.error(f"Could not find drive {drive}")
+                return False
+
+            # Navigate folders with minimal delay
+            for folder in folders:
+                current_item.expand()
+
+                folder_found = False
+                for child in current_item.children():
+                    if child.text() == folder:
+                        child.click_input()
+                        current_item = child
+                        folder_found = True
+                        break
+
+                if not folder_found:
+                    logger.error(f"Could not find folder {folder}")
+                    return False
+
             return True
 
         except Exception as e:
-            # Log the error but don't raise it - we want to continue even if navigation fails
-            self.logger.error(f"Error during folder navigation: {e}")
-            import traceback
-            self.logger.error(traceback.format_exc())
+            logger.error(f"Error in fast navigation: {e}")
             return False
 
     def _click_dialog_button(self, dialog_window, button_titles):
@@ -886,6 +984,9 @@ class MseqAutomation:
 
         self.logger.debug(f"Found {len(ab1_files)} AB1 files to process")
 
+        if self.use_fast_navigation:
+            return self._fast_process_folder(folder_path)
+
         # Connect to mSeq
         self.app, self.main_window = self.connect_or_start_mseq()
         if not self.main_window:
@@ -974,6 +1075,207 @@ class MseqAutomation:
             self.logger.warning(f"Processing may not have completed properly for: {folder_path}")
 
         return True
+
+    def _fast_process_folder(self, folder_path):
+        """Patched method with faster processing and reduced waits"""
+        if not os.path.exists(folder_path):
+            print(f"Warning: Folder does not exist: {folder_path}")
+            return False
+
+        # Check for .ab1 files
+        ab1_files = [f for f in os.listdir(folder_path) if f.endswith('.ab1')]
+        if not ab1_files:
+            print(f"No .ab1 files found in {folder_path}, skipping processing")
+            return False
+
+        self.app, self.main_window = self.connect_or_start_mseq()
+        self.main_window.set_focus()
+        from pywinauto.keyboard import send_keys
+        send_keys('^n')  # Ctrl+N for new project
+
+        # Wait for Browse dialog
+        self.wait_for_dialog("browse_dialog")
+        dialog_window = self._get_browse_dialog()
+
+        if not dialog_window:
+            print("Failed to find Browse For Folder dialog")
+            return False
+
+        # Navigate to folder with faster method
+        navigate_success = self.navigate_folder_tree(dialog_window, folder_path)
+
+        # Click OK
+        try:
+            ok_button = dialog_window.child_window(title="OK", class_name="Button")
+            if ok_button.exists():
+                ok_button.click_input()
+            else:
+                dialog_window.set_focus()
+                send_keys('{ENTER}')
+        except:
+            dialog_window.set_focus()
+            send_keys('{ENTER}')
+
+        # Handle preferences
+        self.wait_for_dialog("preferences")
+        try:
+            pref_window = None
+            for title in ['Mseq Preferences', 'mSeq Preferences']:
+                try:
+                    pref_window = self.app.window(title=title)
+                    if pref_window.exists():
+                        break
+                except:
+                    pass
+
+            if pref_window and pref_window.exists():
+                for btn_title in ["&OK", "OK", "Ok"]:
+                    try:
+                        ok_button = pref_window.child_window(title=btn_title)
+                        if ok_button.exists():
+                            ok_button.click_input()
+                            break
+                    except:
+                        pass
+                else:
+                    pref_window.set_focus()
+                    send_keys('{ENTER}')
+        except:
+            pass
+
+        # Handle Copy files
+        self.wait_for_dialog("copy_files")
+        try:
+            copy_files_window = self.app.window(title_re='Copy.*sequence files')
+
+            # Try to find list view and select all
+            try:
+                shell_view = copy_files_window.child_window(title="ShellView")
+                list_view = shell_view.child_window(class_name="DirectUIHWND")
+                list_view.click_input()
+            except:
+                try:
+                    list_view = copy_files_window.child_window(class_name="DirectUIHWND")
+                    list_view.click_input()
+                except:
+                    rect = copy_files_window.rectangle()
+                    copy_files_window.click_input(coords=((rect.right - rect.left) // 2,
+                                                          (rect.bottom - rect.top) // 2))
+
+            send_keys('^a')  # Select all
+
+            # Click Open
+            for btn_title in ["&Open", "Open"]:
+                try:
+                    open_button = copy_files_window.child_window(title=btn_title)
+                    if open_button.exists():
+                        open_button.click_input()
+                        break
+                except:
+                    pass
+            else:
+                copy_files_window.set_focus()
+                send_keys('{ENTER}')
+        except:
+            pass
+
+        # Handle Error dialog
+        self.wait_for_dialog("error_window")
+        try:
+            error_window = None
+            for title in ['File error', 'Error']:
+                try:
+                    error_window = self.app.window(title=title)
+                    if error_window.exists():
+                        break
+                except:
+                    pass
+
+            if error_window and error_window.exists():
+                ok_button = error_window.child_window(class_name="Button")
+                if ok_button.exists():
+                    ok_button.click_input()
+                else:
+                    error_window.set_focus()
+                    send_keys('{ENTER}')
+        except:
+            pass
+
+        # Handle Call bases
+        self.wait_for_dialog("call_bases")
+        try:
+            call_bases_window = self.app.window(title_re='Call bases.*')
+
+            if call_bases_window and call_bases_window.exists():
+                for btn_title in ["&Yes", "Yes"]:
+                    try:
+                        yes_button = call_bases_window.child_window(title=btn_title)
+                        if yes_button.exists():
+                            yes_button.click_input()
+                            break
+                    except:
+                        pass
+                else:
+                    call_bases_window.set_focus()
+                    send_keys('{ENTER}')
+        except:
+            pass
+
+        # Wait for completion - use a more aggressive check
+        import time
+        max_wait = self.config.TIMEOUTS["process_completion"]
+        interval = 0.5
+        elapsed = 0
+
+        while elapsed < max_wait:
+            # Check if process completed
+            completed = False
+
+            # Check for low quality dialog
+            try:
+                for title in ["Low quality files skipped", "Quality files skipped"]:
+                    if self.app.window(title=title).exists():
+                        low_quality_window = self.app.window(title=title)
+                        ok_button = low_quality_window.child_window(class_name="Button")
+                        ok_button.click_input()
+                        completed = True
+                        break
+            except:
+                pass
+
+            # Check for read info dialog
+            try:
+                if self.app.window(title_re='Read information for*').exists():
+                    read_window = self.app.window(title_re='Read information for*')
+                    read_window.close()
+                    completed = True
+            except:
+                pass
+
+            # Check for txt files
+            txt_count = 0
+            for item in os.listdir(folder_path):
+                if (item.endswith('.raw.qual.txt') or
+                        item.endswith('.raw.seq.txt') or
+                        item.endswith('.seq.info.txt') or
+                        item.endswith('.seq.qual.txt') or
+                        item.endswith('.seq.txt')):
+                    txt_count += 1
+
+            if txt_count >= 5:
+                completed = True
+
+            if completed:
+                return True
+
+            # Get appropriate interval from the compatibility manager
+            wait_interval = OSCompatibilityManager.get_timeout("polling_interval", interval)
+            time.sleep(wait_interval)
+            elapsed += wait_interval  # Make sure to update elapsed with the actual wait time
+
+        print(f"Warning: Timeout waiting for processing to complete for {folder_path}")
+        print("This may be normal if the folder has already been processed or has special files")
+        return True  # Return True anyway to continue with next folder
 
     def close(self):
         """Close the mSeq application with better error handling"""
