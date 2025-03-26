@@ -91,13 +91,13 @@ def main():
         print(f"Error: Batch file {config.BATCH_FILE_PATH} failed to run")
         return
     
-    # Select folder
-    data_folder = get_folder_from_user()
-    
-    if not data_folder:
-        logger.error("No folder selected, exiting")
-        print("No folder selected, exiting")
-        return
+    # # Select folder
+    # data_folder = get_folder_from_user()
+    #
+    # if not data_folder:
+    #     logger.error("No folder selected, exiting")
+    #     print("No folder selected, exiting")
+    #     return
     
     logger.info(f"Using folder: {data_folder}")
     

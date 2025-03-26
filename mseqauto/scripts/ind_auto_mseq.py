@@ -5,88 +5,68 @@ import tkinter as tk
 from tkinter import filedialog
 import subprocess
 import re
-from mseqauto.utils import setup_logger
 
-# Basic imports first
-from mseqauto.core import OSCompatibilityManager
-from mseqauto.config import MseqConfig
-
-OSCompatibilityManager.py32_check(
-    script_path=__file__,
-    logger=logger if 'logger' in locals() else None
-)
 
 def get_folder_from_user():
-    """Get folder selection from user with OS-specific handling"""
-    logger = setup_logger("ind_auto_mseq")
-    logger.info("Opening folder selection dialog...")
-
-    # Create and immediately withdraw (hide) the root window
+    """Simple folder selection dialog that works reliably"""
+    print("Opening folder selection dialog...")
     root = tk.Tk()
     root.withdraw()
+    root.update()  # Force an update to ensure dialog shows
 
-    # Get OS-specific timeout for dialog operation
-    dialog_timeout = OSCompatibilityManager.get_timeout("window_appear")
-
-    # On Windows 11, we might need additional setup for dialogs
-    if OSCompatibilityManager.is_windows_11():
-        # Process any pending UI events for better dialog initialization
-        root.update()
-
-    # Show a directory selection dialog
     folder_path = filedialog.askdirectory(
         title="Select today's data folder to mseq orders",
         mustexist=True
     )
 
-    # Destroy the root window
     root.destroy()
-
-    if folder_path:
-        logger.info(f"Selected folder: {folder_path}")
-        return folder_path
-    else:
-        logger.error("No folder selected")
-        return None
+    return folder_path
 
 
 def main():
+    # Get folder path FIRST before any package imports
+    data_folder = get_folder_from_user()
+
+    if not data_folder:
+        print("No folder selected, exiting")
+        return
+
+    # NOW import package modules
+    from mseqauto.utils import setup_logger
+    from mseqauto.config import MseqConfig
+    from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor
+
     # Setup logger
     logger = setup_logger("ind_auto_mseq")
     logger.info("Starting IND auto mSeq...")
 
-    # Log OS environment information
-    OSCompatibilityManager.log_environment_info(logger)
-
-    # Select folder FIRST, before any complex imports
-    logger.info("About to select folder...")
-    data_folder = get_folder_from_user()
-
-    if not data_folder:
-        logger.error("No folder selected, exiting")
-        print("No folder selected, exiting")
-        return
-
+    # Log that we already selected folder
     logger.info(f"Using folder: {data_folder}")
     data_folder = re.sub(r'/', '\\\\', data_folder)
 
-    # Import other components AFTER folder selection
+    # Check for 32-bit Python requirement
+    OSCompatibilityManager.py32_check(
+        script_path=__file__,
+        logger=logger
+    )
+
+    # Log OS environment information
+    OSCompatibilityManager.log_environment_info(logger)
+
+    # Initialize components
     logger.info("Initializing components...")
     config = MseqConfig()
+    logger.info("Config loaded")
 
-    # Use OS compatibility manager for timeouts instead of hardcoding them
-    # This replaces the hardcoded timeout overrides that were here before
+    # Use OS compatibility manager for timeouts
     logger.info("Using OS-specific timeouts")
 
-    from mseqauto.core import FileSystemDAO
     file_dao = FileSystemDAO(config)
     logger.info("FileSystemDAO initialized")
 
-    from mseqauto.core import MseqAutomation
     ui_automation = MseqAutomation(config)
     logger.info("UI Automation initialized with OS-specific settings")
 
-    from mseqauto.core import FolderProcessor
     processor = FolderProcessor(file_dao, ui_automation, config, logger=logger.info)
     logger.info("Folder processor initialized")
 

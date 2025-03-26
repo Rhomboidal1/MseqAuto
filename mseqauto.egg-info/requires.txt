@@ -1,0 +1,12 @@
+pywinauto>=0.6.8
+numpy>=1.20.0
+openpyxl>=3.0.7
+pylightxl>=1.60
+pywin32>=300
+psutil>=5.9.0
+
+[dev]
+pytest>=6.0.0
+pytest-cov>=2.12.0
+black>=21.5b2
+flake8>=3.9.2

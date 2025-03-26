@@ -1,0 +1,143 @@
+Metadata-Version: 2.4
+Name: mseqauto
+Version: 0.1.0
+Summary: Automation tools for DNA sequencing workflow
+Home-page: https://github.com/Rhomboidal1/MseqAuto
+Author: Tyler Rudig
+Author-email: tyler@functionalbio.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: pywinauto>=0.6.8
+Requires-Dist: numpy>=1.20.0
+Requires-Dist: openpyxl>=3.0.7
+Requires-Dist: pylightxl>=1.60
+Requires-Dist: pywin32>=300
+Requires-Dist: psutil>=5.9.0
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=2.12.0; extra == "dev"
+Requires-Dist: black>=21.5b2; extra == "dev"
+Requires-Dist: flake8>=3.9.2; extra == "dev"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+```markdown
+# MseqAuto
+
+Automation tools for DNA sequencing workflow management
+
+## Features
+
+- Automated file sorting for Individual and Plate sequencing samples
+- mSeq processing automation with quality control
+- File compression and validation for data delivery
+- Support for PCR project handling
+
+## Installation
+
+```bash
+# Install in development mode
+pip install -e .
+
+# For regular installation
+pip install .
+```
+
+## Usage
+
+### Individual Sequencing Workflow
+
+1. Sort files:
+```bash
+ind-sort
+```
+
+2. Run mSeq:
+```bash
+ind-mseq
+```
+
+3. Zip files:
+```bash
+ind-zip
+```
+
+### Plate Sequencing Workflow
+
+1. Sort files:
+```bash
+plate-sort
+```
+
+2. Run mSeq:
+```bash
+plate-mseq
+```
+
+3. Zip files:
+```bash
+plate-zip
+```
+
+## Project Structure
+
+```
+mseqauto/
+â”œâ”€â”€ __init__.py         # Package initialization
+â”œâ”€â”€ config.py           # Configuration settings
+â”œâ”€â”€ core/               # Core functionality
+â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”œâ”€â”€ file_system_dao.py
+â”‚   â”œâ”€â”€ folder_processor.py
+â”‚   â””â”€â”€ ui_automation.py
+â”œâ”€â”€ scripts/            # Executable scripts
+â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”œâ”€â”€ ind_sort_files.py
+â”‚   â”œâ”€â”€ ind_auto_mseq.py
+â”‚   â””â”€â”€ ...
+â”œâ”€â”€ utils/              # Utility functions
+â”‚   â”œâ”€â”€ __init__.py
+â”‚   â”œâ”€â”€ logger.py
+â”‚   â””â”€â”€ excel_dao.py
+â””â”€â”€ legacy/             # Legacy code for reference
+    â””â”€â”€ scripts/
+```
+
+## Requirements
+
+- Python 3.6+
+- Windows OS (for UI automation)
+- mSeq software installed
+
+## Development
+
+```bash
+# Clone the repository
+git clone https://github.com/Rhomboidal1/MseqAuto.git
+cd MseqAuto
+
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+```
+
+## License
+
+[MIT License](LICENSE)
+```
+
+This format should display correctly in your repository with proper Markdown formatting and code blocks. It provides a clean overview of your project, its structure, and how to use it.

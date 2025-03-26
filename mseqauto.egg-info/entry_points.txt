@@ -1,0 +1,8 @@
+[console_scripts]
+ind-mseq = mseqauto.scripts.ind_auto_mseq:main
+ind-sort = mseqauto.scripts.ind_sort_files:main
+ind-zip = mseqauto.scripts.ind_zip_files:main
+plate-mseq = mseqauto.scripts.plate_auto_mseq:main
+plate-sort = mseqauto.scripts.plate_sort_files:main
+plate-zip = mseqauto.scripts.plate_zip_files:main
+validate-zip = mseqauto.scripts.validate_zip_files:main
