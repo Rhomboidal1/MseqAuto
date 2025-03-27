@@ -1,0 +1,200 @@
+PS C:\Users\tyler> & "C:/Program Files/Python312/python.exe" p:/Data/Testing/AutoMSeq/MseqAuto_3.24.25/test_mseq_open_logging.py
+2025-03-25 12:58:40,052 - INFO - ==================================================
+2025-03-25 12:58:40,052 - INFO - Starting mSeq open test...
+2025-03-25 12:58:40,126 - INFO - Platform: Windows-11-10.0.26100-SP0
+2025-03-25 12:58:40,126 - INFO - Config loaded
+2025-03-25 12:58:40,126 - INFO - FileSystemDAO initialized
+2025-03-25 12:58:40,126 - INFO - UI Automation initialized
+2025-03-25 12:58:40,126 - INFO - Current user: tyler
+2025-03-25 12:58:40,126 - INFO - Trying Windows Shell API method
+2025-03-25 12:58:40,145 - WARNING - Error getting Documents via Windows API: _type_ must have storage info
+2025-03-25 12:58:40,145 - INFO - Trying environment variable method
+2025-03-25 12:58:40,146 - INFO - Checking environment path: C:\Users\tyler\Documents
+2025-03-25 12:58:40,146 - INFO - Found Documents via environment variable: C:\Users\tyler\Documents
+2025-03-25 12:58:40,146 - INFO - Overriding automatically detected path with custom folder: P:\Data\Testing\Win11Test
+2025-03-25 12:58:40,147 - INFO - Path discovery took 0.02 seconds
+2025-03-25 12:58:40,147 - INFO - Using test folder: P:\Data\Testing\Win11Test
+2025-03-25 12:58:40,147 - INFO - Folders in P:\Data\Testing\Win11Test:
+2025-03-25 12:58:40,150 - INFO -   - 2025-03-21_BioI-21884_1
+2025-03-25 12:58:40,151 - INFO -   - 2025-03-21_BioI-21885_1
+2025-03-25 12:58:40,151 - INFO -   - Copy from here
+2025-03-25 12:58:40,152 - INFO - Attempting to open mSeq and navigate...
+2025-03-25 12:58:40,152 - INFO - Connecting to or starting mSeq...
+No running mSeq instance found, starting a new one...
+Changed directory to C:\DNA\Mseq4\bin
+Found new mSeq process: PID=9544
+C:\Program Files\Python312\Lib\site-packages\pywinauto\application.py:1085: UserWarning: 32-bit application should be automated using 32-bit Python (you use 64-bit Python)
+  warnings.warn(
+2025-03-25 12:58:42,555 - INFO - Connection took 2.40 seconds
+2025-03-25 12:58:42,555 - INFO - mSeq window: mSeq
+2025-03-25 12:58:42,555 - INFO - Set focus to main window
+2025-03-25 12:58:42,555 - INFO - Pressing Ctrl+N...
+2025-03-25 12:58:42,713 - INFO - Waiting for Browse For Folder dialog...
+2025-03-25 12:58:43,317 - INFO - Dialog detection took 0.60 seconds
+2025-03-25 12:58:43,318 - INFO - Browse For Folder dialog found
+2025-03-25 12:58:43,326 - INFO - Dialog title: Browse For Folder
+2025-03-25 12:58:43,332 - INFO - Dialog rectangle: (L750, T181, R1171, B852)
+2025-03-25 12:58:43,332 - INFO - Attempting to navigate to: P:\Data\Testing\Win11Test
+Could not find folder 'ABISync (P:)' in path
+2025-03-25 12:58:43,430 - INFO - Navigation took 0.10 seconds
+2025-03-25 12:58:43,430 - ERROR - Navigation failed
+2025-03-25 12:58:43,431 - INFO - Test completed. Waiting 5 seconds before closing...
+2025-03-25 12:58:48,432 - INFO - Closing mSeq...
+2025-03-25 12:58:48,433 - INFO - Done
+2025-03-25 12:58:48,433 - INFO - ==================================================
+PS C:\Users\tyler> & "C:/Program Files/Python312/python.exe" p:/Data/Testing/AutoMSeq/MseqAuto_3.24.25/#mseq_diagnostics.py
+Starting mSeq diagnostic tool
+Please make sure mSeq is running before continuing.
+Press Enter to continue...
+
+=== WINDOW DIAGNOSTIC INFORMATION ===
+Found potential mSeq process: PID=7412, EXE=C:\DNA\Mseq4\bin\j.exe
+C:\Program Files\Python312\Lib\site-packages\pywinauto\application.py:1085: UserWarning: 32-bit application should be automated using 32-bit Python (you use 64-bit Python)
+  warnings.warn(
+
+Window details for PID 7412:
+  Title:
+  Class: tooltips_class32
+  Handle: 329600
+  Rectangle: (L0, T0, R0, B0)
+  Control classes: set()
+
+Window details for PID 7412:
+  Title: mSeq
+  Class: Afx:400000:b:10003:6:17055d
+  Handle: 264016
+  Rectangle: (L272, T416, R1072, B886)
+  Control classes: {'ScrollBar', 'isigraph', 'ComboBox', 'ToolbarWindow32', 'msctls_statusbar32', 'Button', 'Static', 'Edit', 'AfxFrameOrView42'}
+
+Window details for PID 7412:
+  Title: Jsoftware
+  Class: Afx:400000:b:10003:6:17055d
+  Handle: 1443364
+  Rectangle: (L234, T234, R1674, B987)
+  Control classes: set()
+
+Window details for PID 7412:
+  Title:
+  Class: DDEMLEvent
+  Handle: 1377682
+  Rectangle: (L0, T0, R0, B0)
+  Control classes: set()
+
+Window details for PID 7412:
+  Title:
+  Class: DDEMLMom
+  Handle: 198576
+  Rectangle: (L0, T0, R0, B0)
+  Control classes: set()
+
+Window details for PID 7412:
+  Title:
+  Class: ComboLBox
+  Handle: 1246818
+  Rectangle: (L0, T23, R278, B85)
+  Control classes: set()
+
+Window details for PID 7412:
+  Title: M
+  Class: MSCTFIME UI
+  Handle: 198542
+  Rectangle: (L0, T0, R0, B0)
+  Control classes: set()
+
+Window details for PID 7412:
+  Title: Default IME
+  Class: IME
+  Handle: 133144
+  Rectangle: (L0, T0, R0, B0)
+  Control classes: set()
+
+Searching for windows with 'mseq' in title:
+Error searching for windows with 'mseq' in title: cannot import name 'Desktop' from 'pywinauto.application' (C:\Program Files\Python312\Lib\site-packages\pywinauto\application.py)
+
+Searching for potential J Software windows:
+Error searching for J Software windows: cannot access local variable 'desktop' where it is not associated with a value
+=== END DIAGNOSTIC INFORMATION ===
+
+
+Diagnostic complete. Results are displayed above.
+PS C:\Users\tyler> & "C:/Program Files/Python312/python.exe" "p:/Data/Testing/Python Not Ready/DialogExplorer/ui-logger.py"
+Starting UI Logger...
+This program will log information about UI elements as you interact with them
+Specifically focusing on tracking TreeView and Dialog information
+Press Ctrl+C to stop logging
+2025-03-25 13:17:23,214 - INFO - UI Logger initialized. Log file: C:\Users\tyler\ui_navigation_log.txt
+2025-03-25 13:17:23,214 - INFO - UI monitoring started
+2025-03-25 13:17:23,214 - INFO - Window: 'ui-logger.py - Visual Studio Code' | Class: 'Chrome_WidgetWin_1' | Handle: 198324 | Rect: (1912, -8, 3848, 1040)
+UI Logger started. Press Ctrl+C to stop. Logs are being written to C:\Users\tyler\ui_navigation_log.txt
+2025-03-25 13:17:23,214 - INFO - Window Details:
+2025-03-25 13:17:23,253 - INFO -   - Title: ui-logger.py - Visual Studio Code
+2025-03-25 13:17:23,255 - INFO -   - Class: Chrome_WidgetWin_1
+2025-03-25 13:17:23,305 - INFO -   - Child Count: 4
+2025-03-25 13:17:25,518 - INFO - Window: 'mSeq' | Class: 'Afx:400000:b:10003:6:1a07f7' | Handle: 460594 | Rect: (664, 283, 1464, 753)
+2025-03-25 13:17:25,518 - INFO - Window Details:
+2025-03-25 13:17:25,538 - INFO -   - Title: mSeq
+2025-03-25 13:17:25,543 - INFO -   - Class: Afx:400000:b:10003:6:1a07f7
+2025-03-25 13:17:25,864 - INFO -   - Child Count: 5
+2025-03-25 13:17:28,828 - INFO - Window: 'Browse For Folder' | Class: '#32770' | Handle: 1377934 | Rect: (750, 181, 1171, 852)
+2025-03-25 13:17:28,828 - INFO - Window Details:
+2025-03-25 13:17:28,840 - INFO -   - Title: Browse For Folder
+2025-03-25 13:17:28,848 - INFO -   - Class: #32770
+2025-03-25 13:17:28,916 - INFO -   - Child Count: 7
+2025-03-25 13:17:29,062 - INFO -   - TreeViews found: 1
+2025-03-25 13:17:29,084 - INFO - Control: Choose project directory
+2025-03-25 13:17:29,084 - INFO -   - Type: Tree
+2025-03-25 13:17:29,084 - INFO -   - Class: SysTreeView32
+2025-03-25 13:17:29,084 - INFO -   - Automation ID: 100
+2025-03-25 13:17:29,085 - INFO -   - Rectangle: (L774, T270, R1147, B796)
+2025-03-25 13:17:29,085 - INFO -   - TreeView detected!
+2025-03-25 13:17:29,085 - INFO -   - Item Count: Unknown
+2025-03-25 13:17:49,156 - INFO - Window: 'Jsoftware' | Class: 'Afx:400000:b:10003:6:1a07f7' | Handle: 984850 | Rect: (104, 104, 1544, 857)
+2025-03-25 13:17:49,156 - INFO - Window Details:
+2025-03-25 13:18:01,405 - INFO -   - Title: Jsoftware
+2025-03-25 13:18:01,425 - INFO -   - Class: Afx:400000:b:10003:6:1a07f7
+2025-03-25 13:18:01,584 - INFO -   - Child Count: 2
+2025-03-25 13:18:01,932 - INFO - Window: 'mSeq' | Class: 'Afx:400000:b:10003:6:1a07f7' | Handle: 460594 | Rect: (664, 283, 1464, 753)
+2025-03-25 13:18:01,932 - INFO - Window Details:
+2025-03-25 13:18:01,962 - INFO -   - Title: mSeq
+2025-03-25 13:18:01,968 - INFO -   - Class: Afx:400000:b:10003:6:1a07f7
+2025-03-25 13:18:02,281 - INFO -   - Child Count: 6
+2025-03-25 13:18:04,173 - INFO - Window: 'Mseq Preferences' | Class: 'Afx:400000:b:10003:6:1a07f7' | Handle: 395124 | Rect: (741, 299, 1179, 780)
+2025-03-25 13:18:04,173 - INFO - Window Details:
+2025-03-25 13:18:04,183 - INFO -   - Title: Mseq Preferences
+2025-03-25 13:18:04,189 - INFO -   - Class: Afx:400000:b:10003:6:1a07f7
+2025-03-25 13:18:04,233 - INFO -   - Child Count: 2
+2025-03-25 13:18:06,530 - INFO - Window: 'Mseq - P:\Data\Testing\' | Class: 'Afx:400000:b:10003:6:1a07f7' | Handle: 460594 | Rect: (664, 283, 1464, 753)
+2025-03-25 13:18:06,530 - INFO - Window Details:
+2025-03-25 13:18:06,540 - INFO -   - Title: Mseq - P:\Data\Testing\
+2025-03-25 13:18:06,550 - INFO -   - Class: Afx:400000:b:10003:6:1a07f7
+2025-03-25 13:18:06,775 - INFO -   - Child Count: 5
+2025-03-25 13:18:07,928 - INFO - Window: 'ui-logger.py - Visual Studio Code' | Class: 'Chrome_WidgetWin_1' | Handle: 198324 | Rect: (1912, -8, 3848, 1040)
+2025-03-25 13:18:07,928 - INFO - Window Details:
+2025-03-25 13:18:07,954 - INFO -   - Title: ui-logger.py - Visual Studio Code
+2025-03-25 13:18:07,964 - INFO -   - Class: Chrome_WidgetWin_1
+2025-03-25 13:18:08,046 - INFO -   - Child Count: 4
+2025-03-25 13:18:25,038 - INFO - Window: 'Search' | Class: 'Windows.UI.Core.CoreWindow' | Handle: 65986 | Rect: (575, 282, 1375, 1080)
+2025-03-25 13:18:25,038 - INFO - Window Details:
+2025-03-25 13:18:25,131 - INFO -   - Title: Search
+2025-03-25 13:18:25,137 - INFO -   - Class: Windows.UI.Core.CoreWindow
+2025-03-25 13:18:25,226 - INFO -   - Child Count: 4
+2025-03-25 13:18:27,284 - INFO - Window: '' | Class: 'ApplicationManager_DesktopShellWindow' | Handle: 65846 | Rect: (0, 0, 0, 0)
+2025-03-25 13:18:27,286 - INFO - Window Details:
+2025-03-25 13:18:27,292 - INFO -   - Title:
+2025-03-25 13:18:27,296 - INFO -   - Class: ApplicationManager_DesktopShellWindow
+2025-03-25 13:18:27,305 - INFO -   - Child Count: 0
+2025-03-25 13:18:27,685 - INFO - Window: 'Selected Tab' | Class: '#32770' | Handle: 984360 | Rect: (16, 406, 311, 612)
+2025-03-25 13:18:27,685 - INFO - Window Details:
+2025-03-25 13:18:28,227 - INFO -   - Title: Selected Tab
+2025-03-25 13:18:28,230 - INFO -   - Class: #32770
+2025-03-25 13:18:28,236 - INFO -   - Child Count: 0
+2025-03-25 13:18:28,473 - INFO - Window: 'P:\get-latest-label-file.bat - Notepad++' | Class: 'Notepad++' | Handle: 591666 | Rect: (1912, -8, 3848, 1040)
+2025-03-25 13:18:28,473 - INFO - Window Details:
+2025-03-25 13:18:28,490 - INFO -   - Title: P:\get-latest-label-file.bat - Notepad++
+2025-03-25 13:18:28,505 - INFO -   - Class: Notepad++
+2025-03-25 13:18:28,540 - INFO -   - Child Count: 6
+2025-03-25 13:18:34,327 - INFO - Window: 'ui-logger.py - Visual Studio Code' | Class: 'Chrome_WidgetWin_1' | Handle: 198324 | Rect: (1912, -8, 3848, 1040)
+2025-03-25 13:18:34,327 - INFO - Window Details:
+2025-03-25 13:18:34,400 - INFO -   - Title: ui-logger.py - Visual Studio Code
+2025-03-25 13:18:34,410 - INFO -   - Class: Chrome_WidgetWin_1
+2025-03-25 13:18:34,456 - INFO -   - Child Count: 4
