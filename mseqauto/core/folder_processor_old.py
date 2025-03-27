@@ -16,35 +16,6 @@ class FolderProcessor:
         self.reinject_list = []
         self.raw_reinject_list = []
 
-    def is_control_file(self, file_name, control_list):
-        """Check if file is a control sample"""
-        clean_name = self.clean_braces_format(file_name)
-        clean_name = self.remove_extension(clean_name)
-        return clean_name.lower() in [control.lower() for control in control_list]
-
-    def is_blank_file(self, file_name):
-        """
-        Check if file is a blank sample
-        Handles two formats:
-        1. Individual sequencing blanks: {07H}.ab1, {11F}.ab1
-        2. Plate sequencing blanks: 01A__.ab1, 02B__.ab1
-        """
-        # Check for individual sequencing blanks pattern {[digits][letter]}.ab1
-        if self.regex_patterns['ind_blank_file'].match(file_name):
-            return True
-
-        # Check for plate sequencing blanks pattern [digits][letter]__.ab1
-        if self.regex_patterns['plate_blank_file'].match(file_name):
-            return True
-
-        return False
-    
-    def remove_extension(file_name, extension=None):
-        """Remove file extension"""
-        if extension and file_name.endswith(extension):
-            return file_name[:-len(extension)]
-        return os.path.splitext(file_name)[0]
-
     def build_order_key_index(self, order_key):
         """Build lookup index for faster order key searches"""
         if self.order_key_index is not None:
@@ -162,7 +133,6 @@ class FolderProcessor:
                     order_folders.append(item_path)
 
         return order_folders
-
 
     def get_destination_for_order(self, order_folder, base_path):
         """Determine the correct destination for an order folder"""
@@ -849,6 +819,19 @@ class FolderProcessor:
             order_number = re.search(r'\d+', match.group(0)).group(0)
             return order_number
         return None
+
+    def _remove_braces_from_string(self, text):
+        """
+        Remove braces and their contents from a string.
+        
+        Args:
+            text (str): Text to process
+        
+        Returns:
+            str: Text with braces and their contents removed
+        """
+        import re
+        return re.sub(r'\{[^}]*\}', '', text)
 
     def get_reinject_list(self, i_numbers, reinject_path=None):
         """Get list of reactions that are reinjects - optimized version"""
