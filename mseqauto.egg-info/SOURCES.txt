@@ -1,0 +1,39 @@
+README.md
+setup.py
+mseqauto/__init__.py
+mseqauto/config.py
+mseqauto.egg-info/PKG-INFO
+mseqauto.egg-info/SOURCES.txt
+mseqauto.egg-info/dependency_links.txt
+mseqauto.egg-info/entry_points.txt
+mseqauto.egg-info/requires.txt
+mseqauto.egg-info/top_level.txt
+mseqauto/core/__init__.py
+mseqauto/core/file_system_dao.py
+mseqauto/core/folder_processor.py
+mseqauto/core/os_compatibility.py
+mseqauto/core/ui_automation.py
+mseqauto/legacy/__init__.py
+mseqauto/legacy/scripts/A IND Sort Files 1.py
+mseqauto/legacy/scripts/B IND Auto Mseq 10.py
+mseqauto/legacy/scripts/C IND Zip ab1 and txt with zip dump.py
+mseqauto/legacy/scripts/D IND Validate Zip Files.py
+mseqauto/legacy/scripts/E Plate Sort Blanks & Controls & Rename Brackets.py
+mseqauto/legacy/scripts/F Plate Auto Mseq 2.py
+mseqauto/legacy/scripts/G Plate Zip ab1 and txt with zip dump.py
+mseqauto/legacy/scripts/__init__.py
+mseqauto/scripts/__init__.py
+mseqauto/scripts/ind_auto_mseq.py
+mseqauto/scripts/ind_sort_files.py
+mseqauto/scripts/ind_zip_files.py
+mseqauto/scripts/plate_auto_mseq.py
+mseqauto/scripts/plate_sort_files.py
+mseqauto/scripts/plate_zip_files.py
+mseqauto/scripts/test_dialog.py
+mseqauto/scripts/validate_zip_files.py
+mseqauto/scripts/wildcard_auto_mseq.py
+mseqauto/utils/__init__.py
+mseqauto/utils/excel_dao.py
+mseqauto/utils/logger.py
+tests/__init__.py
+tests/test_mseq_open_logging.py

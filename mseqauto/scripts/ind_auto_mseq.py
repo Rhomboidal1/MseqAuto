@@ -1,11 +1,14 @@
 # ind_auto_mseq.py
-import os
-import sys
 import tkinter as tk
 from tkinter import filedialog
 import subprocess
 import re
+# Add parent directory to PYTHONPATH for imports
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+print(sys.path)
 
 def get_folder_from_user():
     """Simple folder selection dialog that works reliably"""

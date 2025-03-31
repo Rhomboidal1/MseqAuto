@@ -6,6 +6,13 @@ import sys
 from datetime import datetime
 from tkinter import filedialog
 
+# Add parent directory to PYTHONPATH for imports
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+print(sys.path)
+
 def get_folder_from_user():
     print("Opening folder selection dialog...")
     root = tk.Tk()
@@ -80,7 +87,8 @@ def main():
     logger.info("FileSystemDAO initialized")
     processor = FolderProcessor(file_dao, None, config, logger=logger.info)
     logger.info("Folder processor initialized")
-    
+    logger.info(f"Using folder: {data_folder}")
+
     # Run batch file to generate order key
     try:
         logger.info(f"Running batch file: {config.BATCH_FILE_PATH}")
@@ -90,16 +98,6 @@ def main():
         logger.error(f"Batch file {config.BATCH_FILE_PATH} failed to run")
         print(f"Error: Batch file {config.BATCH_FILE_PATH} failed to run")
         return
-    
-    # # Select folder
-    # data_folder = get_folder_from_user()
-    #
-    # if not data_folder:
-    #     logger.error("No folder selected, exiting")
-    #     print("No folder selected, exiting")
-    #     return
-    
-    logger.info(f"Using folder: {data_folder}")
     
     # Store the selected folder in the processor for later reference
     processor.current_data_folder = data_folder

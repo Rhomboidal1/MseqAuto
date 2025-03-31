@@ -1,6 +1,12 @@
 # folder_processor.py
-import os
 import re
+# Add parent directory to PYTHONPATH for imports
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+print(sys.path)
+
 from mseqauto.config import MseqConfig
 
 config = MseqConfig()

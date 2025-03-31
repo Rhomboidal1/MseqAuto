@@ -6,62 +6,72 @@ from tkinter import filedialog
 import subprocess
 import re
 
-from mseqauto.core import FileSystemDAO, FolderProcessor
-from mseqauto.utils import setup_logger
-from mseqauto.config import MseqConfig
-
-
-# Check for 32-bit Python requirement
-if sys.maxsize > 2**32:
-    py32_path = MseqConfig.PYTHON32_PATH
-    if os.path.exists(py32_path) and py32_path != sys.executable:
-        script_path = os.path.abspath(__file__)
-        subprocess.run([py32_path, script_path])
-        sys.exit(0)
-    else:
-        print("32-bit Python not specified or same as current interpreter")
-        print("Continuing with current Python interpreter")
+# Add parent directory to PYTHONPATH for imports
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def get_folder_from_user():
-    """Get folder selection from user"""
     print("Opening folder selection dialog...")
     root = tk.Tk()
     root.withdraw()
+    root.update()  # Add this line - force an update
+    
     folder_path = filedialog.askdirectory(
-        title="Select folder containing plate folders to sort",
+        title="Select today's data folder to sort",
         mustexist=True
     )
-    root.destroy()
     
-    if folder_path:
-        print(f"Selected folder: {folder_path}")
-        return folder_path
-    else:
-        print("No folder selected")
-        return None
+    root.destroy()
+    return folder_path
 
 def main():
-    # Setup logger
-    logger = setup_logger("plate_sort_files")
-    logger.info("Starting plate sort files...")
-    
-    # Initialize components
-    config = MseqConfig()
-    logger.info("Config loaded")
-    file_dao = FileSystemDAO(config)
-    logger.info("FileSystemDAO initialized")
-    processor = FolderProcessor(file_dao, None, config, logger=logger.info)
-    logger.info("Folder processor initialized")
-    
-    # Select folder
+    # Get folder path FIRST before any package imports
     data_folder = get_folder_from_user()
-    
+
     if not data_folder:
-        logger.error("No folder selected, exiting")
         print("No folder selected, exiting")
         return
-    
+
+    # NOW import package modules
+    from mseqauto.utils import setup_logger
+    from mseqauto.config import MseqConfig
+    from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor
+
+    # Setup logger
+    logger = setup_logger("ind_auto_mseq")
+    logger.info("Starting IND auto mSeq...")
+
+    # Log that we already selected folder
     logger.info(f"Using folder: {data_folder}")
+    data_folder = re.sub(r'/', '\\\\', data_folder)
+
+    # Check for 32-bit Python requirement
+    OSCompatibilityManager.py32_check(
+        script_path=__file__,
+        logger=logger
+    )
+
+    # Log OS environment information
+    OSCompatibilityManager.log_environment_info(logger)
+
+    # Initialize components
+    logger.info("Initializing components...")
+    config = MseqConfig()
+    logger.info("Config loaded")
+
+    # Use OS compatibility manager for timeouts
+    logger.info("Using OS-specific timeouts")
+
+    file_dao = FileSystemDAO(config)
+    logger.info("FileSystemDAO initialized")
+
+    ui_automation = MseqAutomation(config, use_fast_navigation=True)
+    logger.info("UI Automation initialized with fast navigation")
+
+    processor = FolderProcessor(file_dao, ui_automation, config, logger=logger.info)
+    logger.info("Folder processor initialized")
+
     
     # Get plate folders
     plate_folders = file_dao.get_folders(data_folder, pattern=r'p\d+.+')

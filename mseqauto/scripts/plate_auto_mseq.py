@@ -1,59 +1,77 @@
 # plate_auto_mseq.py
-import os
-import sys
 import tkinter as tk
 from tkinter import filedialog
 import subprocess
-from mseqauto.core import FileSystemDAO, FolderProcessor
-from mseqauto.core import MseqAutomation
-from mseqauto.config import MseqConfig
 import re
 import time
-
-# Check for 32-bit Python requirement - gracefully fallback if not available
-if sys.maxsize > 2**32:
-    # Path to 32-bit Python
-    py32_path = MseqConfig.PYTHON32_PATH
-    
-    # Only relaunch if we have a different 32-bit Python
-    if os.path.exists(py32_path) and py32_path != sys.executable:
-        # Get the full path of the current script
-        script_path = os.path.abspath(__file__)
-        
-        # Re-run this script with 32-bit Python and exit current process
-        subprocess.run([py32_path, script_path])
-        sys.exit(0)
-    else:
-        print("32-bit Python not specified or same as current interpreter")
-        print("Continuing with current Python interpreter")
-
+# Add parent directory to PYTHONPATH for imports
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                
 def get_folder_from_user():
-    """Get folder selection from user using a simple approach"""
+    """Simple folder selection dialog that works reliably"""
     print("Opening folder selection dialog...")
-    
-    # Create and immediately withdraw (hide) the root window
     root = tk.Tk()
     root.withdraw()
-    
-    # Show a directory selection dialog
+    root.update()  # Force an update to ensure dialog shows
+
     folder_path = filedialog.askdirectory(
-        title="Select a folder to process plates",
+        title="Select today's data folder to mseq orders",
         mustexist=True
     )
-    
-    # Destroy the root window
+
     root.destroy()
-    
-    if folder_path:
-        print(f"Selected folder: {folder_path}")
-        return folder_path
-    else:
-        print("No folder selected")
-        return None
+    return folder_path
 
 def main():
     print("Starting plate auto mSeq...")
-    
+    # Get folder path FIRST before any package imports
+    data_folder = get_folder_from_user()
+
+    if not data_folder:
+        print("No folder selected, exiting")
+        return
+
+    # NOW import package modules
+    from mseqauto.utils import setup_logger
+    from mseqauto.config import MseqConfig
+    from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor
+
+    # Setup logger
+    logger = setup_logger("plate_auto_mseq")
+    logger.info("Starting Plate auto mSeq...")
+
+    # Log that we already selected folder
+    logger.info(f"Using folder: {data_folder}")
+    data_folder = re.sub(r'/', '\\\\', data_folder)
+
+    # Check for 32-bit Python requirement
+    OSCompatibilityManager.py32_check(
+        script_path=__file__,
+        logger=logger
+    )
+
+    # Log OS environment information
+    OSCompatibilityManager.log_environment_info(logger)
+
+    # Initialize components
+    logger.info("Initializing components...")
+    config = MseqConfig()
+    logger.info("Config loaded")
+
+    # Use OS compatibility manager for timeouts
+    logger.info("Using OS-specific timeouts")
+
+    file_dao = FileSystemDAO(config)
+    logger.info("FileSystemDAO initialized")
+
+    ui_automation = MseqAutomation(config, use_fast_navigation=True)
+    logger.info("UI Automation initialized with fast navigation")
+
+    processor = FolderProcessor(file_dao, ui_automation, config, logger=logger.info)
+    logger.info("Folder processor initialized")
+
     # Initialize components
     config = MseqConfig()
     print("Config loaded")
@@ -63,16 +81,6 @@ def main():
     print("UI Automation initialized")
     processor = FolderProcessor(file_dao, ui_automation, config)
     print("Folder processor initialized")
-    
-    # Select folder 
-    data_folder = get_folder_from_user()
-    
-    if not data_folder:
-        print("No folder selected, exiting")
-        return
-    
-    print(f"Using folder: {data_folder}")
-    data_folder = re.sub(r'/', '\\\\', data_folder)
     
     # Get all plate folders (starting with 'p')
     plate_folders = file_dao.get_folders(data_folder, r'p\d+.+')

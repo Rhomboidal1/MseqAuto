@@ -5,6 +5,8 @@ import logging
 import sys
 import subprocess
 from typing import Dict, Any, Optional
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+print(sys.path)
 from mseqauto.config import MseqConfig
 
 class OSCompatibilityManager:

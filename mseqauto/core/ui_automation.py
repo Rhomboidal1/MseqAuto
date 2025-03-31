@@ -3,6 +3,9 @@ import time
 import platform
 import re
 import win32api
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+print(sys.path)
 from mseqauto.config import MseqConfig
 from mseqauto.core import OSCompatibilityManager
 import logging

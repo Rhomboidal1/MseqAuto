@@ -1,36 +1,43 @@
 # ind_zip_files.py
-import os
 import subprocess
-import sys
 import tkinter as tk
 from tkinter import filedialog
+# Add parent directory to PYTHONPATH for imports
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from mseqauto.core import FileSystemDAO, FolderProcessor, OSCompatibilityManager
-from mseqauto.utils import setup_logger
-from mseqauto.config import MseqConfig
+print(sys.path)
 
 def get_folder_from_user():
-    """Get folder selection from user"""
     print("Opening folder selection dialog...")
     root = tk.Tk()
     root.withdraw()
+    root.update()  # Add this line - force an update
+    
     folder_path = filedialog.askdirectory(
-        title="Select folder containing BioI folders to zip",
+        title="Select today's data folder to zip",
         mustexist=True
     )
-    root.destroy()
     
-    if folder_path:
-        print(f"Selected folder: {folder_path}")
-        return folder_path
-    else:
-        print("No folder selected")
-        return None
+    root.destroy()
+    return folder_path
 
 def main():
+    # Get folder path first before any package imports
+    data_folder = get_folder_from_user()
+    
+    if not data_folder:
+        print("No folder selected, exiting")
+        return
+
+    # ONLY NOW import package modules
+    from mseqauto.config import MseqConfig
+    from mseqauto.core import FileSystemDAO, FolderProcessor, OSCompatibilityManager
+    from mseqauto.utils import setup_logger
+    
     # Setup logger
-    logger = setup_logger("ind_zip_files")
-    logger.info("Starting IND zip files...")
+    logger = setup_logger("ind_sort_files")
 
     # Immediately check for 32-bit Python requirements
     OSCompatibilityManager.py32_check(
@@ -38,6 +45,8 @@ def main():
         logger=logger
     )
 
+    logger.info("Starting IND sort files...")
+    
     # Initialize components
     config = MseqConfig()
     logger.info("Config loaded")
@@ -45,15 +54,6 @@ def main():
     logger.info("FileSystemDAO initialized")
     processor = FolderProcessor(file_dao, None, config, logger=logger.info)
     logger.info("Folder processor initialized")
-    
-    # Select folder
-    data_folder = get_folder_from_user()
-    
-    if not data_folder:
-        logger.error("No folder selected, exiting")
-        print("No folder selected, exiting")
-        return
-    
     logger.info(f"Using folder: {data_folder}")
     
     # Create zip dump folder

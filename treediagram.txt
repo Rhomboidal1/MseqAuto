@@ -1,0 +1,40 @@
+MseqAuto/
+│
+├── mseqauto/
+│   │
+│   ├── core/
+│   │	├── __init__.py
+│   │	├── file_system_dao.py
+│   │	├── os_compatibility.py
+│   │	├── ui_automation.py
+│   │	└── folder_processor.py
+│   │
+│   ├── scripts/
+│   │	├── __init__.py
+│   │	├── ind_auto_mseq.py
+│   │	├── ind_sort_files.py
+│   │	├── ind_zip_files.py
+│   │	├── plate_auto_mseq.py
+│   │	├── plate_sort_files.py
+│   │	├── plate_zip_files.py
+│   │	├── test_dialog.py
+│   │	├── validate_zip_files.py
+│   │	└── wildcard_auto_mseq.py
+│   │
+│   ├── utils/
+│   │	├── __init__.py
+│   │	├── excel_dao.py
+│   │	└── logger.py
+│   │
+│   ├── config.py
+│   └── __init__.py
+│
+├── docs/
+│ 	└── workflow.md
+│
+├── README.md
+├── setup.py
+├── requirements.txt
+├── .gitignore
+├── .gitattributes
+└── .git/
