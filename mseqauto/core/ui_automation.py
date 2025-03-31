@@ -106,6 +106,9 @@ class MseqAutomation:
         
         self.logger.info(f"Processing folder with {len(ab1_files)} AB1 files: {folder_path}")
         
+        # Close any existing Read information windows before starting
+        self._close_all_read_info_dialogs()
+        
         # Connect to mSeq and get main window
         self.app, self.main_window = self.connect_or_start_mseq()
         self.main_window.set_focus()
@@ -165,12 +168,43 @@ class MseqAutomation:
             self._click_dialog_button(call_bases_dialog, ["&Yes", "Yes"])
         
         # Wait for processing to complete
-        if not self._wait_for_completion(folder_path):
-            self.logger.warning(f"Process may not have completed properly for {folder_path}")
+        completion_success = self._wait_for_completion(folder_path)
+        
+        # Always close any Read information windows before returning
+        self._close_all_read_info_dialogs()
+        
+        if completion_success:
+            self.logger.info(f"Successfully processed {folder_path}")
+        else:
+            self.logger.warning(f"Processing may not have completed properly for {folder_path}")
             return False
         
-        self.logger.info(f"Successfully processed {folder_path}")
         return True
+
+    def _close_all_read_info_dialogs(self):
+        """Close all Read information for... dialogs that might be open"""
+        try:
+            from pywinauto import findwindows
+            
+            # Find all Read information windows
+            if self.app:
+                read_windows = findwindows.find_elements(
+                    title_re='Read information for.*', 
+                    process=self.app.process
+                )
+                
+                for win in read_windows:
+                    try:
+                        read_dialog = self.app.window(handle=win.handle)
+                        self.logger.info(f"Closing read information dialog: {read_dialog.window_text()}")
+                        read_dialog.close()
+                    except Exception as e:
+                        self.logger.warning(f"Error closing read dialog: {e}")
+                
+                return len(read_windows) > 0
+        except Exception as e:
+            self.logger.warning(f"Error finding/closing read information dialogs: {e}")
+            return False
     
     def _wait_for_dialog(self, dialog_type):
         """Wait for a specific dialog to appear"""
@@ -308,7 +342,7 @@ class MseqAutomation:
             return True
         except:
             return False
-    
+
     def _navigate_folder_tree(self, dialog, path):
         """Navigate the folder tree - simplified based on success path"""
         dialog.set_focus()
@@ -454,13 +488,12 @@ class MseqAutomation:
                     self._click_dialog_button(dialog, ["OK"])
                     return True
             
-            # Check for read info dialog
-            read_dialog = self.app.window(title_re='Read information for.*')
-            if read_dialog.exists():
-                read_dialog.close()
+            # Check for read info dialog (handle possible multiple windows)
+            if self._close_all_read_info_dialogs():
+                # If we found and closed any read dialogs, consider it a completion signal
                 return True
             
-            # Check for output text files
+            # Check for output text files - most reliable completion signal
             txt_count = 0
             for item in os.listdir(folder_path):
                 if any(item.endswith(ext) for ext in self.config.TEXT_FILES):

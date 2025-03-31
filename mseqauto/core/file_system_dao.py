@@ -13,6 +13,10 @@ class FileSystemDAO:
         self.config = config_obj
         self.directory_cache = {}
 
+        # Add logger initialization
+        import logging
+        self.logger = logging.getLogger(__name__)
+
         # Precompiled regex patterns
         self.regex_patterns = {
             'inumber': re.compile(r'bioi-(\d+)', re.IGNORECASE),
@@ -71,15 +75,52 @@ class FileSystemDAO:
             os.mkdir(path)
         return path
 
-    def move_folder(self, source, destination):
-        """Move folder with proper error handling"""
-        try:
-            move(source, destination)
-            return True
-        except Exception as e:
-            # Proper logging would be implemented here
-            print(f"Error moving folder {source}: {e}")
-            return False
+    def move_folder(self, source, destination, max_retries=3, delay=1.0):
+        """
+        Move folder with proper error handling and retries
+        
+        Args:
+            source: Source folder path
+            destination: Destination folder path
+            max_retries: Maximum number of retries (default 3)
+            delay: Delay between retries in seconds (default 1.0)
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        from shutil import move
+        import time
+        import gc
+        
+        # Make sure destination parent folder exists
+        dest_parent = os.path.dirname(destination)
+        if not os.path.exists(dest_parent):
+            try:
+                os.makedirs(dest_parent)
+            except Exception as e:
+                self.logger.warning(f"Error creating destination parent folder: {e}")
+                return False
+        
+        # Try multiple times with delay between attempts
+        for attempt in range(max_retries):
+            try:
+                # Force garbage collection to release file handles
+                gc.collect()
+                
+                # Attempt to move the folder
+                move(source, destination)
+                self.logger.info(f"Successfully moved {os.path.basename(source)} to {os.path.basename(destination)}")
+                #print(f"Successfully moved {os.path.basename(source)} to {os.path.basename(destination)}")
+                return True
+            except Exception as e:
+                self.logger.warning(f"Error moving folder on attempt {attempt+1}/{max_retries}: {e}")
+                #print(f"Error moving folder on attempt {attempt+1}/{max_retries}: {e}")
+                # Wait before next attempt
+                if attempt < max_retries - 1:
+                    time.sleep(delay)
+        
+        self.logger.error(f"Failed to move folder after {max_retries} attempts: {os.path.basename(source)}")
+        return False
 
     def get_folder_name(self, path):
         """Get the folder name from a path"""
