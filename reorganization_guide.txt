@@ -1,0 +1,116 @@
+I'd be happy to provide a comprehensive list of which functions should stay in each module, based on both your existing `FileSystemDAO` and my proposed refactoring. This will help create a cleaner architecture with better separation of concerns.
+
+## Function Categorization
+
+### Functions to Move to path_utilities.py
+These are pure utility functions that don't require state or direct file operations:
+
+1. `clean_braces_format` → `remove_braces_from_string`
+2. `adjust_abi_chars`
+3. `neutralize_suffixes`
+4. `standardize_filename_for_matching`
+5. `normalize_filename` (simplified version)
+6. `get_inumber_from_name`
+7. `get_pcr_number`
+8. Path utility functions:
+   - `get_folder_name` → rename to `get_basename`
+   - `get_parent_folder` → rename to `get_dirname`
+   - `join_paths`
+9. Pattern matching utilities:
+   - `is_bioi_folder`
+   - `is_pcr_folder`
+   - `is_plate_folder`
+   - `is_order_folder`
+   - `is_reinject_folder`
+10. `standardize_path` (from your FolderProcessor)
+
+### Functions to Keep in FileSystemDAO
+These involve actual file system operations or caching:
+
+1. Directory operations:
+   - `get_directory_contents`
+   - `get_folders`
+   - `get_files_by_extension`
+   - `contains_file_type`
+   - `create_folder_if_not_exists`
+   - `move_folder`
+2. File existence checks:
+   - `file_exists`
+   - `folder_exists`
+3. File statistics:
+   - `count_files_by_extensions`
+   - `get_folder_creation_time`
+   - `get_folder_modification_time`
+4. Zip operations:
+   - `check_for_zip`
+   - `zip_files`
+   - `get_zip_contents`
+   - `copy_zip_to_dump`
+5. File operations:
+   - `move_file`
+   - `rename_file_without_braces`
+6. Data loading:
+   - `load_order_key`
+7. Advanced directory operations:
+   - `get_most_recent_inumber`
+   - `get_recent_files`
+   - `get_inumbers_greater_than`
+
+### Functions for FileProcessor
+These functions are more logical in the FileProcessor class since they involve operations on files but use business logic:
+
+1. Classification functions:
+   - `is_control_file`
+   - `is_blank_file`
+2. File manipulation with business logic:
+   - `remove_extension` (enhanced version)
+   - `sort_control_file`
+   - `sort_blank_file`
+   - `sort_pcr_file`
+   - `move_to_order_folder`
+   - `remove_braces_from_filename`
+
+## Implementation Notes
+
+1. **For path_utilities.py:**
+   - These should be pure functions without dependencies on class state
+   - Precompile regex patterns at the module level
+   - Document clear input/output expectations
+
+2. **For FileSystemDAO:**
+   - Keep the regex_patterns dictionary for efficiency
+   - For utility functions that moved to path_utilities, create thin wrappers that call those utility functions
+   - Focus on direct file system operations
+
+3. **For FileProcessor:**
+   - Take file_dao as a constructor parameter
+   - Use path_utilities for string manipulations
+   - Focus on business logic for file classification and routing
+
+## Example of a Refactored Function
+
+Here's how the clean_braces_format function would look in each module:
+
+```python
+# In path_utilities.py
+def remove_braces_from_string(text):
+    """Remove braces and their contents from a string."""
+    return re.sub(r'\{[^}]*\}', '', text)
+
+# In FileSystemDAO
+def clean_braces_format(self, file_name):
+    """Remove anything contained in {} from filename"""
+    from mseqauto.utils.path_utilities import remove_braces_from_string
+    return remove_braces_from_string(self.neutralize_suffixes(file_name))
+
+# In FileProcessor
+def remove_braces_from_filename(self, file_path):
+    """Remove braces from a file name and rename the file"""
+    from mseqauto.utils.path_utilities import remove_braces_from_string
+    dir_name = os.path.dirname(file_path)
+    file_name = os.path.basename(file_path)
+    new_name = remove_braces_from_string(file_name)
+    # Rest of the implementation...
+```
+
+Would you like me to prepare a more detailed implementation for any specific module, or would you like to see a different example of how these functions would work together?

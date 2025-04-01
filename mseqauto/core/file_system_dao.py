@@ -27,8 +27,8 @@ class FileSystemDAO:
             'plate_blank_file': re.compile(r'^\d{2}[A-H]__.ab1$', re.IGNORECASE)  # Plate blanks pattern
             # Add other patterns as needed
         }
-
-    def get_directory_contents(self, path, refresh=False):
+    # Directory Operations
+    def get_directory_contents(self, path, refresh=False): #KEEP
         """Get directory contents with caching"""
         if path not in self.directory_cache or refresh:
             if not os.path.exists(path):
@@ -44,7 +44,7 @@ class FileSystemDAO:
 
         return self.directory_cache[path]
 
-    def get_folders(self, path, pattern=None):
+    def get_folders(self, path, pattern=None): #KEEP
         """Get folders matching an optional regex pattern"""
         folder_list = []
         for item in self.get_directory_contents(path):
@@ -54,7 +54,7 @@ class FileSystemDAO:
                     folder_list.append(full_path)
         return folder_list
 
-    def get_files_by_extension(self, folder, extension):
+    def get_files_by_extension(self, folder, extension): #KEEP
         """Get all files with specified extension in a folder"""
         files = []
         for item in self.get_directory_contents(folder):
@@ -62,20 +62,20 @@ class FileSystemDAO:
                 files.append(os.path.join(folder, item))
         return files
 
-    def contains_file_type(self, folder, extension):
+    def contains_file_type(self, folder, extension): #KEEP
         """Check if folder contains files with specified extension"""
         for item in self.get_directory_contents(folder):
             if item.endswith(extension):
                 return True
         return False
 
-    def create_folder_if_not_exists(self, path):
+    def create_folder_if_not_exists(self, path): #KEEP
         """Create folder if it doesn't exist"""
         if not os.path.exists(path):
             os.mkdir(path)
         return path
 
-    def move_folder(self, source, destination, max_retries=3, delay=1.0):
+    def move_folder(self, source, destination, max_retries=3, delay=1.0): #KEEP
         """
         Move folder with proper error handling and retries
         
@@ -122,19 +122,24 @@ class FileSystemDAO:
         self.logger.error(f"Failed to move folder after {max_retries} attempts: {os.path.basename(source)}")
         return False
 
-    def get_folder_name(self, path):
+    def get_folder_name(self, path): #Rename to get_basename and move to path_utilities.py
         """Get the folder name from a path"""
         return os.path.basename(path)
 
-    def get_parent_folder(self, path):
+    def get_parent_folder(self, path): 
+        #Rename to get_dirname and move to path_utilities.py
         """Get the parent folder path"""
         return os.path.dirname(path)
 
-    def join_paths(self, base_path, *args):
+    def join_paths(self, base_path, *args): 
+        #Move to path_utilities.py
         """Join path components"""
         return os.path.join(base_path, *args)
+    
+    #################### Data Loading ####################
 
-    def load_order_key(self, key_file_path):
+    def load_order_key(self, key_file_path): 
+        #Keep
         """Load the order key file"""
         try:
             import numpy as np
@@ -142,15 +147,19 @@ class FileSystemDAO:
         except Exception as e:
             print(f"Error loading order key file: {e}")
             return None
-
-    def file_exists(self, path):
+        
+    #################### File Existence Checks ####################
+    def file_exists(self, path): 
+        #KEEP
         """Check if a file exists"""
         return os.path.isfile(path)
 
-    def folder_exists(self, path):
+    def folder_exists(self, path): 
+        #KEEP
         """Check if a folder exists"""
         return os.path.isdir(path)
-
+    
+    #################### File Statistics ####################
     def count_files_by_extensions(self, folder, extensions):
         """Count files with specific extensions in a folder"""
         counts = {ext: 0 for ext in extensions}
@@ -170,11 +179,13 @@ class FileSystemDAO:
         """Get the last modification time of a folder"""
         return os.path.getmtime(folder)
 
-    def clean_braces_format(self, file_name):
+    def clean_braces_format(self, file_name): 
+        #Move to path_utilities.py
         """Remove anything contained in {} from filename"""
         return re.sub(r'{.*?}', '', self.neutralize_suffixes(file_name))
 
-    def adjust_abi_chars(self, file_name):
+    def adjust_abi_chars(self, file_name): 
+        #move to path_utilities.py
         """Adjust characters in file name to match ABI naming conventions"""
         # Create translation table
         translation_table = str.maketrans({
@@ -197,6 +208,7 @@ class FileSystemDAO:
         return file_name.translate(translation_table)
 
     def normalize_filename(self, file_name, remove_extension=True, logger=None):
+        #Move to path_utilities.py
         """Normalize filename with optional logging"""
         # Step 1: Adjust characters
         adjusted_name = self.adjust_abi_chars(file_name)
@@ -224,6 +236,7 @@ class FileSystemDAO:
         return cleaned_name
 
     def neutralize_suffixes(self, file_name):
+        #Move to path_utilities.py
         """Remove suffixes like _Premixed and _RTI"""
         new_file_name = file_name
         new_file_name = new_file_name.replace('_Premixed', '')
@@ -231,13 +244,15 @@ class FileSystemDAO:
         return new_file_name
 
     def remove_extension(self, file_name, extension=None):
+        #Move to FileProcessor
         """Remove file extension"""
         if extension and file_name.endswith(extension):
             return file_name[:-len(extension)]
         return os.path.splitext(file_name)[0]
 
-    # Zip operations
+    #################### Zip operations ####################
     def check_for_zip(self, folder_path):
+        #Keep
         """Check if folder contains any zip files"""
         for item in self.get_directory_contents(folder_path):
             file_path = os.path.join(folder_path, item)
@@ -246,6 +261,7 @@ class FileSystemDAO:
         return False
 
     def zip_files(self, source_folder: str, zip_path: str, file_extensions=None, exclude_extensions=None):
+        #Keep
         """Create a zip file from files in source_folder matching extensions"""
         with ZipFile(zip_path, 'w') as zip_file:
             for item in self.get_directory_contents(source_folder):
@@ -265,6 +281,7 @@ class FileSystemDAO:
         return True
 
     def get_zip_contents(self, zip_path):
+        #Keep
         """Get list of files in a zip archive"""
         try:
             with ZipFile(zip_path, 'r') as zip_ref:
@@ -274,6 +291,7 @@ class FileSystemDAO:
             return []
 
     def copy_zip_to_dump(self, zip_path, dump_folder):
+        #Keep
         """Copy zip file to dump folder"""
         if not os.path.exists(dump_folder):
             os.makedirs(dump_folder)
@@ -282,8 +300,9 @@ class FileSystemDAO:
         copyfile(zip_path, dest_path)
         return dest_path
 
-    # PCR folder operations
+    
     def get_pcr_number(self, filename):
+        #Move to path_utilities.py-done
         """Extract PCR number from file name"""
         pcr_num = ''
         # Look for PCR pattern in brackets - only this matters for folder sorting
@@ -314,8 +333,9 @@ class FileSystemDAO:
             return True
 
         return False
-
+    #################### Advanced Directory Operations ####################
     def get_most_recent_inumber(self, path):
+        #Keep
         """Find the most recent I number based on folder modification times"""
         try:
             # Current timestamp and cutoff (7 days ago)
@@ -346,6 +366,7 @@ class FileSystemDAO:
             return None
 
     def get_recent_files(self, paths, days=None, hours=None):
+        #Keep
         """Get list of files modified within specified time period"""
         # Set cutoff date based on days or hours
         current_date = datetime.now()
@@ -380,6 +401,7 @@ class FileSystemDAO:
         return [file_info[0] for file_info in sorted_files]
 
     def get_inumber_from_name(self, name):
+        #I think we should keep
         """Extract I number from a name using precompiled regex"""
         match = self.regex_patterns['inumber'].search(str(name).lower())
         if match:
@@ -387,6 +409,7 @@ class FileSystemDAO:
         return None
 
     def get_inumbers_greater_than(self, files, lower_inum):
+        #Keep
         """Get files with I number greater than specified value"""
         if not lower_inum:
             return files
@@ -404,8 +427,10 @@ class FileSystemDAO:
         except ValueError:
             # If conversion to int fails, return the original list
             return files
-
+        
+    #################### File Operations ####################
     def move_file(self, source, destination):
+        #Keep
         """Move a file with error handling"""
         try:
             move(source, destination)
@@ -415,6 +440,7 @@ class FileSystemDAO:
             return False
 
     def rename_file_without_braces(self, file_path):
+        #Keep
         """Rename a file to remove anything in braces"""
         if '{' not in file_path and '}' not in file_path:
             return file_path
@@ -435,6 +461,7 @@ class FileSystemDAO:
         return file_path
 
     def standardize_filename_for_matching(self, file_name, remove_extension=True):
+        #Move to path_utilities.py
         """
         Standardized filename cleaning method for consistent matching across all code
         Used for PCR files, reinject lists, and any other string comparison operations
