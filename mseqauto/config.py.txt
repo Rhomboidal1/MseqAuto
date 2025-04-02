@@ -10,13 +10,17 @@ class MseqConfig:
 
     # Paths
     # Check for Python 32-bit, fallback to current Python interpreter
-    if os.path.exists(r"C:\Program Files (x86)\Python312-32\python.exe"):
-        PYTHON32_PATH = r"C:\Program Files (x86)\Python312-32\python.exe"
+    if os.path.exists(r"C:\Python312-32\python.exe"):
+        PYTHON32_PATH = r"C:\Python312-32\python.exe"
+    elif os.path.exists(r"C:\Python311-32\python.exe"):
+        PYTHON32_PATH = r"C:\Python311-32\python.exe"
+    elif os.path.exists(r"C:\Python310-32\python.exe"):
+        PYTHON32_PATH = r"C:\Python310-32\python.exe"
     else:
         # If no 32-bit Python is found, use the current interpreter
         import sys
         PYTHON32_PATH = sys.executable
-    VENV32_PATH = os.path.join(os.path.dirname(PYTHON32_PATH), "venv32")
+
     MSEQ_PATH = r"C:\DNA\Mseq4\bin"
     MSEQ_EXECUTABLE = r"j.exe -jprofile mseq.ijl"
 
