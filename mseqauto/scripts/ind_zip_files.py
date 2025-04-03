@@ -7,7 +7,7 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-print(sys.path)
+# print(sys.path)
 
 def get_folder_from_user():
     print("Opening folder selection dialog...")
@@ -33,17 +33,11 @@ def main():
 
     # ONLY NOW import package modules
     from mseqauto.config import MseqConfig
-    from mseqauto.core import FileSystemDAO, FolderProcessor, OSCompatibilityManager
+    from mseqauto.core import FileSystemDAO, FolderProcessor
     from mseqauto.utils import setup_logger
     
     # Setup logger
     logger = setup_logger("ind_sort_files")
-
-    # Immediately check for 32-bit Python requirements
-    OSCompatibilityManager.py32_check(
-        script_path=__file__,
-        logger=logger
-    )
 
     logger.info("Starting IND sort files...")
     
