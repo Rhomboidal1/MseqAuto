@@ -197,11 +197,16 @@ class FileProcessor:
           # Debug output for troubleshooting
           self.log(f"PCR file normalized name: {normalized_name}")
 
-          # For PCR files, manually check against reinject list
-          is_reinject = False
+          # NEW: Check if file is a reinject by looking for double well location pattern
+          # Pattern: {XXX}{YYY}Sample_Name{PCR####exp#}{dilution} 
+          is_reinject = bool(re.match(r'^{\d+[A-Z]}{\d+[A-Z]}', file_name))
+          
+          if is_reinject:
+               self.log(f"Identified as reinject based on double well location pattern")
+          
+          # For completeness, also check against reinject list
           raw_name = None
-
-          if hasattr(self, 'reinject_list') and self.reinject_list:
+          if not is_reinject and hasattr(self, 'reinject_list') and self.reinject_list:
                for i, item in enumerate(self.reinject_list):
                     reinj_norm = self.file_dao.standardize_filename_for_matching(item)
                     if normalized_name == reinj_norm:
@@ -210,27 +215,47 @@ class FileProcessor:
                          self.log(f"Found PCR file in reinject list: {item}")
                          break
 
-          # Create the destination path
+          # Create the destination path for main folder
           clean_name = re.sub(r'{.*?}', '', file_name)
           target_path = os.path.join(pcr_folder_path, clean_name)
 
           # Handle reinjects
           if is_reinject:
-               # Check for preemptive reinject
+               # Check for preemptive reinject marker
                if raw_name and '{!P}' in raw_name:
-                    # Preemptive reinject goes in main folder
-                    self.log(f"Preemptive reinject moved to main folder")
-                    return self.file_dao.move_file(file_path, target_path)
+                    # Preemptive reinject goes in main folder, but check if file exists first
+                    if os.path.exists(target_path):
+                         # Create Alternate Injections folder instead to avoid overwriting
+                         alt_inj_folder = os.path.join(pcr_folder_path, "Alternate Injections")
+                         if not os.path.exists(alt_inj_folder):
+                              os.makedirs(alt_inj_folder)
+                         alt_file_path = os.path.join(alt_inj_folder, file_name)  # Keep original name with braces
+                         self.log(f"Preemptive reinject moved to alternate injections (to avoid overwrite)")
+                         return self.file_dao.move_file(file_path, alt_file_path)
+                    else:
+                         # No conflict, move to main folder
+                         self.log(f"Preemptive reinject moved to main folder")
+                         return self.file_dao.move_file(file_path, target_path)
                else:
-                    # Regular reinject goes to alternate injections
+                    # Regular reinject always goes to alternate injections
                     alt_inj_folder = os.path.join(pcr_folder_path, "Alternate Injections")
                     if not os.path.exists(alt_inj_folder):
                          os.makedirs(alt_inj_folder)
-
-                         alt_file_path = os.path.join(alt_inj_folder, file_name)
-                         self.log(f"Reinject moved to alternate injections")
-                         return self.file_dao.move_file(file_path, alt_file_path)
+                    alt_file_path = os.path.join(alt_inj_folder, file_name)  # Keep original name with braces
+                    self.log(f"Reinject moved to alternate injections")
+                    return self.file_dao.move_file(file_path, alt_file_path)
           else:
-               # Regular file goes in main folder
-               self.log(f"File moved to main folder")
-               return self.file_dao.move_file(file_path, target_path)
+               # Regular file goes in main folder, but check if it already exists
+               if os.path.exists(target_path):
+                    # File with same name exists - might be an undetected reinject or a duplicate
+                    # Move to alternate injections to be safe
+                    alt_inj_folder = os.path.join(pcr_folder_path, "Alternate Injections")
+                    if not os.path.exists(alt_inj_folder):
+                         os.makedirs(alt_inj_folder)
+                    alt_file_path = os.path.join(alt_inj_folder, file_name)  # Keep original name with braces
+                    self.log(f"File with same name already exists in main folder, moved to alternate injections")
+                    return self.file_dao.move_file(file_path, alt_file_path)
+               else:
+                    # No conflict, move to main folder
+                    self.log(f"File moved to main folder")
+                    return self.file_dao.move_file(file_path, target_path)
