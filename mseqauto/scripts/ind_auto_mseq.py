@@ -117,34 +117,62 @@ def main():
         # Get folders to process
         bio_folders = file_dao.get_folders(data_folder, r'bioi-\d+')
         logger.info(f"Found {len(bio_folders)} BioI folders")
-        
+
         immediate_orders = file_dao.get_folders(data_folder, r'bioi-\d+_.+_\d+')
         logger.info(f"Found {len(immediate_orders)} immediate order folders")
-        
+
         pcr_folders = file_dao.get_folders(data_folder, r'fb-pcr\d+_\d+')
         logger.info(f"Found {len(pcr_folders)} PCR folders")
-        
+
         # Process BioI folders
         for i, folder in enumerate(bio_folders):
             logger.info(f"Processing BioI folder {i+1}/{len(bio_folders)}: {os.path.basename(folder)}")
-            processor.process_bio_folder(folder)
-        
-        # Check if processing IND Not Ready folder
-        is_ind_not_ready = os.path.basename(data_folder) == config.IND_NOT_READY_FOLDER
-        logger.info(f"Is IND Not Ready folder: {is_ind_not_ready}")
-        
+            processor.process_sequencing_folder(folder, data_folder, is_bio_folder=True)
+
         # Process immediate orders
         for i, folder in enumerate(immediate_orders):
             logger.info(f"Processing order folder {i+1}/{len(immediate_orders)}: {os.path.basename(folder)}")
-            processor.process_order_folder(folder, data_folder)
-        
+            processor.process_sequencing_folder(folder, data_folder, is_bio_folder=False)
+
         # Process PCR folders
         for i, folder in enumerate(pcr_folders):
             logger.info(f"Processing PCR folder {i+1}/{len(pcr_folders)}: {os.path.basename(folder)}")
             processor.process_pcr_folder(folder)
-        
+
         logger.info("All processing completed")
         print("\nALL DONE")
+        
+        # # Get folders to process
+        # bio_folders = file_dao.get_folders(data_folder, r'bioi-\d+')
+        # logger.info(f"Found {len(bio_folders)} BioI folders")
+        
+        # immediate_orders = file_dao.get_folders(data_folder, r'bioi-\d+_.+_\d+')
+        # logger.info(f"Found {len(immediate_orders)} immediate order folders")
+        
+        # pcr_folders = file_dao.get_folders(data_folder, r'fb-pcr\d+_\d+')
+        # logger.info(f"Found {len(pcr_folders)} PCR folders")
+        
+        # # Process BioI folders
+        # for i, folder in enumerate(bio_folders):
+        #     logger.info(f"Processing BioI folder {i+1}/{len(bio_folders)}: {os.path.basename(folder)}")
+        #     processor.process_bio_folder(folder)
+        
+        # # Check if processing IND Not Ready folder
+        # is_ind_not_ready = os.path.basename(data_folder) == config.IND_NOT_READY_FOLDER
+        # logger.info(f"Is IND Not Ready folder: {is_ind_not_ready}")
+        
+        # # Process immediate orders
+        # for i, folder in enumerate(immediate_orders):
+        #     logger.info(f"Processing order folder {i+1}/{len(immediate_orders)}: {os.path.basename(folder)}")
+        #     processor.process_order_folder(folder, data_folder)
+        
+        # # Process PCR folders
+        # for i, folder in enumerate(pcr_folders):
+        #     logger.info(f"Processing PCR folder {i+1}/{len(pcr_folders)}: {os.path.basename(folder)}")
+        #     processor.process_pcr_folder(folder)
+        
+        # logger.info("All processing completed")
+        # print("\nALL DONE")
     except Exception as e:
         import traceback
         logger.error(f"Unexpected error: {e}")

@@ -144,14 +144,13 @@ class FolderProcessor:
      def get_destination_for_order(self, order_identifier, base_path=None):
           """
           Find the correct destination for an order based on its I-number.
-          Always creates folders at the main level of the provided base_path.
           
           Args:
                order_identifier: Either an order folder path or an I-number string
                base_path: Optional base path to search from
                
           Returns:
-               Path to the destination folder
+               str: Path to the destination parent folder (not the full target path)
           """
           # Determine if we have a folder path or direct I-number
           if isinstance(order_identifier, str) and os.path.exists(order_identifier):
@@ -162,52 +161,92 @@ class FolderProcessor:
                # Assume direct I-number was provided
                i_num = order_identifier
           
+          if not i_num:
+               self.log("Warning: Could not extract I number from identifier")
+               return None
+               
           self.log(f"Extracted I number: {i_num}")
           
-          # Use the current_data_folder attribute if it exists
-          current_data_folder = getattr(self, 'current_data_folder', None)
+          # Determine search path priority:
+          # 1. Explicitly provided base_path
+          # 2. current_data_folder attribute
+          # 3. Today's date folder in P:\Data
+          # 4. Current working directory
           
-          # Prioritize base_path if provided, otherwise use current_data_folder
-          search_path = base_path if base_path else current_data_folder
+          search_path = None
           
-          if search_path and os.path.exists(search_path):
+          # 1. Use base_path if provided
+          if base_path and os.path.exists(base_path):
+               search_path = base_path
+               self.log(f"Using provided base path: {search_path}")
+          
+          # 2. Use current_data_folder attribute if it exists
+          if not search_path:
+               current_data_folder = getattr(self, 'current_data_folder', None)
+               if current_data_folder and os.path.exists(current_data_folder):
+                    search_path = current_data_folder
+                    self.log(f"Using current data folder: {search_path}")
+          
+          # Search in the determined path if we have one
+          if search_path:
                self.log(f"Searching for matching I number folder in: {search_path}")
                
                # Look for existing BioI folder at the main level - EXACT match only
                for item in os.listdir(search_path):
                     item_path = os.path.join(search_path, item)
-                    if os.path.isdir(item_path) and item == f"BioI-{i_num}":
+                    if os.path.isdir(item_path) and item.lower() == f"bioi-{i_num}".lower():
                          self.log(f"Found matching folder: {item_path}")
                          return item_path
                
                # Create a new folder at the main level
                new_folder = os.path.join(search_path, f"BioI-{i_num}")
+               try:
+                    if not os.path.exists(new_folder):
+                         os.makedirs(new_folder)
+                         self.log(f"Created new folder: {new_folder}")
+                    return new_folder
+               except Exception as e:
+                    self.log(f"Error creating folder {new_folder}: {e}")
+                    # Continue to fallback paths
+          
+          # 3. Fall back to today's date folder
+          try:
+               from datetime import datetime
+               today = datetime.now().strftime('%m.%d.%y')
+               preferred_path = os.path.join('P:', 'Data', today)
+               
+               # Create today's folder if it doesn't exist
+               if not os.path.exists(preferred_path):
+                    try:
+                         os.makedirs(preferred_path)
+                         self.log(f"Created today's data folder: {preferred_path}")
+                    except Exception as e:
+                         self.log(f"Error creating preferred path {preferred_path}: {e}")
+                         preferred_path = None
+               
+               if preferred_path:
+                    # Create a new folder with the I-number in the selected path
+                    new_folder = os.path.join(preferred_path, f"BioI-{i_num}")
+                    if not os.path.exists(new_folder):
+                         os.makedirs(new_folder)
+                         self.log(f"Created new folder in data path: {new_folder}")
+                    return new_folder
+          except Exception as e:
+               self.log(f"Error using preferred date path: {e}")
+          
+          # 4. Ultimate fallback - current working directory
+          try:
+               fallback_path = os.path.dirname(os.getcwd())
+               self.log(f"All other paths failed, using fallback: {fallback_path}")
+               
+               new_folder = os.path.join(fallback_path, f"BioI-{i_num}")
                if not os.path.exists(new_folder):
                     os.makedirs(new_folder)
-                    self.log(f"Created new folder: {new_folder}")
+                    self.log(f"Created new folder at fallback location: {new_folder}")
                return new_folder
-          
-          # If no valid search path, fall back to default location
-          today = datetime.now().strftime('%m.%d.%y')
-          preferred_path = os.path.join('P:', 'Data', today)
-          
-          # Create today's folder if it doesn't exist
-          if not os.path.exists(preferred_path):
-               try:
-                    os.makedirs(preferred_path)
-                    self.log(f"Created today's data folder: {preferred_path}")
-               except PermissionError:
-                    # Fall back to current working directory
-                    preferred_path = os.path.dirname(os.getcwd())
-                    self.log(f"Cannot access preferred path, using: {preferred_path}")
-          
-          # Create a new folder with the I-number in the selected path
-          new_folder = os.path.join(preferred_path, f"BioI-{i_num}")
-          if not os.path.exists(new_folder):
-               os.makedirs(new_folder)
-               self.log(f"Created new folder: {new_folder}")
-          
-          return new_folder
+          except Exception as e:
+               self.log(f"Critical error creating any destination folder: {e}")
+               return None
 
      def _move_file_to_destination(self, file_path, destination_folder, normalized_name):
           """Handle file placement including reinject logic"""
@@ -279,88 +318,191 @@ class FolderProcessor:
 
           return count
 
-     def process_bio_folder(self, folder):
-          """Process a BioI folder (specialized for IND)"""
-          self.log(f"Processing BioI folder: {os.path.basename(folder)}")
+     # def process_bio_folder(self, folder):
+     #      """Process a BioI folder (specialized for IND)"""
+     #      self.log(f"Processing BioI folder: {os.path.basename(folder)}")
 
-          # Get all order folders in this BioI folder
-          order_folders = self.get_order_folders(folder)
+     #      # Get all order folders in this BioI folder
+     #      order_folders = self.get_order_folders(folder)
 
-          for order_folder in order_folders:
-               # Skip Andreev's orders for mSeq processing
-               if self.config.ANDREEV_NAME in order_folder.lower():
-                    continue
+     #      for order_folder in order_folders:
+     #           # Skip Andreev's orders for mSeq processing
+     #           if self.config.ANDREEV_NAME in order_folder.lower():
+     #                continue
 
-               order_number = self.get_order_number_from_folder_name(order_folder)
-               ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
+     #           order_number = self.get_order_number_from_folder_name(order_folder)
+     #           ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
 
-               # Check order status
-               was_mseqed, has_braces, has_ab1_files = self.check_order_status(order_folder)
+     #           # Check order status
+     #           was_mseqed, has_braces, has_ab1_files = self.check_order_status(order_folder)
 
-               if not was_mseqed and not has_braces:
-                    # Process if we have the right number of ab1 files
-                    expected_count = self._get_expected_file_count(order_number)
+     #           if not was_mseqed and not has_braces:
+     #                # Process if we have the right number of ab1 files
+     #                expected_count = self._get_expected_file_count(order_number)
 
-                    if expected_count > 0 and len(ab1_files) == expected_count:
-                         if has_ab1_files:
-                              self.ui_automation.process_folder(order_folder)
-                              self.log(f"mSeq completed: {os.path.basename(order_folder)}")
-                    else:
-                         # Move to Not Ready folder if incomplete
-                         not_ready_path = os.path.join(os.path.dirname(folder), self.config.IND_NOT_READY_FOLDER)
-                         self.file_dao.create_folder_if_not_exists(not_ready_path)
-                         self.file_dao.move_folder(order_folder, not_ready_path)
-                         self.log(f"Order moved to Not Ready: {os.path.basename(order_folder)}")
+     #                if expected_count > 0 and len(ab1_files) == expected_count:
+     #                     if has_ab1_files:
+     #                          self.ui_automation.process_folder(order_folder)
+     #                          self.log(f"mSeq completed: {os.path.basename(order_folder)}")
+     #                else:
+     #                     # Move to Not Ready folder if incomplete
+     #                     not_ready_path = os.path.join(os.path.dirname(folder), self.config.IND_NOT_READY_FOLDER)
+     #                     self.file_dao.create_folder_if_not_exists(not_ready_path)
+     #                     self.file_dao.move_folder(order_folder, not_ready_path)
+     #                     self.log(f"Order moved to Not Ready: {os.path.basename(order_folder)}")
 
-     def process_order_folder(self, order_folder, data_folder_path):
-          """Process an order folder"""
-          self.log(f"Processing order folder: {os.path.basename(order_folder)}")
+     # def process_order_folder(self, order_folder, data_folder_path):
+     #      """Process an order folder"""
+     #      self.log(f"Processing order folder: {os.path.basename(order_folder)}")
 
-          # Skip Andreev's orders for mSeq processing
-          if self.config.ANDREEV_NAME in order_folder.lower():
-               order_number = self.get_order_number_from_folder_name(order_folder)
-               ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
-               expected_count = self._get_expected_file_count(order_number)
+     #      # Skip Andreev's orders for mSeq processing
+     #      if self.config.ANDREEV_NAME in order_folder.lower():
+     #           order_number = self.get_order_number_from_folder_name(order_folder)
+     #           ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
+     #           expected_count = self._get_expected_file_count(order_number)
 
-               # For Andreev's orders, just check if complete to move back if needed
-               if expected_count > 0 and len(ab1_files) == expected_count:
-                    # If we're processing from IND Not Ready, move it back
-                    if os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER:
-                         destination = self.get_destination_for_order(order_folder, data_folder_path)
-                         self.file_dao.move_folder(order_folder, destination)
-                         self.log(f"Andreev's order moved back: {os.path.basename(order_folder)}")
+     #           # For Andreev's orders, just check if complete to move back if needed
+     #           if expected_count > 0 and len(ab1_files) == expected_count:
+     #                # If we're processing from IND Not Ready, move it back
+     #                if os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER:
+     #                     destination = self.get_destination_for_order(order_folder, data_folder_path)
+     #                     self.file_dao.move_folder(order_folder, destination)
+     #                     self.log(f"Andreev's order moved back: {os.path.basename(order_folder)}")
+     #           return
+
+     #      order_number = self.get_order_number_from_folder_name(order_folder)
+     #      ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
+
+     #      # Check order status
+     #      was_mseqed, has_braces, has_ab1_files = self.check_order_status(order_folder)
+
+     #      # Process based on status
+     #      if not was_mseqed and not has_braces:
+     #           expected_count = self._get_expected_file_count(order_number)
+
+     #           if expected_count > 0 and len(ab1_files) == expected_count and has_ab1_files:
+     #                self.ui_automation.process_folder(order_folder)
+     #                self.log(f"mSeq completed: {os.path.basename(order_folder)}")
+
+     #                # If processing from IND Not Ready, move it back
+     #                if os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER:
+     #                     destination = self.get_destination_for_order(order_folder, data_folder_path)
+     #                     self.file_dao.move_folder(order_folder, destination)
+     #           else:
+     #                # Move to Not Ready if incomplete
+     #                not_ready_path = os.path.join(os.path.dirname(data_folder_path), self.config.IND_NOT_READY_FOLDER)
+     #                self.file_dao.create_folder_if_not_exists(not_ready_path)
+     #                self.file_dao.move_folder(order_folder, not_ready_path)
+     #                self.log(f"Order moved to Not Ready: {os.path.basename(order_folder)}")
+
+     #      # If already mSeqed but in IND Not Ready, move it back
+     #      elif was_mseqed and os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER:
+     #           destination = self.get_destination_for_order(order_folder, data_folder_path)
+     #           self.file_dao.move_folder(order_folder, destination)
+     #           self.log(f"Processed order moved back: {os.path.basename(order_folder)}")
+
+     def process_sequencing_folder(self, folder_path, parent_folder=None, is_bio_folder=False):
+          """
+          Unified method to process both BioI folders and individual order folders
+          
+          Args:
+               folder_path: Path to the folder to process
+               parent_folder: Optional parent folder path for context awareness
+               is_bio_folder: Whether the folder is a BioI folder containing multiple orders
+          """
+          folder_name = os.path.basename(folder_path)
+          self.log(f"Processing {'BioI' if is_bio_folder else 'order'} folder: {folder_name}")
+          
+          # Determine if we're in IND Not Ready context
+          in_not_ready = os.path.basename(os.path.dirname(folder_path)) == self.config.IND_NOT_READY_FOLDER
+          
+          # For BioI folders, process each contained order folder
+          if is_bio_folder:
+               order_folders = self.get_order_folders(folder_path)
+               for order_folder in order_folders:
+                    self.process_sequencing_folder(order_folder, folder_path)
                return
-
-          order_number = self.get_order_number_from_folder_name(order_folder)
-          ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
-
+               
+          # From here on, we're handling a single order folder
+          
+          # Get order information
+          order_number = self.get_order_number_from_folder_name(folder_path)
+          ab1_files = self.file_dao.get_files_by_extension(folder_path, self.config.ABI_EXTENSION)
+          expected_count = self._get_expected_file_count(order_number)
+          is_andreev_order = self.config.ANDREEV_NAME in folder_name.lower()
+          
+          # Check order completeness - now applied to all orders including Andreev's
+          files_complete = expected_count > 0 and len(ab1_files) == expected_count
+          
           # Check order status
-          was_mseqed, has_braces, has_ab1_files = self.check_order_status(order_folder)
-
-          # Process based on status
+          was_mseqed, has_braces, has_ab1_files = self.check_order_status(folder_path)
+          
+          # Handle based on status and order type
           if not was_mseqed and not has_braces:
-               expected_count = self._get_expected_file_count(order_number)
-
-               if expected_count > 0 and len(ab1_files) == expected_count and has_ab1_files:
-                    self.ui_automation.process_folder(order_folder)
-                    self.log(f"mSeq completed: {os.path.basename(order_folder)}")
-
-                    # If processing from IND Not Ready, move it back
-                    if os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER:
-                         destination = self.get_destination_for_order(order_folder, data_folder_path)
-                         self.file_dao.move_folder(order_folder, destination)
+               if files_complete and has_ab1_files:
+                    # Process with mSeq if complete (but skip actual mSeq for Andreev orders)
+                    if not is_andreev_order:
+                         self.ui_automation.process_folder(folder_path)
+                         self.log(f"mSeq completed: {folder_name}")
+                    
+                    # If in IND Not Ready, move back to appropriate location
+                    if in_not_ready:
+                         destination = self.get_destination_for_order(folder_path, parent_folder)
+                         
+                         # Check if destination exists before attempting to move
+                         target_path = os.path.join(destination, folder_name)
+                         if os.path.exists(target_path):
+                              self.log(f"Destination already exists: {target_path}, leaving in current location")
+                         else:
+                              # Attempt to move the folder
+                              move_success = self.file_dao.move_folder(folder_path, destination)
+                              if not move_success:
+                                   self.log(f"Failed to move folder, leaving in current location: {folder_name}")
+                              else:
+                                   self.log(f"Order moved back: {folder_name}")
                else:
-                    # Move to Not Ready if incomplete
-                    not_ready_path = os.path.join(os.path.dirname(data_folder_path), self.config.IND_NOT_READY_FOLDER)
-                    self.file_dao.create_folder_if_not_exists(not_ready_path)
-                    self.file_dao.move_folder(order_folder, not_ready_path)
-                    self.log(f"Order moved to Not Ready: {os.path.basename(order_folder)}")
-
-          # If already mSeqed but in IND Not Ready, move it back
-          elif was_mseqed and os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER:
-               destination = self.get_destination_for_order(order_folder, data_folder_path)
-               self.file_dao.move_folder(order_folder, destination)
-               self.log(f"Processed order moved back: {os.path.basename(order_folder)}")
+                    # Not complete - move to IND Not Ready
+                    # Skip if already in IND Not Ready
+                    if not in_not_ready:
+                         # Determine the correct Not Ready path
+                         if parent_folder:
+                              # If called from BioI folder
+                              not_ready_path = os.path.join(os.path.dirname(parent_folder), 
+                                                       self.config.IND_NOT_READY_FOLDER)
+                         else:
+                              # If called directly on order folder
+                              not_ready_path = os.path.join(os.path.dirname(folder_path), 
+                                                       self.config.IND_NOT_READY_FOLDER)
+                         
+                         self.file_dao.create_folder_if_not_exists(not_ready_path)
+                         
+                         # Check if destination already exists
+                         target_path = os.path.join(not_ready_path, folder_name)
+                         if os.path.exists(target_path):
+                              self.log(f"Destination already exists in IND Not Ready: {target_path}, leaving in current location")
+                         else:
+                              # Attempt to move the folder
+                              move_success = self.file_dao.move_folder(folder_path, not_ready_path)
+                              if not move_success:
+                                   self.log(f"Failed to move folder to IND Not Ready, leaving in current location: {folder_name}")
+                              else:
+                                   self.log(f"Incomplete order moved to Not Ready: {folder_name}")
+          
+          # Already mSeqed but in IND Not Ready - move back
+          elif was_mseqed and in_not_ready:
+               destination = self.get_destination_for_order(folder_path, parent_folder)
+               
+               # Check if destination exists before attempting to move
+               target_path = os.path.join(destination, folder_name)
+               if os.path.exists(target_path):
+                    self.log(f"Destination already exists: {target_path}, leaving in current location")
+               else:
+                    # Attempt to move the folder
+                    move_success = self.file_dao.move_folder(folder_path, destination)
+                    if not move_success:
+                         self.log(f"Failed to move folder, leaving in current location: {folder_name}")
+                    else:
+                         self.log(f"Processed order moved back: {folder_name}")
 
      def get_pcr_folder_path(self, pcr_number, base_path):
           """Get proper PCR folder path or create one if needed"""
