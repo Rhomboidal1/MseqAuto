@@ -23,7 +23,8 @@ FolderProcessor Module Functions and Dependencies
             file_dao.get_inumber_from_name()
 
         _move_file_to_destination(self, file_path, destination_folder, normalized_name): 
-            file_dao.standardize_filename_for_matching()
+            file_dao.standardize_filename_for_matching(self, file_name, remove_extension=True): 
+                config.ABI_EXTENSION
             file_dao.move_file()
 
         _get_expected_file_count(self, order_number): 
@@ -48,7 +49,8 @@ FolderProcessor Module Functions and Dependencies
 
         process_pcr_folder(self, pcr_folder): 
             config.ABI_EXTENSION
-            ->file_dao.standardize_filename_for_matching()
+            ->file_dao.standardize_filename_for_matching(self, file_name, remove_extension=True): 
+                config.ABI_EXTENSION
             ->file_dao.move_file()
             check_order_status(self, folder_path): 
                 file_dao.get_directory_contents()
@@ -74,7 +76,8 @@ FolderProcessor Module Functions and Dependencies
 
         _sort_pcr_file(self, file_path, pcr_number): 
             get_pcr_folder_path()
-            file_dao.standardize_filename_for_matching()
+            file_dao.standardize_filename_for_matching(self, file_name, remove_extension=True): 
+                config.ABI_EXTENSION
             file_dao.move_file()
 
         _sort_control_file(self, file_path): 
@@ -89,20 +92,22 @@ FolderProcessor Module Functions and Dependencies
 
         get_todays_inumbers_from_folder(self, path):
             file_dao.get_directory_contents()
-            file_dao.get_inumber_from_name()
+            file_dao.get_inumber_from_name(self, name): 
+                file_dao.regex_patterns['inumber']
             file_dao.regex_patterns
 
         get_order_number_from_folder_name(self, folder_path):
  
         get_reinject_list(self, i_numbers, reinject_path=None): 
             file_dao.get_directory_contents()
-            file_dao.standardize_filename_for_matching()
+            file_dao.standardize_filename_for_matching(self, file_name, remove_extension=True): 
+                config.ABI_EXTENSION
             pylightxl module (optional)
 
         test_specific_pcr_sorting(self, pcr_number, folder_path=None): 
             get_reinject_list()
-            file_dao.standardize_filename_for_matching()
-            config.ABI_EXTENSION
+            file_dao.standardize_filename_for_matching(self, file_name, remove_extension=True): 
+                config.ABI_EXTENSION
 
         check_order_status(self, folder_path): 
             file_dao.get_directory_contents()
