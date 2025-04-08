@@ -1,0 +1,282 @@
+FolderProcessor Module Functions and Dependencies 
+    Constructor
+        __init__(self, file_dao, ui_automation, config, logger=None) 
+            Takes file_dao, ui_automation, and config as parameters
+
+    Core Functions     
+        build_order_key_index(self, order_key): 
+            file_dao.normalize_filename()
+    
+        sort_customer_file(self, file_path, order_key):
+            build_order_key_index()
+            file_dao.normalize_filename()
+            file_dao.get_inumber_from_name()
+            create_order_folder()
+            _move_file_to_destination()
+
+        create_order_folder(self, i_num, acct_name, order_num, base_path=None): 
+            get_destination_for_order()
+
+        get_order_folders(self, bio_folder):
+    
+        get_destination_for_order(self, order_identifier, base_path=None): 
+            file_dao.get_inumber_from_name()
+
+        _move_file_to_destination(self, file_path, destination_folder, normalized_name): 
+            file_dao.standardize_filename_for_matching()
+            file_dao.move_file()
+
+        _get_expected_file_count(self, order_number): 
+            file_dao.load_order_key()
+            config.KEY_FILE_PATH
+
+        process_sequencing_folder(self, folder_path, parent_folder=None, is_bio_folder=False): 
+            get_order_folders():
+            get_order_number_from_folder_name():
+            file_dao.get_files_by_extension():
+            _get_expected_file_count(self, order_number): 
+                file_dao.load_order_key()
+                config.KEY_FILE_PATH
+            check_order_status()
+            ui_automation.process_folder()
+            get_destination_for_order()
+            file_dao.move_folder()
+            file_dao.create_folder_if_not_exists()
+
+        get_pcr_folder_path(self, pcr_number, base_path): 
+            file_dao.create_folder_if_not_exists()
+
+        process_pcr_folder(self, pcr_folder): 
+            config.ABI_EXTENSION
+            ->file_dao.standardize_filename_for_matching()
+            ->file_dao.move_file()
+            check_order_status(self, folder_path): 
+                file_dao.get_directory_contents()
+                config.ABI_EXTENSION
+            ->ui_automation.process_folder()
+
+        sort_ind_folder(self, folder_path, reinject_list, order_key): 
+            file_dao.get_inumber_from_name()
+            file_dao.get_files_by_extension()
+            file_dao.get_pcr_number()
+            file_dao.is_blank_file()
+            file_dao.is_control_file()
+            _sort_pcr_file()
+            file_dao.move_file()
+            sort_customer_file()
+            _cleanup_original_folder()
+            config.CONTROLS
+
+        _cleanup_original_folder(self, original_folder, new_folder): 
+            file_dao.get_directory_contents()
+            file_dao.get_files_by_extension()
+            file_dao.move_file()
+
+        _sort_pcr_file(self, file_path, pcr_number): 
+            get_pcr_folder_path()
+            file_dao.standardize_filename_for_matching()
+            file_dao.move_file()
+
+        _sort_control_file(self, file_path): 
+            file_dao.move_file()
+
+        _sort_blank_file(self, file_path): 
+            file_dao.get_inumber_from_name()
+            file_dao.move_file()
+
+        _rename_processed_folder(self, folder_path): 
+            file_dao.get_inumber_from_name()
+
+        get_todays_inumbers_from_folder(self, path):
+            file_dao.get_directory_contents()
+            file_dao.get_inumber_from_name()
+            file_dao.regex_patterns
+
+        get_order_number_from_folder_name(self, folder_path):
+ 
+        get_reinject_list(self, i_numbers, reinject_path=None): 
+            file_dao.get_directory_contents()
+            file_dao.standardize_filename_for_matching()
+            pylightxl module (optional)
+
+        test_specific_pcr_sorting(self, pcr_number, folder_path=None): 
+            get_reinject_list()
+            file_dao.standardize_filename_for_matching()
+            config.ABI_EXTENSION
+
+        check_order_status(self, folder_path): 
+            file_dao.get_directory_contents()
+            config.ABI_EXTENSION
+
+        zip_order_folder(self, folder_path, include_txt=True): 
+            config.ABI_EXTENSION
+            config.TEXT_FILES
+            file_dao.zip_files()
+
+        find_zip_file(self, folder_path):
+
+        get_zip_mod_time(self, worksheet, order_number): 
+            Relies on worksheet parameter (likely from an Excel library)
+
+        validate_zip_contents(self, zip_path, i_number, order_number, order_key): 
+            file_dao.normalize_filename()
+            config.ABI_EXTENSION
+            config.TEXT_FILES
+
+
+FileSystemDAO Module Functions and Dependencies
+    Constructor
+        __init__(self, config_obj): 
+            mseqauto.config.MseqConfig
+            
+    Directory Operations
+        get_directory_contents(self, path, refresh=False):
+    
+        get_folders(self, path, pattern=None): 
+            get_directory_contents()
+
+        get_files_by_extension(self, folder, extension): 
+            get_directory_contents()
+
+        contains_file_type(self, folder, extension): 
+            get_directory_contents()
+
+        create_folder_if_not_exists(self, path): 
+
+        move_folder(self, source, destination, max_retries=3, delay=1.0): 
+
+        get_folder_name(self, path): 
+
+        get_parent_folder(self, path): 
+
+        join_paths(self, base_path, *args):
+
+    Data Loading
+        load_order_key(self, key_file_path): 
+
+    File Existence Checks
+        file_exists(self, path): 
+
+        folder_exists(self, path): 
+
+    File Statistics
+        count_files_by_extensions(self, folder, extensions): 
+            get_directory_contents()
+
+        get_folder_creation_time(self, folder): 
+
+        get_folder_modification_time(self, folder): 
+
+    Filename Processing
+        clean_braces_format(self, file_name): 
+            neutralize_suffixes()
+
+        adjust_abi_chars(self, file_name): 
+
+        normalize_filename(self, file_name, remove_extension=True, logger=None): 
+            adjust_abi_chars()
+            neutralize_suffixes()
+            config.ABI_EXTENSION
+
+        neutralize_suffixes(self, file_name): 
+
+        remove_extension(self, file_name, extension=None): 
+
+        standardize_filename_for_matching(self, file_name, remove_extension=True): 
+            config.ABI_EXTENSION
+
+    Zip Operations
+        check_for_zip(self, folder_path): 
+            get_directory_contents()
+            self.config.ZIP_EXTENSION
+            
+        zip_files(self, source_folder: str, zip_path: str, file_extensions=None, exclude_extensions=None): 
+            get_directory_contents()
+
+        get_zip_contents(self, zip_path): 
+        copy_zip_to_dump(self, zip_path, dump_folder): 
+
+    File Classification
+        get_pcr_number(self, filename) 
+
+        is_control_file(self, file_name, control_list): 
+            clean_braces_format()
+            remove_extension()
+
+        is_blank_file(self, file_name): 
+            self.regex_patterns['ind_blank_file']
+            self.regex_patterns['plate_blank_file']
+
+    Advanced Directory Operations
+        get_most_recent_inumber(self, path): 
+            get_inumber_from_name()
+
+        get_recent_files(self, paths, days=None, hours=None): 
+
+        get_inumber_from_name(self, name): 
+            self.regex_patterns['inumber']
+
+        get_inumbers_greater_than(self, files, lower_inum): 
+            get_inumber_from_name()
+
+    File Operations
+        move_file(self, source, destination): 
+
+        rename_file_without_braces(self, file_path): 
+
+
+MseqAutomation Module Functions and Dependencies
+    Constructor and Initialization
+        __init__(self, config, logger=None)
+
+        _is_windows_11(self):
+
+        connect_or_start_mseq(self):
+            pywinauto Application
+            ElementNotFoundError, ElementAmbiguousError from pywinauto.findwindows
+            timings from pywinauto
+            self.config.MSEQ_PATH
+            self.config.MSEQ_EXECUTABLE
+
+        process_folder(self, folder_path):
+            #Main public function for processing folders
+            self.config.ABI_EXTENSION
+            _close_all_read_info_dialogs()
+            connect_or_start_mseq()
+            _wait_for_dialog()
+            _get_browse_dialog()
+            _navigate_folder_tree()
+            _click_dialog_button()
+            _get_dialog_by_titles()
+            _select_all_files_in_dialog()
+            _wait_for_completion()
+
+        _close_all_read_info_dialogs(self):
+            findwindows from pywinauto
+
+        _wait_for_dialog(self, dialog_type):
+            timings from pywinauto
+            self.timeouts dictionary
+
+        _get_browse_dialog(self):
+
+        _get_dialog_by_titles(self, titles):
+
+        _get_tree_view(self, dialog):
+
+        _click_dialog_button(self, dialog, button_titles):
+            send_keys from pywinauto.keyboard
+
+        _select_all_files_in_dialog(self, dialog):
+            send_keys from pywinauto.keyboard
+
+        _navigate_folder_tree(self, dialog, path):
+            _get_tree_view()
+            self.config.NETWORK_DRIVES
+
+        _wait_for_completion(self, folder_path):
+            self.config.TEXT_FILES
+            _click_dialog_button()
+            _close_all_read_info_dialogs()
+
+        close(self):
