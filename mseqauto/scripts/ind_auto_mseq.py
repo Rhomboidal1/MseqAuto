@@ -85,8 +85,12 @@ def main():
     from mseqauto.config import MseqConfig
     from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor
     
-    # Setup logging
-    logger = setup_logger("ind_auto_mseq")
+    # Get the script directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    log_dir = os.path.join(script_dir, "logs")
+
+    # Setup logger
+    logger = setup_logger("ind_auto_mseq", log_dir=log_dir)
     logger.info("Starting IND auto mSeq...")
     logger.info(f"Using folder: {data_folder}")
     data_folder = re.sub(r'/', '\\\\', data_folder)

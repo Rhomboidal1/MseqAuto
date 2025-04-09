@@ -318,89 +318,6 @@ class FolderProcessor:
 
           return count
 
-     # def process_bio_folder(self, folder):
-     #      """Process a BioI folder (specialized for IND)"""
-     #      self.log(f"Processing BioI folder: {os.path.basename(folder)}")
-
-     #      # Get all order folders in this BioI folder
-     #      order_folders = self.get_order_folders(folder)
-
-     #      for order_folder in order_folders:
-     #           # Skip Andreev's orders for mSeq processing
-     #           if self.config.ANDREEV_NAME in order_folder.lower():
-     #                continue
-
-     #           order_number = self.get_order_number_from_folder_name(order_folder)
-     #           ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
-
-     #           # Check order status
-     #           was_mseqed, has_braces, has_ab1_files = self.check_order_status(order_folder)
-
-     #           if not was_mseqed and not has_braces:
-     #                # Process if we have the right number of ab1 files
-     #                expected_count = self._get_expected_file_count(order_number)
-
-     #                if expected_count > 0 and len(ab1_files) == expected_count:
-     #                     if has_ab1_files:
-     #                          self.ui_automation.process_folder(order_folder)
-     #                          self.log(f"mSeq completed: {os.path.basename(order_folder)}")
-     #                else:
-     #                     # Move to Not Ready folder if incomplete
-     #                     not_ready_path = os.path.join(os.path.dirname(folder), self.config.IND_NOT_READY_FOLDER)
-     #                     self.file_dao.create_folder_if_not_exists(not_ready_path)
-     #                     self.file_dao.move_folder(order_folder, not_ready_path)
-     #                     self.log(f"Order moved to Not Ready: {os.path.basename(order_folder)}")
-
-     # def process_order_folder(self, order_folder, data_folder_path):
-     #      """Process an order folder"""
-     #      self.log(f"Processing order folder: {os.path.basename(order_folder)}")
-
-     #      # Skip Andreev's orders for mSeq processing
-     #      if self.config.ANDREEV_NAME in order_folder.lower():
-     #           order_number = self.get_order_number_from_folder_name(order_folder)
-     #           ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
-     #           expected_count = self._get_expected_file_count(order_number)
-
-     #           # For Andreev's orders, just check if complete to move back if needed
-     #           if expected_count > 0 and len(ab1_files) == expected_count:
-     #                # If we're processing from IND Not Ready, move it back
-     #                if os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER:
-     #                     destination = self.get_destination_for_order(order_folder, data_folder_path)
-     #                     self.file_dao.move_folder(order_folder, destination)
-     #                     self.log(f"Andreev's order moved back: {os.path.basename(order_folder)}")
-     #           return
-
-     #      order_number = self.get_order_number_from_folder_name(order_folder)
-     #      ab1_files = self.file_dao.get_files_by_extension(order_folder, config.ABI_EXTENSION)
-
-     #      # Check order status
-     #      was_mseqed, has_braces, has_ab1_files = self.check_order_status(order_folder)
-
-     #      # Process based on status
-     #      if not was_mseqed and not has_braces:
-     #           expected_count = self._get_expected_file_count(order_number)
-
-     #           if expected_count > 0 and len(ab1_files) == expected_count and has_ab1_files:
-     #                self.ui_automation.process_folder(order_folder)
-     #                self.log(f"mSeq completed: {os.path.basename(order_folder)}")
-
-     #                # If processing from IND Not Ready, move it back
-     #                if os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER:
-     #                     destination = self.get_destination_for_order(order_folder, data_folder_path)
-     #                     self.file_dao.move_folder(order_folder, destination)
-     #           else:
-     #                # Move to Not Ready if incomplete
-     #                not_ready_path = os.path.join(os.path.dirname(data_folder_path), self.config.IND_NOT_READY_FOLDER)
-     #                self.file_dao.create_folder_if_not_exists(not_ready_path)
-     #                self.file_dao.move_folder(order_folder, not_ready_path)
-     #                self.log(f"Order moved to Not Ready: {os.path.basename(order_folder)}")
-
-     #      # If already mSeqed but in IND Not Ready, move it back
-     #      elif was_mseqed and os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER:
-     #           destination = self.get_destination_for_order(order_folder, data_folder_path)
-     #           self.file_dao.move_folder(order_folder, destination)
-     #           self.log(f"Processed order moved back: {os.path.basename(order_folder)}")
-
      def process_sequencing_folder(self, folder_path, parent_folder=None, is_bio_folder=False):
           """
           Unified method to process both BioI folders and individual order folders
@@ -937,26 +854,6 @@ class FolderProcessor:
 
           return False
 
-     def get_todays_inumbers_from_folder(self, path):
-          """Get I numbers and folder paths from the selected folder"""
-          i_numbers = []
-          bioi_folders = []
-
-          for item in self.file_dao.get_directory_contents(path):
-               item_path = os.path.join(path, item)
-               if os.path.isdir(item_path):
-                    # Check if it's a BioI folder
-                    if self.file_dao.regex_patterns['inumber'].search(item):
-                         i_num = self.file_dao.get_inumber_from_name(item)
-                         if i_num and i_num not in i_numbers:
-                              i_numbers.append(i_num)
-
-                    # Get BioI folders before sorting (avoid reinject folders)
-                    if (self.file_dao.regex_patterns['bioi_folder'].search(item) and
-                         'reinject' not in item.lower()):
-                         bioi_folders.append(item_path)
-
-          return i_numbers, bioi_folders
 
      def get_order_number_from_folder_name(self, folder_path):
           """Extract order number from folder name"""
@@ -1444,7 +1341,7 @@ if __name__ == "__main__":
         print(f"Testing reinject detection for: {folder_path}")
 
         # Get I numbers from the folder
-        i_numbers, _ = processor.get_todays_inumbers_from_folder(folder_path)
+        i_numbers, _ = file_dao.get_folders_with_inumbers(folder_path)
         print(f"Found I numbers: {i_numbers}")
 
         # Get reinject list

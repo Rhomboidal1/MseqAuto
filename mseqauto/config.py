@@ -2,6 +2,7 @@
 import getpass
 import os
 import platform
+import re
 
 
 class MseqConfig:
@@ -29,6 +30,19 @@ class MseqConfig:
     NETWORK_DRIVES = {
         "P:": r"ABISync (P:)",
         "H:": f"{USERNAME} (\\\\w2k16\\users) (H:)"  # Dynamic user mapping
+    }
+
+    # Precompiled regex patterns
+    REGEX_PATTERNS = {
+        'inumber': re.compile(r'bioi-(\d+)', re.IGNORECASE),
+        'pcr_number': re.compile(r'{pcr(\d+).+}', re.IGNORECASE),
+        'brace_content': re.compile(r'{.*?}'),
+        'bioi_folder': re.compile(r'^bioi-\d+$', re.IGNORECASE),
+        'ind_blank_file': re.compile(r'{\d+[A-H]}.ab1$', re.IGNORECASE),  # Individual blanks pattern
+        'plate_blank_file': re.compile(r'^\d{2}[A-H]__.ab1$', re.IGNORECASE),  # Plate blanks pattern
+        'order_folder': re.compile(r'bioi-\d+_.+_\d+', re.IGNORECASE),  # For BioI order folders
+        'pcr_folder': re.compile(r'fb-pcr\d+(_\d+)?', re.IGNORECASE),     # For PCR folders
+        'reinject': re.compile(r'reinject', re.IGNORECASE)             # For filtering out reinject folders
     }
 
     # Timeouts for UI operations - extended for Windows 11

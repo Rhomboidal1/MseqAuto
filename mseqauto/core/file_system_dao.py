@@ -1,5 +1,8 @@
 # file_system_dao.py
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 import re
 from datetime import datetime, timedelta
 from shutil import move, copyfile
@@ -9,13 +12,33 @@ from mseqauto.config import MseqConfig
 config = MseqConfig()
 
 class FileSystemDAO:
-    def __init__(self, config_obj):
-        self.config = config_obj
+    def __init__(self, config, logger=None):
+        self.config = config
         self.directory_cache = {}
-
-        # Add logger initialization
+        
+        # Create a unified logging interface with support for different levels
         import logging
-        self.logger = logging.getLogger(__name__)
+        if logger is None:
+            # No logger provided, use default
+            self._logger = logging.getLogger(__name__)
+            self.log = self._logger.info
+            self.debug = self._logger.debug
+            self.warning = self._logger.warning
+            self.error = self._logger.error
+        elif isinstance(logger, logging.Logger):
+            # It's a Logger object
+            self._logger = logger
+            self.log = logger.info
+            self.debug = logger.debug
+            self.warning = logger.warning
+            self.error = logger.error
+        else:
+            # Assume it's a callable function - in this case, we don't have level differentiation
+            self._logger = None
+            self.log = logger
+            self.debug = logger
+            self.warning = logger
+            self.error = logger
 
         # Precompiled regex patterns
         self.regex_patterns = {
@@ -45,13 +68,50 @@ class FileSystemDAO:
         return self.directory_cache[path]
 
     def get_folders(self, path, pattern=None): #KEEP
-        """Get folders matching an optional regex pattern"""
+        """
+        Get folders matching an optional regex pattern
+        
+        Args:
+            path (str): Path to search for folders
+            pattern (str or re.Pattern): A regex pattern string or a compiled regex object
+            
+        Returns:
+            list: List of folder paths matching the pattern
+        """
         folder_list = []
-        for item in self.get_directory_contents(path):
+        self.log(f"Searching for folders in: {path}")
+
+    
+        # If pattern is a compiled regex, print its pattern attribute
+        if hasattr(pattern, 'pattern'):
+            print(f"Regex pattern string: {pattern.pattern}")
+        self.log(f"Using pattern: {pattern}")
+
+        contents = self.get_directory_contents(path)
+        self.log(f"Found {len(contents)} items in directory")
+        
+        for item in contents:
             full_path = os.path.join(path, item)
+            
             if os.path.isdir(full_path):
-                if pattern is None or re.search(pattern, item.lower()):
+                if pattern is None:
+                    self.log(f"  No pattern provided, adding {item}")  # Changed from print to self.log
                     folder_list.append(full_path)
+                else:
+                    # Check if pattern is a compiled regex object or a string
+                    if hasattr(pattern, 'search'):  # Compiled regex
+                        match = pattern.search(item.lower())
+                        match_method = "using compiled regex search"
+                    else:  # String pattern
+                        match = re.search(pattern, item.lower())
+                        match_method = "using re.search"
+                    
+                    if match:
+                        folder_list.append(full_path)
+                    else:
+                        self.log(f"  No match for {item}")  # Changed from print to self.log
+        
+        self.log(f"Returning {len(folder_list)} matching folders: {[os.path.basename(f) for f in folder_list]}")  # Changed from print to self.log
         return folder_list
 
     def get_files_by_extension(self, folder, extension): #KEEP
@@ -98,7 +158,7 @@ class FileSystemDAO:
             try:
                 os.makedirs(dest_parent)
             except Exception as e:
-                self.logger.warning(f"Error creating destination parent folder: {e}")
+                self.warning(f"Error creating destination parent folder: {e}")
                 return False
         
         # Try multiple times with delay between attempts
@@ -109,17 +169,17 @@ class FileSystemDAO:
                 
                 # Attempt to move the folder
                 move(source, destination)
-                self.logger.info(f"Successfully moved {os.path.basename(source)} to {os.path.basename(destination)}")
+                self.log(f"Successfully moved {os.path.basename(source)} to {os.path.basename(destination)}")
                 #print(f"Successfully moved {os.path.basename(source)} to {os.path.basename(destination)}")
                 return True
             except Exception as e:
-                self.logger.warning(f"Error moving folder on attempt {attempt+1}/{max_retries}: {e}")
+                self.warning(f"Error moving folder on attempt {attempt+1}/{max_retries}: {e}")
                 #print(f"Error moving folder on attempt {attempt+1}/{max_retries}: {e}")
                 # Wait before next attempt
                 if attempt < max_retries - 1:
                     time.sleep(delay)
         
-        self.logger.error(f"Failed to move folder after {max_retries} attempts: {os.path.basename(source)}")
+        self.error(f"Failed to move folder after {max_retries} attempts: {os.path.basename(source)}")
         return False
 
     def get_folder_name(self, path): #Rename to get_basename and move to path_utilities.py
@@ -334,37 +394,14 @@ class FileSystemDAO:
 
         return False
     #################### Advanced Directory Operations ####################
-    def get_most_recent_inumber(self, path):
-        #Keep
-        """Find the most recent I number based on folder modification times"""
-        try:
-            # Current timestamp and cutoff (7 days ago)
-            current_timestamp = datetime.now().timestamp()
-            cutoff_timestamp = current_timestamp - (7 * 24 * 3600)
-
-            recent_dirs = []  # Changed from 'folders' to 'recent_dirs'
-
-            # Get folders modified in the last 7 days
-            with os.scandir(path) as entries:
-                for entry in entries:
-                    if entry.is_dir():
-                        last_modified_timestamp = entry.stat().st_mtime
-                        if last_modified_timestamp >= cutoff_timestamp:
-                            recent_dirs.append(entry.name)
-
-            # Sort folders by modification time (newest first)
-            sorted_dirs = sorted(recent_dirs, key=lambda f: os.path.getmtime(os.path.join(path, f)), reverse=True)
-
-            # Extract I number from the most recent folder
-            if sorted_dirs:
-                inum = self.get_inumber_from_name(sorted_dirs[0])
-                return inum
-
-            return None
-        except Exception as e:
-            print(f"Error getting most recent I number: {e}")
-            return None
-
+    def get_inumber_from_name(self, name):
+        #I think we should keep
+        """Extract I number from a name using precompiled regex"""
+        match = self.regex_patterns['inumber'].search(str(name).lower())
+        if match:
+            return match.group(1)  # Return just the number
+        return None
+    
     def get_recent_files(self, paths, days=None, hours=None):
         #Keep
         """Get list of files modified within specified time period"""
@@ -399,35 +436,123 @@ class FileSystemDAO:
 
         # Return just the file names
         return [file_info[0] for file_info in sorted_files]
-
-    def get_inumber_from_name(self, name):
-        #I think we should keep
-        """Extract I number from a name using precompiled regex"""
-        match = self.regex_patterns['inumber'].search(str(name).lower())
-        if match:
-            return match.group(1)  # Return just the number
-        return None
-
-    def get_inumbers_greater_than(self, files, lower_inum):
-        #Keep
-        """Get files with I number greater than specified value"""
-        if not lower_inum:
-            return files
-
-        try:
-            lower_inum_int = int(lower_inum)
-            result = []
-
-            for file_name in files:
-                inum = self.get_inumber_from_name(file_name)
-                if inum and int(inum) > lower_inum_int:
-                    result.append(file_name)
-
-            return result
-        except ValueError:
-            # If conversion to int fails, return the original list
-            return files
+    
+    def collect_active_inumbers(self, paths, days=5, hours=12, min_inum=None, 
+                                return_most_recent=False, return_files=False):
+        """
+        Comprehensive method to collect active I-numbers with various filtering options
         
+        Args:
+            paths (list): List of paths to search for files
+            days (int, optional): Include files modified in the last N days (default: 5)
+            hours (int, optional): Include files modified in the last N hours (default: 12)
+            min_inum (str, optional): Only include I-numbers greater than this value
+            return_most_recent (bool): If True, return only the most recent I-number
+            return_files (bool): If True, return the files instead of just I-numbers
+        
+        Returns:
+            list: Deduplicated list of I-numbers or files meeting criteria
+        """
+        collected_items = {}  # Use dict to track inums and their source files
+        
+        # Get files from the past N days
+        if days:
+            day_files = self.get_recent_files(paths, days=days)
+            for file in day_files:
+                inum = self.get_inumber_from_name(file)
+                if inum and (min_inum is None or int(inum) > int(min_inum)):
+                    if inum not in collected_items:
+                        collected_items[inum] = []
+                    collected_items[inum].append(file)
+        
+        # Get files from the past N hours
+        if hours:
+            hour_files = self.get_recent_files(paths, hours=hours)
+            for file in hour_files:
+                inum = self.get_inumber_from_name(file)
+                if inum:
+                    if inum not in collected_items:
+                        collected_items[inum] = []
+                    collected_items[inum].append(file)
+        
+        # Handle return options
+        if return_most_recent and collected_items:
+            # Find most recent I-number (highest number assuming sequential assignment)
+            most_recent = max(collected_items.keys(), key=lambda x: int(x))
+            if return_files:
+                return collected_items[most_recent]
+            return [most_recent]
+        
+        if return_files:
+            # Flatten the file list
+            all_files = []
+            for files in collected_items.values():
+                all_files.extend(files)
+            return all_files
+        
+        # Return just the I-numbers
+        return list(collected_items.keys())
+
+    def get_most_recent_inumber(self, path):
+        """Find the most recent I number based on folder modification times"""
+        try:
+            folders = self.get_directory_contents(path)
+            if not folders:
+                return None
+                
+            # Sort folders by modification time (newest first)
+            sorted_folders = sorted(
+                [f for f in folders if os.path.isdir(os.path.join(path, f))],
+                key=lambda f: os.path.getmtime(os.path.join(path, f)), 
+                reverse=True
+            )
+            
+            # Extract I number from the most recent folder
+            if sorted_folders:
+                return self.get_inumber_from_name(sorted_folders[0])
+            return None
+        except Exception as e:
+            print(f"Error getting most recent I number: {e}")
+            return None
+
+    def get_folders_with_inumbers(self, path, folder_pattern='bioi_folder', exclude_patterns=None):
+        """
+        Get folders matching a specified pattern and extract their I-numbers
+        
+        Args:
+            path (str): Directory to search
+            folder_pattern (str): Regex pattern key to match folders (default: 'bioi_folder')
+            exclude_patterns (list): List of patterns to exclude (default: ['reinject'])
+        
+        Returns:
+            tuple: (list of I-numbers, list of folder paths)
+        """
+        if exclude_patterns is None:
+            exclude_patterns = ['reinject']
+            
+        matching_folders = []
+        
+        # Scan the directory for matching folders
+        for item in self.get_directory_contents(path):
+            item_path = os.path.join(path, item)
+            if not os.path.isdir(item_path):
+                continue
+                
+            # Check if folder matches pattern
+            if self.regex_patterns[folder_pattern].search(item):
+                # Check exclusion patterns
+                if not any(exclude in item.lower() for exclude in exclude_patterns):
+                    matching_folders.append(item_path)
+        
+        # Extract unique I-numbers
+        i_numbers = []
+        for folder in matching_folders:
+            i_num = self.get_inumber_from_name(os.path.basename(folder))
+            if i_num and i_num not in i_numbers:
+                i_numbers.append(i_num)
+        
+        return i_numbers, matching_folders
+
     #################### File Operations ####################
     def move_file(self, source, destination):
         #Keep
@@ -499,5 +624,8 @@ if __name__ == "__main__":
     print(f"Found {len(folders)} folders in {test_path}")
 
     # Test file operations
-    ab1_files = dao.get_files_by_extension(test_path, ".py")
+    py_files = dao.get_files_by_extension(test_path, ".py")
+    print(f"Found {len(py_files)} Python files in {test_path}")
+
+    ab1_files = dao.get_files_by_extension(test_path, ".ab1")
     print(f"Found {len(ab1_files)} Python files in {test_path}")

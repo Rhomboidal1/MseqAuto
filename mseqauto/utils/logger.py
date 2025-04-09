@@ -3,16 +3,36 @@ import logging
 import os
 from datetime import datetime
 
-def setup_logger(name):
+def setup_logger(name, log_dir=None):
     # Configure logger
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     
     # Create logs directory if it doesn't exist
-    log_dir = "logs"
+    if log_dir is None:
+        # Default to a logs directory in the same directory as this module
+        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+    
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     
+    # # Alternative way to set up the logger into a parent \logs directory
+    # # Uncomment if needed
+    # logger = logging.getLogger(name)
+    # logger.setLevel(logging.DEBUG)
+    
+    # # Get the directory where the logger module is located
+    # module_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # # Move up to the parent directory (mseqauto)
+    # parent_dir = os.path.dirname(os.path.dirname(module_dir))
+    
+    # # Create logs directory in the parent directory
+    # log_dir = os.path.join(parent_dir, "logs")
+    # if not os.path.exists(log_dir):
+    #     os.makedirs(log_dir)
+    
+
     # File handler - logs to file
     log_file = os.path.join(log_dir, f"{name}_{datetime.now().strftime('%Y%m%d')}.log")
     file_handler = logging.FileHandler(log_file)
@@ -20,7 +40,7 @@ def setup_logger(name):
     
     # Console handler - logs to console
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)  # Can keep console at INFO to reduce spam
+    console_handler.setLevel(logging.WARNING)  # Can keep console at INFO to reduce spam
     
     # Format
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
