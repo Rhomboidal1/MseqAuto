@@ -62,13 +62,22 @@ def main():
         os.makedirs(zip_dump_folder)
         logger.info(f"Created zip dump folder: {zip_dump_folder}")
 
-
     bio_folders = file_dao.get_folders(data_folder, pattern=REGEX['bioi_folder'].pattern)
     logger.info(f"Found {len(bio_folders)} BioI folders")
 
     # Get PCR folders - use the new pcr_folder pattern
     pcr_folders = file_dao.get_folders(data_folder, pattern=REGEX['pcr_folder'].pattern)
     logger.info(f"Found {len(pcr_folders)} PCR folders")
+
+    # Copy recent existing zips to the zip dump folder (recovery logic)
+    recovered_count = file_dao.copy_recent_zips_to_dump(
+        bio_folders + pcr_folders, 
+        zip_dump_folder, 
+        max_age_minutes=15
+    )
+
+    if recovered_count > 0:
+        logger.info(f"Recovered {recovered_count} recently created zip files")
 
     # Process BioI folders
     order_count = 0
@@ -127,13 +136,26 @@ def main():
         else:
             logger.warning(f"Failed to zip {os.path.basename(pcr_folder)}")
     
+    # Calculate total processed files
+    total_processed = order_count + recovered_count
+    
     # Remove empty zip dump folder if nothing was processed
-    if order_count == 0 and os.path.exists(zip_dump_folder) and not os.listdir(zip_dump_folder):
+    if total_processed == 0 and os.path.exists(zip_dump_folder) and not os.listdir(zip_dump_folder):
         os.rmdir(zip_dump_folder)
         logger.info("Removed empty zip dump folder")
     
-    logger.info(f"Total orders zipped: {order_count}")
-    print(f"All done! {order_count} orders zipped.")
+    # Log the total count
+    logger.info(f"Total files processed: {total_processed} (New: {order_count}, Recovered: {recovered_count})")
+    
+    # Update the console message to include both newly zipped and recovered files
+    if total_processed == 0:
+        print("All done! No files were processed.")
+    elif recovered_count > 0 and order_count > 0:
+        print(f"All done! {order_count} orders zipped and {recovered_count} recent files recovered.")
+    elif recovered_count > 0:
+        print(f"All done! {recovered_count} recent files recovered.")
+    else:
+        print(f"All done! {order_count} orders zipped.")
 
 if __name__ == "__main__":
     main()

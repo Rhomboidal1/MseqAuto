@@ -10,8 +10,8 @@ from tkinter import filedialog
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-print(f"Current working directory: {os.getcwd()}")
-print(f"Script directory: {os.path.dirname(os.path.abspath(__file__))}")
+# print(f"Current working directory: {os.getcwd()}")
+# print(f"Script directory: {os.path.dirname(os.path.abspath(__file__))}")
 # print(sys.path)
 
 def get_folder_from_user():

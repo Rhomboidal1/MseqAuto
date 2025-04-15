@@ -5,10 +5,10 @@ import sys
 import tkinter as tk
 from datetime import datetime
 from tkinter import filedialog
-
-from mseqauto.core import FileSystemDAO, FolderProcessor
-from mseqauto.utils import ExcelDAO, setup_logger
-from mseqauto.config import MseqConfig
+# Add parent directory to PYTHONPATH for imports
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Check for 32-bit Python requirement
 if sys.maxsize > 2 ** 32:
@@ -42,10 +42,27 @@ def get_folder_from_user():
 
 
 def main():
-    # Setup logger
-    logger = setup_logger("validate_zip_files")
-    logger.info("Starting zip file validation...")
+    # Get folder path first before any package imports
+    data_folder = get_folder_from_user()
+    
+    if not data_folder:
+        print("No folder selected, exiting")
+        return
 
+    # ONLY NOW import package modules
+    from mseqauto.config import MseqConfig
+    from mseqauto.core import FileSystemDAO, FolderProcessor
+    from mseqauto.utils import setup_logger, ExcelDAO
+    
+    # Get the script directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    log_dir = os.path.join(script_dir, "logs")
+
+    # Setup logger
+    logger = setup_logger(f"validate_zip_files", log_dir=log_dir)
+
+    logger.info("Starting zip file validation...")
+    
     # Initialize components
     config = MseqConfig()
     logger.info("Config loaded")
@@ -66,15 +83,6 @@ def main():
         print(f"Error: Batch file {config.BATCH_FILE_PATH} failed to run")
         return
 
-    # Select folder
-    data_folder = get_folder_from_user()
-
-    if not data_folder:
-        logger.error("No folder selected, exiting")
-        print("No folder selected, exiting")
-        return
-
-    logger.info(f"Using folder: {data_folder}")
 
     # Load order key
     order_key = file_dao.load_order_key(config.KEY_FILE_PATH)

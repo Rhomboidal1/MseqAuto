@@ -360,6 +360,103 @@ class FileSystemDAO:
         copyfile(zip_path, dest_path)
         return dest_path
 
+    def find_recent_zips(self, folder_path, max_age_minutes=15):
+        """
+        Find recently created/modified zip files in a folder
+        
+        Args:
+            folder_path (str): Path to search for zip files
+            max_age_minutes (int): Maximum age in minutes for a zip to be considered recent
+            
+        Returns:
+            list: List of paths to recently created zip files
+        """
+        from datetime import datetime, timedelta
+        
+        self.log(f"Checking for recently created zip files in {os.path.basename(folder_path)}")
+        
+        # Calculate the cutoff time
+        now = datetime.now()
+        cutoff_time = now - timedelta(minutes=max_age_minutes)
+        recent_zips = []
+        
+        # Ensure folder exists
+        if not os.path.exists(folder_path):
+            return recent_zips
+        
+        # Check each file in the folder
+        for item in self.get_directory_contents(folder_path):
+            if item.endswith(self.config.ZIP_EXTENSION):
+                zip_path = os.path.join(folder_path, item)
+                
+                # Skip if not a file
+                if not os.path.isfile(zip_path):
+                    continue
+                    
+                # Check if file is recent
+                modified_time = datetime.fromtimestamp(os.path.getmtime(zip_path))
+                if modified_time >= cutoff_time:
+                    recent_zips.append(zip_path)
+                    self.debug(f"Found recent zip: {item}")
+        
+        return recent_zips
+
+    def copy_recent_zips_to_dump(self, folder_list, zip_dump_folder, max_age_minutes=15):
+        """
+        Copy recently created zip files to the zip dump folder
+        
+        Args:
+            folder_list (list): List of folders to check for zips
+            zip_dump_folder (str): Target folder to copy zips to
+            max_age_minutes (int): Maximum age in minutes for a zip to be considered recent
+            
+        Returns:
+            int: Number of zip files copied
+        """
+        self.log(f"Checking for recently created zip files (within {max_age_minutes} minutes)")
+        
+        # Create zip dump folder if it doesn't exist
+        if not os.path.exists(zip_dump_folder):
+            os.makedirs(zip_dump_folder)
+        
+        copied_count = 0
+        
+        # Process each folder
+        for parent_folder in folder_list:
+            # For BioI folders, check order folders within
+            if os.path.basename(parent_folder).lower().startswith("bioi-"):
+                # Get list of order folders 
+                for item in self.get_directory_contents(parent_folder):
+                    order_path = os.path.join(parent_folder, item)
+                    if os.path.isdir(order_path):
+                        # Find recent zips in this order folder
+                        recent_zips = self.find_recent_zips(order_path, max_age_minutes)
+                        
+                        # Copy each recent zip to the dump folder
+                        for zip_path in recent_zips:
+                            dump_path = os.path.join(zip_dump_folder, os.path.basename(zip_path))
+                            if not os.path.exists(dump_path):
+                                try:
+                                    self.copy_zip_to_dump(zip_path, zip_dump_folder)
+                                    copied_count += 1
+                                except Exception as e:
+                                    self.warning(f"Failed to copy zip to dump: {e}")
+            else:
+                # For other folders (like PCR), check directly
+                recent_zips = self.find_recent_zips(parent_folder, max_age_minutes)
+                
+                # Copy each recent zip to the dump folder
+                for zip_path in recent_zips:
+                    dump_path = os.path.join(zip_dump_folder, os.path.basename(zip_path))
+                    if not os.path.exists(dump_path):
+                        try:
+                            self.copy_zip_to_dump(zip_path, zip_dump_folder)
+                            copied_count += 1
+                        except Exception as e:
+                            self.warning(f"Failed to copy zip to dump: {e}")
+        
+        return copied_count
+
     
     def get_pcr_number(self, filename):
         #Move to path_utilities.py-done

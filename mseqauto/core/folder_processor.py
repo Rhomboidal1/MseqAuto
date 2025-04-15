@@ -977,127 +977,127 @@ class FolderProcessor:
           self.raw_reinject_list = raw_reinject_list
           return reinject_list
 
-     def test_specific_pcr_sorting(self, pcr_number, folder_path=None):
-          """Test PCR file sorting for a specific PCR number"""
-          # Set up file output
-          from datetime import datetime
-          timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-          output_file = f"pcr_test_{pcr_number}_{timestamp}.txt"
+     # def test_specific_pcr_sorting(self, pcr_number, folder_path=None):
+     #      """Test PCR file sorting for a specific PCR number"""
+     #      # Set up file output
+     #      from datetime import datetime
+     #      timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+     #      output_file = f"pcr_test_{pcr_number}_{timestamp}.txt"
 
-          # Function to log both to console and file
-          def log(message):
-               print(message)
-               with open(output_file, "a") as f:
-                    f.write(message + "\n")
+     #      # Function to log both to console and file
+     #      def log(message):
+     #           print(message)
+     #           with open(output_file, "a") as f:
+     #                f.write(message + "\n")
 
-          log(f"\n=== Testing PCR {pcr_number} Sorting ===")
-          log(f"Output saved to: {output_file}")
+     #      log(f"\n=== Testing PCR {pcr_number} Sorting ===")
+     #      log(f"Output saved to: {output_file}")
 
-          # Load the reinject list
-          if not hasattr(self, 'reinject_list') or not self.reinject_list:
-               log("Loading reinject list...")
-               i_numbers = ['21888', '21889', '21890', '21891']  # Hardcode I numbers for testing
-               reinject_path = f"P:\\Data\\Reinjects\\Reinject List_{datetime.now().strftime('%m-%d-%Y')}.xlsx"
-               self.reinject_list = self.get_reinject_list(i_numbers, reinject_path)
-               log(f"Loaded {len(self.reinject_list)} reinjections")
+     #      # Load the reinject list
+     #      if not hasattr(self, 'reinject_list') or not self.reinject_list:
+     #           log("Loading reinject list...")
+     #           i_numbers = ['21888', '21889', '21890', '21891']  # Hardcode I numbers for testing
+     #           reinject_path = f"P:\\Data\\Reinjects\\Reinject List_{datetime.now().strftime('%m-%d-%Y')}.xlsx"
+     #           self.reinject_list = self.get_reinject_list(i_numbers, reinject_path)
+     #           log(f"Loaded {len(self.reinject_list)} reinjections")
 
-          if folder_path:
-               log(f"\nListing ALL files in folder: {folder_path}")
-               log("=" * 50)
+     #      if folder_path:
+     #           log(f"\nListing ALL files in folder: {folder_path}")
+     #           log("=" * 50)
 
-               # Get all files in this folder recursively
-               all_files = []
-               for root, dirs, files in os.walk(folder_path):
-                    for file in files:
-                         all_files.append(os.path.join(root, file))
+     #           # Get all files in this folder recursively
+     #           all_files = []
+     #           for root, dirs, files in os.walk(folder_path):
+     #                for file in files:
+     #                     all_files.append(os.path.join(root, file))
 
-               # Group by file extension
-               file_by_ext = {}
-               for file_path in all_files:
-                    ext = os.path.splitext(file_path)[1].lower()
-                    if ext not in file_by_ext:
-                         file_by_ext[ext] = []
-                         file_by_ext[ext].append(file_path)
+     #           # Group by file extension
+     #           file_by_ext = {}
+     #           for file_path in all_files:
+     #                ext = os.path.splitext(file_path)[1].lower()
+     #                if ext not in file_by_ext:
+     #                     file_by_ext[ext] = []
+     #                     file_by_ext[ext].append(file_path)
 
-               # Print summary of file types
-               log(f"Found {len(all_files)} total files:")
-               for ext, files in file_by_ext.items():
-                    log(f"  {ext}: {len(files)} files")
+     #           # Print summary of file types
+     #           log(f"Found {len(all_files)} total files:")
+     #           for ext, files in file_by_ext.items():
+     #                log(f"  {ext}: {len(files)} files")
 
-               # Print all .ab1 files
-               log("\nAll .ab1 files:")
-               ab1_files = file_by_ext.get(config.ABI_EXTENSION, [])
-               for i, file_path in enumerate(ab1_files):
-                    log(f"  {i + 1}. {os.path.relpath(file_path, folder_path)}")
+     #           # Print all .ab1 files
+     #           log("\nAll .ab1 files:")
+     #           ab1_files = file_by_ext.get(config.ABI_EXTENSION, [])
+     #           for i, file_path in enumerate(ab1_files):
+     #                log(f"  {i + 1}. {os.path.relpath(file_path, folder_path)}")
 
-               # Check file contents for PCR number
-               pcr_files = []
-               for file_path in ab1_files:
-                    file_content = os.path.basename(file_path)
-                    if f"PCR{pcr_number}" in file_content:
-                         pcr_files.append(file_path)
+     #           # Check file contents for PCR number
+     #           pcr_files = []
+     #           for file_path in ab1_files:
+     #                file_content = os.path.basename(file_path)
+     #                if f"PCR{pcr_number}" in file_content:
+     #                     pcr_files.append(file_path)
 
-               log(f"\nFound {len(pcr_files)} PCR {pcr_number} files")
-               if pcr_files:
-                    log("PCR files found:")
-                    for i, file_path in enumerate(pcr_files):
-                         log(f"  {i + 1}. {os.path.basename(file_path)}")
+     #           log(f"\nFound {len(pcr_files)} PCR {pcr_number} files")
+     #           if pcr_files:
+     #                log("PCR files found:")
+     #                for i, file_path in enumerate(pcr_files):
+     #                     log(f"  {i + 1}. {os.path.basename(file_path)}")
 
-          else:
-               log("No folder specified, using test files")
-               pcr_files = [
-                    "{07E}{06G}940.9.H446_940R{PCR2961exp1}{2_28}{I-21889}.ab1",
-                    "{06G}940.9.H446_940R{PCR2961exp1}.ab1"
-               ]
+     #      else:
+     #           log("No folder specified, using test files")
+     #           pcr_files = [
+     #                "{07E}{06G}940.9.H446_940R{PCR2961exp1}{2_28}{I-21889}.ab1",
+     #                "{06G}940.9.H446_940R{PCR2961exp1}.ab1"
+     #           ]
 
-          # Check reinject list for entries that might match these files
-          log("\nChecking reinject list for matches:")
-          matches_found = 0
+     #      # Check reinject list for entries that might match these files
+     #      log("\nChecking reinject list for matches:")
+     #      matches_found = 0
 
-          if hasattr(self, 'reinject_list') and self.reinject_list and pcr_files:
-               for file_path in pcr_files:
-                    file_name = os.path.basename(file_path) if os.path.exists(file_path) else file_path
-                    log(f"\nFile: {file_name}")
+     #      if hasattr(self, 'reinject_list') and self.reinject_list and pcr_files:
+     #           for file_path in pcr_files:
+     #                file_name = os.path.basename(file_path) if os.path.exists(file_path) else file_path
+     #                log(f"\nFile: {file_name}")
 
-                    # Standard normalization (with extension removal)
-                    std_norm = self.file_dao.standardize_filename_for_matching(file_name)
-                    log(f"Standard normalized: {std_norm}")
+     #                # Standard normalization (with extension removal)
+     #                std_norm = self.file_dao.standardize_filename_for_matching(file_name)
+     #                log(f"Standard normalized: {std_norm}")
 
-                    # PCR normalization (with manual extension removal)
-                    pcr_norm = self.file_dao.standardize_filename_for_matching(file_name)
-                    if pcr_norm.endswith(config.ABI_EXTENSION):
-                         pcr_norm = pcr_norm[:-4]
-                    log(f"PCR normalized: {pcr_norm}")
+     #                # PCR normalization (with manual extension removal)
+     #                pcr_norm = self.file_dao.standardize_filename_for_matching(file_name)
+     #                if pcr_norm.endswith(config.ABI_EXTENSION):
+     #                     pcr_norm = pcr_norm[:-4]
+     #                log(f"PCR normalized: {pcr_norm}")
 
-                    # Check for matches in reinject list
-                    found_match = False
-                    for i, item in enumerate(self.reinject_list):
-                         reinj_std_norm = self.file_dao.standardize_filename_for_matching(item)
+     #                # Check for matches in reinject list
+     #                found_match = False
+     #                for i, item in enumerate(self.reinject_list):
+     #                     reinj_std_norm = self.file_dao.standardize_filename_for_matching(item)
 
-                         if std_norm == reinj_std_norm:
-                              log(f"MATCH found with reinject #{i + 1}: {item}")
-                              log(f"  Normalized to: {reinj_std_norm}")
-                              found_match = True
-                              matches_found += 1
-                              break
+     #                     if std_norm == reinj_std_norm:
+     #                          log(f"MATCH found with reinject #{i + 1}: {item}")
+     #                          log(f"  Normalized to: {reinj_std_norm}")
+     #                          found_match = True
+     #                          matches_found += 1
+     #                          break
 
-                    if not found_match:
-                         log("No matches found in reinject list")
-          else:
-               log("No reinject list available for testing or no PCR files found")
+     #                if not found_match:
+     #                     log("No matches found in reinject list")
+     #      else:
+     #           log("No reinject list available for testing or no PCR files found")
 
-          log(f"\nFound {matches_found} files that match entries in the reinject list")
-          log("===================================")
+     #      log(f"\nFound {matches_found} files that match entries in the reinject list")
+     #      log("===================================")
 
-          # Display all entries in reinject list for reference
-          log("\nFull reinject list for reference:")
-          if hasattr(self, 'reinject_list') and self.reinject_list:
-               for i, item in enumerate(self.reinject_list):
-                    log(f"{i + 1}. {item}")
-          else:
-               log("No reinject list available")
+     #      # Display all entries in reinject list for reference
+     #      log("\nFull reinject list for reference:")
+     #      if hasattr(self, 'reinject_list') and self.reinject_list:
+     #           for i, item in enumerate(self.reinject_list):
+     #                log(f"{i + 1}. {item}")
+     #      else:
+     #           log("No reinject list available")
 
-          log(f"\nTest completed. Results saved to {output_file}")
+     #      log(f"\nTest completed. Results saved to {output_file}")
 
      def check_order_status(self, folder_path):
           """
@@ -1154,25 +1154,43 @@ class FolderProcessor:
 
      def zip_order_folder(self, folder_path, include_txt=True):
           """
-          Zip the contents of an order folder
-
+          Zip the contents of an order folder with special handling for Andreev orders
+          
           Args:
                folder_path (str): Path to the order folder
                include_txt (bool): Whether to include text files in zip
-
+               
           Returns:
                str: Path to created zip file, or None if failed
           """
           try:
                folder_name = os.path.basename(folder_path)
-               zip_filename = f"{folder_name}.zip"
+               is_andreev_order = self.config.ANDREEV_NAME.lower() in folder_name.lower()
+               
+               # For Andreev orders, use different naming and never include txt files
+               if is_andreev_order:
+                    # Extract order number and I-number from folder name
+                    order_number = self.get_order_number_from_folder_name(folder_path)
+                    i_number = self.file_dao.get_inumber_from_name(folder_name)
+                    
+                    if not order_number or not i_number:
+                         self.log(f"Could not extract order number or I-number for Andreev order: {folder_name}")
+                         return None
+                         
+                    # Use Andreev's preferred naming format: "123456_I-20000.zip"
+                    zip_filename = f"{order_number}_I-{i_number}.zip"
+                    include_txt = False  # Never include txt files for Andreev
+               else:
+                    # Use standard naming format: "BioI-20000_Customer_123456.zip"
+                    zip_filename = f"{folder_name}.zip"
+               
                zip_path = os.path.join(folder_path, zip_filename)
-
+               
                # Determine which files to include
-               file_extensions = [config.ABI_EXTENSION]
+               file_extensions = [self.config.ABI_EXTENSION]
                if include_txt:
                     file_extensions.extend(self.config.TEXT_FILES)
-
+                    
                # Create zip file
                self.log(f"Creating zip file: {zip_filename}")
                success = self.file_dao.zip_files(
@@ -1187,7 +1205,7 @@ class FolderProcessor:
                     return zip_path
                else:
                     self.log(f"Failed to create zip file: {zip_path}")
-                    return None
+                    return None               
           except Exception as e:
                self.log(f"Error creating zip file for {folder_path}: {e}")
                return None
@@ -1351,5 +1369,3 @@ if __name__ == "__main__":
         print(f"\nReinject List ({len(reinject_list)} entries):")
         for i, item in enumerate(reinject_list):
             print(f"{i + 1}. {item}")
-    processor.test_specific_pcr_sorting("2961", folder_path)
-    processor.test_specific_pcr_sorting("2872", folder_path)
