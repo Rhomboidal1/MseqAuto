@@ -134,8 +134,7 @@ class FileSystemDAO:
         if not os.path.exists(path):
             os.mkdir(path)
         return path
-
-    def move_folder(self, source, destination, max_retries=3, delay=1.0): #KEEP
+    def move_folder(self, source, destination, max_retries=3, delay=1.0):
         """
         Move folder with proper error handling and retries
         
@@ -148,9 +147,87 @@ class FileSystemDAO:
         Returns:
             bool: True if successful, False otherwise
         """
-        from shutil import move
         import time
         import gc
+        import shutil
+        
+        # Check if destination already exists
+        if os.path.exists(destination):
+            self.warning(f"Destination already exists: {destination}")
+            
+            # If both source and destination exist, we need to handle carefully
+            if os.path.isdir(source) and os.path.isdir(destination):
+                source_files = os.listdir(source)
+                
+                # If source is empty, just try to delete it
+                if len(source_files) == 0:
+                    self.log(f"Source folder {os.path.basename(source)} is empty, deleting it")
+                    try:
+                        os.rmdir(source)
+                        return True
+                    except Exception as e:
+                        self.warning(f"Error removing empty source folder: {e}")
+                        return False
+                
+                # Move contents file by file
+                self.log(f"Moving individual files from {os.path.basename(source)} to existing destination")
+                success = True
+                
+                for item in source_files:
+                    source_item = os.path.join(source, item)
+                    dest_item = os.path.join(destination, item)
+                    
+                    # Skip if destination already exists
+                    if os.path.exists(dest_item):
+                        self.log(f"File {item} already exists in destination, skipping")
+                        continue
+                    
+                    # Copy file or folder
+                    try:
+                        if os.path.isdir(source_item):
+                            # Check if we're creating a recursive structure - AVOID THIS
+                            if os.path.basename(source_item) == os.path.basename(destination):
+                                self.warning(f"Avoiding recursive folder creation: {source_item} -> {dest_item}")
+                                continue
+                            
+                            shutil.copytree(source_item, dest_item)
+                        else:
+                            shutil.copy2(source_item, dest_item)
+                    except Exception as e:
+                        self.warning(f"Error copying {item}: {e}")
+                        success = False
+                
+                # If all files copied successfully, try to delete the source folder
+                if success:
+                    try:
+                        # Try to delete the source folder
+                        for retry in range(3):
+                            try:
+                                # Force closure of any file handles
+                                gc.collect()
+                                
+                                # Try to delete the folder
+                                if os.path.exists(source) and os.path.isdir(source):
+                                    # Check if folder is now empty
+                                    if len(os.listdir(source)) == 0:
+                                        os.rmdir(source)
+                                    else:
+                                        # If not empty, use rmtree
+                                        shutil.rmtree(source)
+                                    
+                                self.log(f"Successfully moved contents and removed source folder")
+                                return True
+                            except Exception as e:
+                                self.warning(f"Retry {retry+1}/3: Error removing source folder: {e}")
+                                time.sleep(1)
+                        
+                        self.warning(f"Could not remove source folder after copying contents")
+                        return True  # Return true anyway since files were copied
+                    except Exception as e:
+                        self.warning(f"Error removing source folder after copying contents: {e}")
+                        return True  # Return true anyway since files were copied
+                
+                return success
         
         # Make sure destination parent folder exists
         dest_parent = os.path.dirname(destination)
@@ -161,23 +238,102 @@ class FileSystemDAO:
                 self.warning(f"Error creating destination parent folder: {e}")
                 return False
         
-        # Try multiple times with delay between attempts
+        # Try standard move with retries
         for attempt in range(max_retries):
             try:
                 # Force garbage collection to release file handles
                 gc.collect()
                 
                 # Attempt to move the folder
-                move(source, destination)
+                shutil.move(source, destination)
                 self.log(f"Successfully moved {os.path.basename(source)} to {os.path.basename(destination)}")
-                #print(f"Successfully moved {os.path.basename(source)} to {os.path.basename(destination)}")
                 return True
             except Exception as e:
                 self.warning(f"Error moving folder on attempt {attempt+1}/{max_retries}: {e}")
-                #print(f"Error moving folder on attempt {attempt+1}/{max_retries}: {e}")
+                
+                # Special handling for "already exists" error - critical to avoid nested folders
+                if "already exists" in str(e):
+                    # This means destination folder exists but may be empty
+                    # Try to copy contents individually instead
+                    self.log(f"Destination exists error, trying file-by-file copy")
+                    
+                    # Check if source exists and has files
+                    if os.path.isdir(source) and os.path.exists(source):
+                        source_files = os.listdir(source)
+                        
+                        # If source is empty, just try to delete it
+                        if len(source_files) == 0:
+                            try:
+                                os.rmdir(source)
+                                self.log(f"Source was empty, deleted it")
+                                return True
+                            except Exception as e_inner:
+                                self.warning(f"Error removing empty source folder: {e_inner}")
+                        else:
+                            # Copy files one by one, avoiding recursive structures
+                            success = True
+                            for item in source_files:
+                                source_item = os.path.join(source, item)
+                                dest_item = os.path.join(destination, item)
+                                
+                                # Skip if destination already exists
+                                if os.path.exists(dest_item):
+                                    continue
+                                
+                                # Copy file or folder
+                                try:
+                                    if os.path.isdir(source_item):
+                                        # Avoid creating nested folders with same name
+                                        if os.path.basename(source_item) == os.path.basename(destination):
+                                            continue
+                                        shutil.copytree(source_item, dest_item)
+                                    else:
+                                        shutil.copy2(source_item, dest_item)
+                                except Exception as e_copy:
+                                    self.warning(f"Error copying {item}: {e_copy}")
+                                    success = False
+                            
+                            # Try to delete source if all files copied
+                            if success:
+                                try:
+                                    shutil.rmtree(source)
+                                    self.log(f"Copied files and removed source directory")
+                                    return True
+                                except Exception as e_rm:
+                                    self.warning(f"Error removing source after copy: {e_rm}")
+                                    return True  # Return true anyway since files were copied
+                
                 # Wait before next attempt
                 if attempt < max_retries - 1:
                     time.sleep(delay)
+        
+        # If we get here, standard move failed - try manual copy/delete as last resort
+        if os.path.isdir(source) and os.path.exists(source):
+            if not os.path.exists(destination):
+                try:
+                    # Create destination first to avoid nested folder issues
+                    os.makedirs(destination)
+                    
+                    # Copy files individually
+                    for item in os.listdir(source):
+                        source_item = os.path.join(source, item)
+                        dest_item = os.path.join(destination, item)
+                        
+                        if os.path.isdir(source_item):
+                            shutil.copytree(source_item, dest_item)
+                        else:
+                            shutil.copy2(source_item, dest_item)
+                    
+                    # Try to remove source
+                    try:
+                        shutil.rmtree(source)
+                    except:
+                        pass
+                    
+                    self.log(f"Manual copy/delete succeeded")
+                    return True
+                except Exception as e:
+                    self.warning(f"Manual copy/delete failed: {e}")
         
         self.error(f"Failed to move folder after {max_retries} attempts: {os.path.basename(source)}")
         return False

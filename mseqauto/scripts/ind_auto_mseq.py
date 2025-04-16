@@ -81,9 +81,9 @@ def main():
         return
     
     # NOW import package modules
-    from mseqauto.utils import setup_logger
-    from mseqauto.config import MseqConfig
-    from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor
+    from mseqauto.utils import setup_logger # type: ignore
+    from mseqauto.config import MseqConfig # type: ignore
+    from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor # type: ignore
     
     # Get the script directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -121,31 +121,34 @@ def main():
         # Get folders to process
         bio_folders = file_dao.get_folders(data_folder, r'bioi-\d+')
         logger.info(f"Found {len(bio_folders)} BioI folders")
-
+        
         immediate_orders = file_dao.get_folders(data_folder, r'bioi-\d+_.+_\d+')
         logger.info(f"Found {len(immediate_orders)} immediate order folders")
-
+        
         pcr_folders = file_dao.get_folders(data_folder, r'fb-pcr\d+_\d+')
         logger.info(f"Found {len(pcr_folders)} PCR folders")
-
+        
         # Process BioI folders
         for i, folder in enumerate(bio_folders):
             logger.info(f"Processing BioI folder {i+1}/{len(bio_folders)}: {os.path.basename(folder)}")
-            processor.process_sequencing_folder(folder, data_folder, is_bio_folder=True)
-
+            processor.process_bio_folder(folder)
+        
+        # Check if processing IND Not Ready folder
+        is_ind_not_ready = os.path.basename(data_folder) == config.IND_NOT_READY_FOLDER
+        logger.info(f"Is IND Not Ready folder: {is_ind_not_ready}")
+        
         # Process immediate orders
         for i, folder in enumerate(immediate_orders):
             logger.info(f"Processing order folder {i+1}/{len(immediate_orders)}: {os.path.basename(folder)}")
-            processor.process_sequencing_folder(folder, data_folder, is_bio_folder=False)
-
+            processor.process_order_folder(folder, data_folder)
+        
         # Process PCR folders
         for i, folder in enumerate(pcr_folders):
             logger.info(f"Processing PCR folder {i+1}/{len(pcr_folders)}: {os.path.basename(folder)}")
             processor.process_pcr_folder(folder)
-
+        
         logger.info("All processing completed")
         print("\nALL DONE")
-        
         # # Get folders to process
         # bio_folders = file_dao.get_folders(data_folder, r'bioi-\d+')
         # logger.info(f"Found {len(bio_folders)} BioI folders")

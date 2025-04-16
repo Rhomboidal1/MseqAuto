@@ -33,9 +33,9 @@ def main():
         return
 
     # ONLY NOW import package modules
-    from mseqauto.config import MseqConfig
-    from mseqauto.core import FileSystemDAO, FolderProcessor
-    from mseqauto.utils import setup_logger
+    from mseqauto.config import MseqConfig # type: ignore
+    from mseqauto.core import FileSystemDAO, FolderProcessor # type: ignore
+    from mseqauto.utils import setup_logger # type: ignore
     
     # Get the script directory
     script_dir = os.path.dirname(os.path.abspath(__file__))

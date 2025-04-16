@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from datetime import datetime, timedelta
 #print(sys.path)
 
-from mseqauto.config import MseqConfig
+from mseqauto.config import MseqConfig # type: ignore
 
 config = MseqConfig()
 
