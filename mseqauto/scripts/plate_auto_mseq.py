@@ -7,7 +7,9 @@ import time
 # Add parent directory to PYTHONPATH for imports
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import warnings
+warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
                 
 def get_folder_from_user():
     """Simple folder selection dialog that works reliably"""

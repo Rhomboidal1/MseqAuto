@@ -13,6 +13,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 # print(f"Current working directory: {os.getcwd()}")
 # print(f"Script directory: {os.path.dirname(os.path.abspath(__file__))}")
 # print(sys.path)
+import warnings
+warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
 
 def get_folder_from_user():
     print("Opening folder selection dialog...")

@@ -8,7 +8,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 #print(sys.path)
 import time
 from datetime import datetime
+
 from mseqauto.config import MseqConfig
+import warnings
+warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
 
 config = MseqConfig()
 

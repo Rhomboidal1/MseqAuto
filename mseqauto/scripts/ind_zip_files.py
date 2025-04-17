@@ -7,6 +7,8 @@ from tkinter import filedialog
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import warnings
+warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
 
 # print(sys.path)
 

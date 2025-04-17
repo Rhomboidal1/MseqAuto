@@ -11,6 +11,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 import subprocess
 import ctypes
 
+import warnings
+warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
+
 # Store the selected folder path globally to avoid asking twice
 selected_folder = None
 
