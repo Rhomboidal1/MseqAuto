@@ -20,7 +20,12 @@ class FolderProcessor:
           self.file_dao = file_dao
           self.ui_automation = ui_automation
           self.config = config
-          
+          # Add AB1Processor
+          self.ab1_processor = AB1Processor(config)
+
+          # Flag to control whether to use direct processing or UI automation
+          self.use_direct_processing = True  # Set default here or from config
+
           # Create a unified logging interface regardless of input type
           import logging
           if logger is None:
@@ -337,12 +342,18 @@ class FolderProcessor:
                self.process_order_folder(order_folder, bio_folder)
           
           return
+     
+
+          
+
+          
+
 
      def process_order_folder(self, order_folder, parent_folder=None):
           """Process an individual order folder"""
           folder_name = os.path.basename(order_folder)
           self.log(f"Processing order folder: {folder_name}")
-          
+
           # Determine if we're in IND Not Ready context
           in_not_ready = os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER
           
@@ -351,15 +362,54 @@ class FolderProcessor:
           ab1_files = self.file_dao.get_files_by_extension(order_folder, self.config.ABI_EXTENSION)
           expected_count = self._get_expected_file_count(order_number)
           is_andreev_order = self.config.ANDREEV_NAME in folder_name.lower()
+
+          # Skip Andreev's orders for mSeq processing - same as original
+          if is_andreev_order in order_folder.lower():
+               return
           
+          # Check if we should use direct processing or UI automation
+          if self.use_direct_processing:
+               # Use AB1Processor for direct processing
+               was_processed, has_braces, has_ab1_files = self.ab1_processor.check_process_status(order_folder)
+          else:
+               # Use original mSeq detection approach
+               was_processed, has_braces, has_ab1_files = self.check_order_status(order_folder)
+
+          # Process based on status - similar logic to original
+          if not was_processed and not has_braces:
+               expected_count = self._get_expected_file_count(order_number)
+               
+               if expected_count > 0 and len(ab1_files) == expected_count and has_ab1_files:
+                    if self.use_direct_processing:
+                         # Process directly with AB1Processor
+                         success = self.ab1_processor.process_folder(order_folder)
+                         if success:
+                              self.log(f"Direct processing completed: {os.path.basename(order_folder)}")
+                    else:
+                         # Use UI automation as before
+                         self.ui_automation.process_folder(order_folder)
+                         self.log(f"mSeq completed: {os.path.basename(order_folder)}")
+                    
+                    # Handle IND Not Ready folder - same logic as original
+                    if os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER:
+                         destination = self.get_destination_for_order(order_folder, parent_folder)
+                         self.file_dao.move_folder(order_folder, destination)
+               else:
+                    # Move to Not Ready folder if incomplete - same logic as original
+                    not_ready_path = os.path.join(os.path.dirname(parent_folder), 
+                                                  self.config.IND_NOT_READY_FOLDER)
+                    self.file_dao.create_folder_if_not_exists(not_ready_path)
+                    self.file_dao.move_folder(order_folder, not_ready_path)
+                    self.log(f"Order moved to Not Ready: {os.path.basename(order_folder)}")
+
           # Check order completeness
           files_complete = expected_count > 0 and len(ab1_files) == expected_count
           
           # Check order status
-          was_mseqed, has_braces, has_ab1_files = self.check_order_status(order_folder)
+          was_processed, has_braces, has_ab1_files = self.check_order_status(order_folder)
           
           # Handle based on status and order type
-          if not was_mseqed and not has_braces:
+          if not was_processed and not has_braces:
                if files_complete and has_ab1_files:
                     # Process with mSeq if complete (but skip for Andreev orders)
                     if not is_andreev_order:
@@ -414,7 +464,7 @@ class FolderProcessor:
                                    self.log(f"Failed to move folder to IND Not Ready: {folder_name}")
           
           # Already mSeqed but in IND Not Ready - move back
-          elif was_mseqed and in_not_ready:
+          elif was_processed and in_not_ready:
                # Close mSeq to release file handles before moving
                if self.ui_automation:
                     self.ui_automation.close()
@@ -458,35 +508,50 @@ class FolderProcessor:
           return new_folder_path
 
      def process_pcr_folder(self, pcr_folder):
-          """Process all files in a PCR folder - simpler matching logic"""
+          """Process a PCR folder using either direct processing or UI automation"""
           self.log(f"Processing PCR folder: {os.path.basename(pcr_folder)}")
-
+          
+          # Handle reinjects first - same logic as original
           for file in os.listdir(pcr_folder):
-               if file.endswith(config.ABI_EXTENSION):
+               if file.endswith(self.config.ABI_EXTENSION):
                     # Clean the filename for matching with reinject list
                     clean_name = self.file_dao.standardize_filename_for_matching(file)
-
+                    
                     # Check if it's in the reinject list
                     is_reinject = clean_name in self.reinject_list
-
+                    
                     if is_reinject:
                          # Make sure Alternate Injections folder exists
                          alt_folder = os.path.join(pcr_folder, "Alternate Injections")
                          if not os.path.exists(alt_folder):
                               os.mkdir(alt_folder)
-
+                              
                          # Move file to Alternate Injections
                          source = os.path.join(pcr_folder, file)
                          dest = os.path.join(alt_folder, file)  # Keep original filename with brackets
                          if os.path.exists(source) and not os.path.exists(dest):
                               self.file_dao.move_file(source, dest)
                               self.log(f"Moved reinject {file} to Alternate Injections")
-
-          # Now process the folder with mSeq if it's ready
-          was_mseqed, has_braces, has_ab1_files = self.check_order_status(pcr_folder)
-          if not was_mseqed and not has_braces and has_ab1_files:
-               self.ui_automation.process_folder(pcr_folder)
-               self.log(f"mSeq completed: {os.path.basename(pcr_folder)}")
+          
+          # Check order status
+          if self.use_direct_processing:
+               # Use AB1Processor for direct processing
+               was_processed, has_braces, has_ab1_files = self.ab1_processor.check_process_status(pcr_folder)
+          else:
+               # Use original mSeq detection approach
+               was_processed, has_braces, has_ab1_files = self.check_order_status(pcr_folder)
+          
+          # Process the folder if needed
+          if not was_processed and not has_braces and has_ab1_files:
+               if self.use_direct_processing:
+                    # Process directly with AB1Processor
+                    success = self.ab1_processor.process_folder(pcr_folder)
+                    if success:
+                         self.log(f"Direct processing completed: {os.path.basename(pcr_folder)}")
+               else:
+                    # Use UI automation as before
+                    self.ui_automation.process_folder(pcr_folder)
+                    self.log(f"mSeq completed: {os.path.basename(pcr_folder)}")
           else:
                self.log(f"mSeq NOT completed: {os.path.basename(pcr_folder)}")
 
@@ -998,180 +1063,53 @@ class FolderProcessor:
           self.raw_reinject_list = raw_reinject_list
           return reinject_list
 
-     # def test_specific_pcr_sorting(self, pcr_number, folder_path=None):
-     #      """Test PCR file sorting for a specific PCR number"""
-     #      # Set up file output
-     #      from datetime import datetime
-     #      timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-     #      output_file = f"pcr_test_{pcr_number}_{timestamp}.txt"
-
-     #      # Function to log both to console and file
-     #      def log(message):
-     #           print(message)
-     #           with open(output_file, "a") as f:
-     #                f.write(message + "\n")
-
-     #      log(f"\n=== Testing PCR {pcr_number} Sorting ===")
-     #      log(f"Output saved to: {output_file}")
-
-     #      # Load the reinject list
-     #      if not hasattr(self, 'reinject_list') or not self.reinject_list:
-     #           log("Loading reinject list...")
-     #           i_numbers = ['21888', '21889', '21890', '21891']  # Hardcode I numbers for testing
-     #           reinject_path = f"P:\\Data\\Reinjects\\Reinject List_{datetime.now().strftime('%m-%d-%Y')}.xlsx"
-     #           self.reinject_list = self.get_reinject_list(i_numbers, reinject_path)
-     #           log(f"Loaded {len(self.reinject_list)} reinjections")
-
-     #      if folder_path:
-     #           log(f"\nListing ALL files in folder: {folder_path}")
-     #           log("=" * 50)
-
-     #           # Get all files in this folder recursively
-     #           all_files = []
-     #           for root, dirs, files in os.walk(folder_path):
-     #                for file in files:
-     #                     all_files.append(os.path.join(root, file))
-
-     #           # Group by file extension
-     #           file_by_ext = {}
-     #           for file_path in all_files:
-     #                ext = os.path.splitext(file_path)[1].lower()
-     #                if ext not in file_by_ext:
-     #                     file_by_ext[ext] = []
-     #                     file_by_ext[ext].append(file_path)
-
-     #           # Print summary of file types
-     #           log(f"Found {len(all_files)} total files:")
-     #           for ext, files in file_by_ext.items():
-     #                log(f"  {ext}: {len(files)} files")
-
-     #           # Print all .ab1 files
-     #           log("\nAll .ab1 files:")
-     #           ab1_files = file_by_ext.get(config.ABI_EXTENSION, [])
-     #           for i, file_path in enumerate(ab1_files):
-     #                log(f"  {i + 1}. {os.path.relpath(file_path, folder_path)}")
-
-     #           # Check file contents for PCR number
-     #           pcr_files = []
-     #           for file_path in ab1_files:
-     #                file_content = os.path.basename(file_path)
-     #                if f"PCR{pcr_number}" in file_content:
-     #                     pcr_files.append(file_path)
-
-     #           log(f"\nFound {len(pcr_files)} PCR {pcr_number} files")
-     #           if pcr_files:
-     #                log("PCR files found:")
-     #                for i, file_path in enumerate(pcr_files):
-     #                     log(f"  {i + 1}. {os.path.basename(file_path)}")
-
-     #      else:
-     #           log("No folder specified, using test files")
-     #           pcr_files = [
-     #                "{07E}{06G}940.9.H446_940R{PCR2961exp1}{2_28}{I-21889}.ab1",
-     #                "{06G}940.9.H446_940R{PCR2961exp1}.ab1"
-     #           ]
-
-     #      # Check reinject list for entries that might match these files
-     #      log("\nChecking reinject list for matches:")
-     #      matches_found = 0
-
-     #      if hasattr(self, 'reinject_list') and self.reinject_list and pcr_files:
-     #           for file_path in pcr_files:
-     #                file_name = os.path.basename(file_path) if os.path.exists(file_path) else file_path
-     #                log(f"\nFile: {file_name}")
-
-     #                # Standard normalization (with extension removal)
-     #                std_norm = self.file_dao.standardize_filename_for_matching(file_name)
-     #                log(f"Standard normalized: {std_norm}")
-
-     #                # PCR normalization (with manual extension removal)
-     #                pcr_norm = self.file_dao.standardize_filename_for_matching(file_name)
-     #                if pcr_norm.endswith(config.ABI_EXTENSION):
-     #                     pcr_norm = pcr_norm[:-4]
-     #                log(f"PCR normalized: {pcr_norm}")
-
-     #                # Check for matches in reinject list
-     #                found_match = False
-     #                for i, item in enumerate(self.reinject_list):
-     #                     reinj_std_norm = self.file_dao.standardize_filename_for_matching(item)
-
-     #                     if std_norm == reinj_std_norm:
-     #                          log(f"MATCH found with reinject #{i + 1}: {item}")
-     #                          log(f"  Normalized to: {reinj_std_norm}")
-     #                          found_match = True
-     #                          matches_found += 1
-     #                          break
-
-     #                if not found_match:
-     #                     log("No matches found in reinject list")
-     #      else:
-     #           log("No reinject list available for testing or no PCR files found")
-
-     #      log(f"\nFound {matches_found} files that match entries in the reinject list")
-     #      log("===================================")
-
-     #      # Display all entries in reinject list for reference
-     #      log("\nFull reinject list for reference:")
-     #      if hasattr(self, 'reinject_list') and self.reinject_list:
-     #           for i, item in enumerate(self.reinject_list):
-     #                log(f"{i + 1}. {item}")
-     #      else:
-     #           log("No reinject list available")
-
-     #      log(f"\nTest completed. Results saved to {output_file}")
-
-     def check_order_status(self, folder_path):
-          """
-          Check the processing status of a folder
-
-          Args:
-               folder_path (str): Path to the folder to check
-
-          Returns:
-               tuple: (was_mseqed, has_braces, has_ab1_files)
-                    - was_mseqed: True if folder has been processed by mSeq
-                    - has_braces: True if any files have brace tags (e.g., {tag})
-                    - has_ab1_files: True if folder contains .ab1 files
-          """
-          was_mseqed = False
-          has_braces = False
-          has_ab1_files = False
-
-          # Get all files in the folder
-          folder_contents = self.file_dao.get_directory_contents(folder_path)
-
-          # Check for mSeq directory structure
-          mseq_set = {'chromat_dir', 'edit_dir', 'phd_dir', 'mseq4.ini'}
-          current_proj = [item for item in folder_contents if item in mseq_set]
-
-          # A folder has been mSeqed if it contains all the required directories/files
-          if set(current_proj) == mseq_set:
-               was_mseqed = True
-
-          # Check for the 5 txt files as an additional verification
-          txt_file_count = 0
-          for item in folder_contents:
-               item_path = os.path.join(folder_path, item)
-               if os.path.isfile(item_path):
-                    if (item.endswith('.raw.qual.txt') or
-                              item.endswith('.raw.seq.txt') or
-                              item.endswith('.seq.info.txt') or
-                              item.endswith('.seq.qual.txt') or
-                              item.endswith('.seq.txt')):
-                         txt_file_count += 1
-
-          # If all 5 txt files are present, that's another indicator it was mSeqed
-          if txt_file_count == 5:
-               was_mseqed = True
-
-          # Check for .ab1 files and braces
-          for item in folder_contents:
-               if item.endswith(config.ABI_EXTENSION):
-                    has_ab1_files = True
-                    if '{' in item or '}' in item:
-                         has_braces = True
-
-          return was_mseqed, has_braces, has_ab1_files
+     def process_pcr_folder(self, pcr_folder):
+          """Process a PCR folder using either direct processing or UI automation"""
+          self.log(f"Processing PCR folder: {os.path.basename(pcr_folder)}")
+          
+          # Handle reinjects first - same logic as original
+          for file in os.listdir(pcr_folder):
+               if file.endswith(config.ABI_EXTENSION):
+                    # Clean the filename for matching with reinject list
+                    clean_name = self.file_dao.standardize_filename_for_matching(file)
+                    
+                    # Check if it's in the reinject list
+                    is_reinject = clean_name in self.reinject_list
+                    
+                    if is_reinject:
+                         # Make sure Alternate Injections folder exists
+                         alt_folder = os.path.join(pcr_folder, "Alternate Injections")
+                         if not os.path.exists(alt_folder):
+                              os.mkdir(alt_folder)
+                              
+                         # Move file to Alternate Injections
+                         source = os.path.join(pcr_folder, file)
+                         dest = os.path.join(alt_folder, file)  # Keep original filename with brackets
+                         if os.path.exists(source) and not os.path.exists(dest):
+                              self.file_dao.move_file(source, dest)
+                              self.log(f"Moved reinject {file} to Alternate Injections")
+          
+          # Check order status
+          if self.use_direct_processing:
+               # Use AB1Processor for direct processing
+               was_processed, has_braces, has_ab1_files = self.ab1_processor.check_process_status(pcr_folder)
+          else:
+               # Use original mSeq detection approach
+               was_processed, has_braces, has_ab1_files = self.check_order_status(pcr_folder)
+          
+          # Process the folder if needed
+          if not was_processed and not has_braces and has_ab1_files:
+               if self.use_direct_processing:
+                    # Process directly with AB1Processor
+                    success = self.ab1_processor.process_folder(pcr_folder)
+                    if success:
+                         self.log(f"Direct processing completed: {os.path.basename(pcr_folder)}")
+               else:
+                    # Use UI automation as before
+                    self.ui_automation.process_folder(pcr_folder)
+                    self.log(f"mSeq completed: {os.path.basename(pcr_folder)}")
+          else:
+               self.log(f"mSeq NOT completed: {os.path.basename(pcr_folder)}")
 
      def zip_order_folder(self, folder_path, include_txt=True):
           """
