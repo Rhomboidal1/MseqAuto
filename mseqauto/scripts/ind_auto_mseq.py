@@ -7,6 +7,7 @@ import re
 # Add parent directory to PYTHONPATH for imports
 import os
 import sys
+import argparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import subprocess
 import ctypes
@@ -73,6 +74,10 @@ def main():
     # Check if we're in a relaunched process
     is_relaunched = check_and_cleanup_relaunch()
 
+    parser = argparse.ArgumentParser(description='MSeq Individual Auto Processing')
+    parser.add_argument('--direct', action='store_true', help='Use direct processing instead of UI automation')
+    args = parser.parse_args()
+    
     # Get folder path FIRST before any imports
     data_folder = get_folder_from_user()
     
@@ -116,6 +121,8 @@ def main():
     file_dao = FileSystemDAO(config)
     ui_automation = MseqAutomation(config)
     processor = FolderProcessor(file_dao, ui_automation, config, logger=logger.info)
+
+    processor.use_direct_processing = args.direct
     
     try:
         # Get folders to process
@@ -149,37 +156,7 @@ def main():
         
         logger.info("All processing completed")
         print("\nALL DONE")
-        # # Get folders to process
-        # bio_folders = file_dao.get_folders(data_folder, r'bioi-\d+')
-        # logger.info(f"Found {len(bio_folders)} BioI folders")
-        
-        # immediate_orders = file_dao.get_folders(data_folder, r'bioi-\d+_.+_\d+')
-        # logger.info(f"Found {len(immediate_orders)} immediate order folders")
-        
-        # pcr_folders = file_dao.get_folders(data_folder, r'fb-pcr\d+_\d+')
-        # logger.info(f"Found {len(pcr_folders)} PCR folders")
-        
-        # # Process BioI folders
-        # for i, folder in enumerate(bio_folders):
-        #     logger.info(f"Processing BioI folder {i+1}/{len(bio_folders)}: {os.path.basename(folder)}")
-        #     processor.process_bio_folder(folder)
-        
-        # # Check if processing IND Not Ready folder
-        # is_ind_not_ready = os.path.basename(data_folder) == config.IND_NOT_READY_FOLDER
-        # logger.info(f"Is IND Not Ready folder: {is_ind_not_ready}")
-        
-        # # Process immediate orders
-        # for i, folder in enumerate(immediate_orders):
-        #     logger.info(f"Processing order folder {i+1}/{len(immediate_orders)}: {os.path.basename(folder)}")
-        #     processor.process_order_folder(folder, data_folder)
-        
-        # # Process PCR folders
-        # for i, folder in enumerate(pcr_folders):
-        #     logger.info(f"Processing PCR folder {i+1}/{len(pcr_folders)}: {os.path.basename(folder)}")
-        #     processor.process_pcr_folder(folder)
-        
-        # logger.info("All processing completed")
-        # print("\nALL DONE")
+
     except Exception as e:
         import traceback
         logger.error(f"Unexpected error: {e}")
