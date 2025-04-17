@@ -1066,7 +1066,7 @@ class FolderProcessor:
           
           # Handle reinjects first - same logic as original
           for file in os.listdir(pcr_folder):
-               if file.endswith(self.config.ABI_EXTENSION):
+               if file.endswith(config.ABI_EXTENSION):
                     # Clean the filename for matching with reinject list
                     clean_name = self.file_dao.standardize_filename_for_matching(file)
                     
