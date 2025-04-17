@@ -103,7 +103,6 @@ class MseqConfig:
     ANDREEV_NAME = "andreev"  # Used to identify special handling for Andreev orders
 
     # Paths for data operations
-    #KEY_FILE_PATH = r"P:\order_key.txt"
     KEY_FILE_PATH = r"P:\order_key.txt"
     BATCH_FILE_PATH = r"P:\generate-data-sorting-key-file.bat"
     REINJECT_FOLDER = r"P:\Data\Reinjects"
