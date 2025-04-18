@@ -20,12 +20,7 @@ class FolderProcessor:
           self.file_dao = file_dao
           self.ui_automation = ui_automation
           self.config = config
-          # Add AB1Processor
-          self.ab1_processor = AB1Processor(config)
-
-          # Flag to control whether to use direct processing or UI automation
-          self.use_direct_processing = True  # Set default here or from config
-
+          
           # Create a unified logging interface regardless of input type
           import logging
           if logger is None:
