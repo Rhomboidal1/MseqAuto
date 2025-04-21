@@ -2,7 +2,7 @@
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from typing import List, Union, Pattern, Optional
+
 import re
 from datetime import datetime, timedelta
 from shutil import move, copyfile
@@ -67,70 +67,51 @@ class FileSystemDAO:
 
         return self.directory_cache[path]
 
-
-
-    def get_folders(self, path: str, pattern: Optional[Union[str, Pattern]] = None) -> List[str]:
+    def get_folders(self, path, pattern=None): #KEEP
         """
         Get folders matching an optional regex pattern
         
         Args:
             path (str): Path to search for folders
             pattern (str or re.Pattern): A regex pattern string or a compiled regex object
-                
+            
         Returns:
             list: List of folder paths matching the pattern
         """
-        # Initialize empty list to store matched folder paths
-        folder_list: List[str] = []
-        
-        # Log the starting point of our search (helps with debugging)
+        folder_list = []
         self.log(f"Searching for folders in: {path}")
 
-        # If we received a compiled regex, print its pattern for debugging
-        # This helps identify what pattern is actually being used
+    
+        # If pattern is a compiled regex, print its pattern attribute
         if hasattr(pattern, 'pattern'):
             print(f"Regex pattern string: {pattern.pattern}")
         self.log(f"Using pattern: {pattern}")
 
-        # Get all items in the specified directory
-        contents: List[str] = self.get_directory_contents(path)
+        contents = self.get_directory_contents(path)
         self.log(f"Found {len(contents)} items in directory")
         
-        # Iterate through each item in the directory
         for item in contents:
-            # Create full path by joining directory path with item name
-            full_path: str = os.path.join(path, item)
+            full_path = os.path.join(path, item)
             
-            # Only process directories (folders), skip files
             if os.path.isdir(full_path):
-                # CASE 1: No pattern specified - include all folders
                 if pattern is None:
-                    self.log(f"  No pattern provided, adding {item}")
+                    self.log(f"  No pattern provided, adding {item}")  # Changed from print to self.log
                     folder_list.append(full_path)
                 else:
-                    # CASE 2: Pattern specified - check if folder name matches
-                    
-                    # Determine if pattern is a compiled regex object or a string
-                    # This optimization allows us to use the faster compiled regex if available
-                    if hasattr(pattern, 'search'):  # It's a compiled regex
+                    # Check if pattern is a compiled regex object or a string
+                    if hasattr(pattern, 'search'):  # Compiled regex
                         match = pattern.search(item.lower())
                         match_method = "using compiled regex search"
-                        self.log(f"  Matching '{item}' {match_method}")  # 
-                    else:  # It's a string pattern
+                    else:  # String pattern
                         match = re.search(pattern, item.lower())
                         match_method = "using re.search"
-                        self.log(f"  Matching '{item}' {match_method}")                      
-                    # Add folder to list if it matches the pattern
+                    
                     if match:
                         folder_list.append(full_path)
                     else:
-                        # Log folders that don't match (helpful for debugging)
-                        self.log(f"  No match for {item}")
+                        self.log(f"  No match for {item}")  # Changed from print to self.log
         
-        # Log summary of results before returning
-        # Using basename to make the log more readable
-        self.log(f"Returning {len(folder_list)} matching folders: {[os.path.basename(f) for f in folder_list]}")
-        
+        self.log(f"Returning {len(folder_list)} matching folders: {[os.path.basename(f) for f in folder_list]}")  # Changed from print to self.log
         return folder_list
 
     def get_files_by_extension(self, folder, extension): #KEEP
@@ -148,15 +129,10 @@ class FileSystemDAO:
                 return True
         return False
 
-    def create_folder_if_not_exists(self, path):
+    def create_folder_if_not_exists(self, path): #KEEP
         """Create folder if it doesn't exist"""
         if not os.path.exists(path):
-            try:
-                os.makedirs(path)
-                self.log(f"Created folder: {path}")
-            except Exception as e:
-                self.log(f"Error creating folder {path}: {e}")
-                return None
+            os.mkdir(path)
         return path
     def move_folder(self, source, destination, max_retries=3, delay=1.0):
         """

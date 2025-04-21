@@ -27,17 +27,28 @@ from subprocess import CalledProcessError, run as SubprocessRun
 from tkinter import filedialog
 from os import listdir, path as OsPath, mkdir
 from shutil import move as ShutilMove
-from re import search, sub, findall
-from time import time, sleep as TimeSleep
+from re import search, sub
+from time import sleep as TimeSleep
 from datetime import date
 from numpy import loadtxt, where
 
 #function that gets today's date in format m-d-yyyy
-
-
-def get_formatted_date():
+def GetFormattedDate():
     today = date.today()
-    return f"{int(today.strftime('%m'))}-{int(today.strftime('%d'))}-{today.strftime('%Y')}"
+    #gets rid of leading 
+    if today.strftime('%m')[:1]=='0':
+        m = today.strftime('%m')[1:]
+    else:
+        m = today.strftime('%m')
+
+    if today.strftime('%d')[:1]=='0':
+        d = today.strftime('%d')[1:]
+    else:
+        d = today.strftime('%d')
+    y = today.strftime('%Y')
+
+    formatteDate= f'{m}-{d}-{y}'
+    return formatteDate
 
 #Function returns a version of the string without anything contained in {} ex: {01A}Sample_Primer{5_25}{I-12345} returns Sample_Primer
 def CleanBracesFormat(aList):
@@ -284,38 +295,37 @@ def CheckFor5txt(orderPath):
     return all5
 
 #function returns both the app object and its main window.
-
 def GetMseq():
-    """Connect to existing mSeq instance or start a new one"""
-    from pywinauto.findwindows import ElementNotFoundError, ElementAmbiguousError
-    from pywinauto import Application, timings
-    
+    #from pywinauto.findwindows import ElementNotFoundError, ElementAmbiguousError
+    #from pywinauto import Application
     try:
-        app = Application(backend='win32').connect(title_re='[mM]seq.*', timeout=1)  # Try existing instance
+        app = Application(backend='win32').connect(title_re='Mseq*', timeout=1)
+        #return app
     except (ElementNotFoundError, timings.TimeoutError):
         try:
-            app = Application(backend='win32').start(
-                'cmd /c "cd /d C:\\DNA\\Mseq4\\bin && C:\\DNA\\Mseq4\\bin\\j.exe -jprofile mseq.ijl"', 
-                wait_for_idle=False)
-            app.connect(title='mSeq', timeout=10)
-        except Exception as e:
-            print(f"Failed to start mSeq: {e}")
-            raise
+            app = Application(backend='win32').connect(title_re='mSeq*', timeout=1)
+            #return app
+        except (ElementNotFoundError, timings.TimeoutError):
+            app = Application(backend='win32').start('cmd /c "cd /d C:\\DNA\\Mseq4\\bin && C:\\DNA\\Mseq4\\bin\\j.exe -jprofile mseq.ijl"', wait_for_idle=False).connect(title='mSeq', timeout=10)
+            #return app
+        except ElementAmbiguousError:
+            app = Application(backend='win32').connect(title_re='mSeq*', found_index=0, timeout=1)
+            app2 = Application(backend='win32').connect(title_re='mSeq*', found_index=1, timeout=1)
+            app2.kill()
+            #return app
     except ElementAmbiguousError:
-        app = Application(backend='win32').connect(title_re='[mM]seq.*', found_index=0)  # Multiple instances found
+        app = Application(backend='win32').connect(title_re='Mseq*', found_index=0, timeout=1)
+        app2 = Application(backend='win32').connect(title_re='Mseq*', found_index=1, timeout=1)
+        app2.kill()
+        #return app
     
-    # Find main window with either capitalization
-    main_window = None
-    for title_pattern in ['mSeq.*', 'Mseq.*']:
-        try:
-            main_window = app.window(title_re=title_pattern)
-            if main_window.exists(): break
-        except: pass
+    if app.window(title_re='mSeq*').exists()==False:
+        mainWindow = app.window(title_re='Mseq*')
+    else:
+        mainWindow = app.window(title_re='mSeq*')
+
+    return app, mainWindow
     
-    if not main_window or not main_window.exists():
-        raise RuntimeError("Could not find mSeq main window")
-       
-    return app, main_window    
  
 def IsBrowseDialogOpen(myapp):
     #app = GetMseq()
@@ -345,265 +355,91 @@ def FivetxtORlowQualityWindow(myApp, orderpath):
         return True
     return False
 
-def wait_for_dialog(app, dialog_type, timeout=5):
-    """Wait for a specific dialog to appear"""
-    retry_interval = 0.3 if dialog_type in ["error_window", "call_bases"] else 0.1
-    
-    if dialog_type == "browse_dialog":
-        return timings.wait_until(timeout=timeout, retry_interval=retry_interval,
-                                func=lambda: IsBrowseDialogOpen(app), value=True)
-    elif dialog_type == "preferences":
-        return timings.wait_until(timeout=timeout, retry_interval=retry_interval,
-                                func=lambda: IsPreferencesOpen(app), value=True)
-    elif dialog_type == "copy_files":
-        return timings.wait_until(timeout=timeout, retry_interval=retry_interval,
-                                func=lambda: IsCopyFilesOpen(app), value=True)
-    elif dialog_type == "error_window":
-        return timings.wait_until(timeout=timeout, retry_interval=retry_interval,
-                                func=lambda: IsErrorWindowOpen(app), value=True)
-    elif dialog_type == "call_bases":
-        return timings.wait_until(timeout=timeout, retry_interval=retry_interval,
-                                func=lambda: IsCallBasesOpen(app), value=True)
-    return False
-
-def get_dialog_by_titles(app, titles):
-    """Get a dialog window by multiple possible titles"""
-    for title in titles:
-        try:
-            dialog = app.window(title=title)
-            if dialog.exists():
-                return dialog
-        except:
-            pass
-    return None
-
-def click_dialog_button(dialog, button_titles):
-    """Click a button in a dialog using multiple possible titles"""
-    for title in button_titles:
-        try:
-            button = dialog.child_window(title=title, class_name="Button")
-            if button.exists():
-                button.click_input()
-                TimeSleep(0.2)
-                return True
-        except:
-            pass
-    return False
-
-def select_all_files_in_dialog(dialog):
-    """Select all files in a dialog"""
-    try:
-        # Try Windows 10 approach first
-        shell_view = dialog.child_window(title="ShellView", class_name="SHELLDLL_DefView")
-        if shell_view.exists():
-            list_view = shell_view.child_window(class_name="DirectUIHWND")
-            if list_view.exists():
-                list_view.click_input()
-                send_keys('^a')  # Ctrl+A
-                return True
-    except:
-        pass
-    
-    try:
-        # Try Windows 11 approach
-        list_view = dialog.child_window(class_name="DirectUIHWND")
-        if list_view.exists():
-            list_view.click_input()
-            send_keys('^a')  # Ctrl+A
-            return True
-    except:
-        pass
-    
-    # Last resort
-    try:
-        rect = dialog.rectangle()
-        dialog.click_input(coords=((rect.right - rect.left) // 2, (rect.bottom - rect.top) // 2))
-        TimeSleep(0.2)
-        send_keys('^a')  # Ctrl+A
-        return True
-    except:
-        return False
-def wait_until_completion(app, orderpath, timeout=45):
-    """Wait for mSeq processing to complete"""
-    from time import time 
-    start_time = time.time()
-    interval = 0.2
-    
-    while time.time() - start_time < timeout:
-        # Check for low quality dialog
-        if app.window(title="Low quality files skipped").exists():
-            return True
-            
-        # Check for 5 text files (alternative completion signal)
-        if CheckFor5txt(orderpath):
-            return True
-            
-        time.sleep(interval)
-    
-    return False
-
-def close_all_read_info_dialogs(app):
-    """Close all Read information dialogs"""
-    try:
-        from pywinauto import findwindows
-        # Find all Read information windows
-        read_windows = findwindows.find_elements(
-            title_re='Read information for.*', 
-            process=app.process
-        )
-        for win in read_windows:
-            try:
-                read_dialog = app.window(handle=win.handle)
-                read_dialog.close()
-                TimeSleep(0.1)
-            except Exception as e:
-                print(f"Error closing read dialog: {e}")
-        return len(read_windows) > 0
-    except Exception as e:
-        # Fallback approach
-        try:
-            readWindow = app.window(title_re='Read information for*')
-            if readWindow.exists():
-                readWindow.close()
-                return True
-        except:
-            pass
-        return False
-        
 def MseqOrder(orderpath):
-    """Process folder with mSeq using more reliable methods"""
-    from pywinauto.keyboard import send_keys
+    #from pywinauto.application import Application
+    #from pywinauto.application import findwindows
+    #from pywinauto.keyboard import send_keys
+    #from pywinauto import timings
     
-    # Connect to mSeq and get main window
+    #mseqMainWindow = app.window(title_re='mSeq*')
+    
     app, mseqMainWindow = GetMseq()
     mseqMainWindow.set_focus()
-    
-    # Start new project (Ctrl+N)
     send_keys('^n')
-    print("Starting new project")
-    
-    # Handle Browse For Folder dialog
-    wait_for_dialog(app, "browse_dialog")
-    dialog_window = get_dialog_by_titles(app, ['Browse For Folder', 'Browse for Folder'])
-    if not dialog_window:
-        dialog_window = app.window(title_re='Browse.*Folder')
-    
-    if not dialog_window:
-        print("Could not get Browse For Folder dialog")
-        return False
-    
-    # Navigate to the target folder
-    TimeSleep(0.5)  # Add delay for first browsing operation
-    if not NavigateToFolder(dialog_window, orderpath):
-        print(f"Failed to navigate to {orderpath}")
-        return False
-    
-    # Click OK button
-    click_dialog_button(dialog_window, ["OK", "&OK"])
-    
-    # Handle mSeq Preferences dialog
-    wait_for_dialog(app, "preferences")
-    pref_dialog = get_dialog_by_titles(app, ['Mseq Preferences', 'mSeq Preferences'])
-    if pref_dialog:
-        click_dialog_button(pref_dialog, ["&OK", "OK"])
-    
-    # Handle Copy sequence files dialog
-    wait_for_dialog(app, "copy_files")
-    copy_dialog = app.window(title_re='Copy.*sequence files')
-    if copy_dialog:
-        select_all_files_in_dialog(copy_dialog) # Select all files
-        click_dialog_button(copy_dialog, ["&Open", "Open"])
-    wait_for_dialog(app, "error_window") # Handle File error dialog
-    error_dialog = get_dialog_by_titles(app, ['File error', 'Error'])
-    if error_dialog:
-        click_dialog_button(error_dialog, ["OK"])
 
-    wait_for_dialog(app, "call_bases") # Handle Call bases dialog
-    call_bases_dialog = app.window(title_re='Call bases.*')
-    if call_bases_dialog:
-        click_dialog_button(call_bases_dialog, ["&Yes", "Yes"])
+    timings.wait_until(timeout=5, retry_interval=.1, func=lambda: IsBrowseDialogOpen(app), value=True)
+    dialogWindow = app.window(title='Browse For Folder')
+    TimeSleep(.5)
+    NavigateToFolder(dialogWindow, orderpath)
+    okDiaglogButton = app.BrowseForFolder.child_window(title="OK", class_name="Button")
+    okDiaglogButton.click_input()
 
-    # Wait for processing to complete
-    wait_until_completion(app, orderpath)
+    timings.wait_until(timeout=5, retry_interval=.1, func=lambda: IsPreferencesOpen(app), value=True)
+    mseqPrefWindow = app.window(title='Mseq Preferences')
+    okPrefButton = mseqPrefWindow.child_window(title="&OK", class_name="Button")
+    okPrefButton.click_input()
+    
+    timings.wait_until(timeout=5, retry_interval=.1, func=lambda: IsCopyFilesOpen(app), value=True)
+    copySeqFilesWindow = app.window(title='Copy sequence files', class_name='#32770')
+    shellViewFiles = copySeqFilesWindow.child_window(title="ShellView", class_name="SHELLDLL_DefView")      #get the shell view control from the file dialog window
+    listView = shellViewFiles.child_window(class_name="DirectUIHWND")                       #get this thing, whatever it is (it's like a UI element displaying the list of files in the selected directory)
+    listView.click_input()                                                                  #click on that thing, whatever it is (clicks right in the center of the window)
+    send_keys('^a')     
+    #fileComboBox = copySeqFilesWindow.child_window(class_name="ComboBoxEx32")
+    #fileEditBox = fileComboBox.child_window(class_name='Edit')
+    #fileEditBox.set_edit_text(fileString)
+    copySeqOpenButton = copySeqFilesWindow.child_window(title="&Open", class_name="Button")
+    copySeqOpenButton.click_input()
 
-    # Close any Read information windows before returning
-    close_all_read_info_dialogs(app)
-    print(f"Successfully processed {orderpath}")
-    return True
+    timings.wait_until(timeout=10, retry_interval=.3, func=lambda: IsErrorWindowOpen(app), value=True)
+    fileErrorWindow = app.window(title='File error')                                        #since we ^a in the shell view, we'll always get the mseq.ini file - not a seq file type so we get this file error window every time.
+    fileErrorOkButton = fileErrorWindow.child_window(class_name="Button")                   #get the ok button in the error window
+    fileErrorOkButton.click_input()     
 
+    timings.wait_until(timeout=10, retry_interval=.3, func=lambda: IsCallBasesOpen(app), value=True)
+    callBasesWindow = app.window(title='Call bases?')
+    callBasesYesButton = callBasesWindow.child_window(title="&Yes", class_name="Button")
+    callBasesYesButton.click_input()
+    #phredWindow = app.window(title='Phred')                                                 #three cmd windows
+    #phd2fastaWindow = app.window(title='phd2fasta')
+    #crossmatch = app.window(title="Crossmatch")
+
+    timings.wait_until(timeout=45, retry_interval=.2, func=lambda: FivetxtORlowQualityWindow(app, orderpath), value=True)   #wait until all bases are called. one of two things happens - either a 5th txt file shows up in the order folder or the low quality read window opens.
+    if app.window(title="Low quality files skipped").exists():
+        lowQualityWindow = app.window(title='Low quality files skipped')
+        lowQualityOkButton = lowQualityWindow.child_window(class_name="Button")
+        lowQualityOkButton.click_input()
+    
+    timings.wait_until(timeout=5, retry_interval=.1, func=lambda: IsReadInfoOpen(app), value=True)
+    if app.window(title_re='Read information for*').exists:
+        readWindow = app.window(title_re='Read information for*')
+        readWindow.close()
+
+
+
+    
+
+#function clicks through the treeview control to get to the folder the user selected.
 def NavigateToFolder(browsefolderswindow, path):
-    """Navigate through folder tree with improved reliability"""
-    import re
     browsefolderswindow.set_focus()
     treeView = browsefolderswindow.child_window(class_name="SysTreeView32")
-    if not treeView.exists(): return False
-    # Get Desktop item and expand it
-    item = treeView.get_item('\\Desktop')
-    item.click_input()
-    TimeSleep(0.2)
-    item.expand()
-    TimeSleep(0.3)
-    # Find This PC under Desktop (name varies by Windows version)
-    this_pc_item = None
-    for child in item.children():
-        if any(term in child.text().lower() for term in ["pc", "computer"]):
-            this_pc_item = child
-            break
-    
-    if not this_pc_item: return False
-    # Expand This PC
-    this_pc_item.click_input()
-    TimeSleep(0.2)
-    this_pc_item.expand()
-    TimeSleep(0.3)
-    # Parse path and handle drive first
+    desktopPath = f'\\Desktop\\{get_virtual_folder_name()}'
+    #desktopPath = f'\\Desktop\\This PC'
+    item = treeView.get_item(desktopPath)
     data = path.split('\\')
-    if len(data) > 0:
-        drive = data[0]
-        # Handle mapped network drives
-        if 'P:' in drive: drive = sub('P:', r'ABISync (P:)', drive)
-        if 'H:' in drive: drive = sub('H:', r'Tom (\\\\w2k16\\users) (H:)', drive)
-        # Find the drive in This PC children
-        drive_item = None
-        for child in this_pc_item.children():
-            drive_text = child.text()
-            # Extract drive letter for better matching
-            drive_letter = None
-            if ":" in drive_text:
-                drive_letter_parts = re.findall(r'([A-Za-z]:)', drive_text)
-                if drive_letter_parts: drive_letter = drive_letter_parts[0]
-            # Try multiple matching approaches
-            if (drive_text == drive or drive in drive_text or 
-                (drive_letter and drive_letter.upper() == drive.upper()[:2])):
-                drive_item = child
+    for folder in data:
+        if 'P:' in folder:
+            #folder = sub('P:', r'abisync (\\\\w2k16) (P:)', folder         OLD DRIVE NAME
+            folder = sub('P:', r'ABISync (P:)', folder)                     #NEW DRIVE NAME
+        if 'H:' in folder:
+            folder = sub('H:', r'Tom (\\\\w2k16\\users) (H:)', folder)
+        for child in item.children():
+            #print(child.text())
+            if child.text() == folder:
+                browsefolderswindow.set_focus()
+                item = child
+                item.click_input()              #the last folder will be clicked on, so the next mseq function should be ready to just click ok.
                 break
-        if not drive_item: return False
-        # Navigate folder hierarchy
-        current_item = drive_item
-        current_item.click_input()
-        TimeSleep(0.2)
-        for folder in data[1:]:
-            if not folder: continue  # Skip empty segments
-            current_item.expand()
-            TimeSleep(0.3)
-            # Find next folder (exact match first, then partial)
-            next_item = None
-            for child in current_item.children():
-                if child.text() == folder:
-                    next_item = child
-                    break
-            if not next_item:
-                for child in current_item.children():
-                    if folder.lower() in child.text().lower():
-                        next_item = child
-                        break
-            if not next_item: return False
-            next_item.click_input()
-            TimeSleep(0.2)
-            current_item = next_item
-    # Ensure final folder is selected
-    current_item.click_input()
-    return True
     
 #End functions 
 ########################################################################################################
@@ -614,20 +450,25 @@ def NavigateToFolder(browsefolderswindow, path):
 if __name__ == "__main__":
     batPath = "P:\\generate-data-sorting-key-file.bat"
     try:
-        # SubprocessRun(batPath, shell=True, check=True)
-        keyFilePathName = 'C:\\P\\order_key.txt'
-        reinjectListFileName = f'Reinject List_{get_formatted_date()}.xlsx'
-        reinjectListFilePath = f'C:\\P:\\Data\\Reinjects\\{reinjectListFileName}'
+        SubprocessRun(batPath, shell=True, check=True)
+        keyFilePathName = 'P:\\order_key.txt'
+        reinjectListFileName = f'Reinject List_{GetFormattedDate()}.xlsx'
+        reinjectListFilePath = f'P:\\Data\\Reinjects\\{reinjectListFileName}'
         completeReinjectList = []
         reinjectPrepList = []
         completeRawReinjectList = []
         key = loadtxt(keyFilePathName, dtype=str, delimiter='\t')
         AdjustFullKeyToABIChars
 
+        #root = tk.Tk()
+        #dialog = tk.Toplevel(root)
+        #dataFolderPath = filedialog.askdirectory(parent=dialog, title="Select today's data folder. To mseq orders.")
         dataFolderPath = filedialog.askdirectory(title="Select today's data folder. To mseq orders.")
+        #dialog.destroy()
         dataFolderPath = sub(r'/','\\\\', dataFolderPath)
         bioIFolders  = GetInumberFolders(dataFolderPath)  #get bioIfolders that have been sorted already
         immediateOrderFolders = GetImmediateOrders(dataFolderPath)
+        #print(bioIFolders)
         pcrFolders = GetPCRFolders(dataFolderPath)
 
         from pywinauto import Application
@@ -639,7 +480,9 @@ if __name__ == "__main__":
         #loop through each bioI folder
         for bioIFolder in bioIFolders:
             orderFolders = GetOrderFolders(bioIFolder) #get order folders which will be compressed.
+            #print(orderFolders)
             for orderFolder in orderFolders:
+                #print(orderFolder)
                 if not 'andreev' in orderFolder.lower():                            #don't mseq dmitri's orders
                     orderNumber = GetOrderNumberFromFolderName(orderFolder)
                     orderKey = GetOrderList(orderNumber)
