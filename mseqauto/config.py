@@ -42,7 +42,8 @@ class MseqConfig:
         'plate_blank_file': re.compile(r'^\d{2}[A-H]__.ab1$', re.IGNORECASE),  # Plate blanks pattern
         'order_folder': re.compile(r'bioi-\d+_.+_\d+', re.IGNORECASE),  # For BioI order folders
         'pcr_folder': re.compile(r'fb-pcr\d+(_\d+)?', re.IGNORECASE),     # For PCR folders
-        'reinject': re.compile(r'reinject', re.IGNORECASE)             # For filtering out reinject folders
+        'reinject': re.compile(r'reinject', re.IGNORECASE),             # For filtering out reinject folders
+        'double_well': re.compile(r'^{\d+[A-Z]}{(\d+[A-Z])}')
     }
 
     # Timeouts for UI operations - extended for Windows 11

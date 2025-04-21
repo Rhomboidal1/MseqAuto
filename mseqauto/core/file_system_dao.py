@@ -839,27 +839,33 @@ class FileSystemDAO:
         return file_path
 
     def standardize_filename_for_matching(self, file_name, remove_extension=True):
-        #Move to path_utilities.py
         """
         Standardized filename cleaning method for consistent matching across all code
         Used for PCR files, reinject lists, and any other string comparison operations
         """
         # Step 1: Remove file extension if needed
-        if remove_extension and file_name.endswith(config.ABI_EXTENSION):
+        if remove_extension and file_name.endswith(self.config.ABI_EXTENSION):
             clean_name = file_name[:-4]
         else:
             clean_name = file_name
 
-        # Step 2: Remove content in brackets (PCR numbers, well locations)
+        # Step 2: Check if the name is just a well location (e.g., {01G})
+        well_pattern = re.compile(r'^{\d+[A-Z]}$')
+        if well_pattern.match(clean_name):
+            # For well locations, keep them as is to avoid empty string normalization
+            return clean_name
+            
+        # Step 3: Remove content in brackets (PCR numbers, well locations)
         clean_name = re.sub(r'{.*?}', '', clean_name)
 
-        # Step 3: Remove standard suffixes
+        # Step 4: Remove standard suffixes
         clean_name = clean_name.replace('_Premixed', '')
         clean_name = clean_name.replace('_RTI', '')
 
-        # Step 4: Character standardization (only if needed for PCR matching)
-        # Note: For PCR files we generally don't need this step as we want exact matches
-        # clean_name = self.adjust_abi_chars(clean_name)
+        # Step 5: If after all cleaning we have an empty string, return the original
+        # to avoid normalization conflicts
+        if not clean_name.strip():
+            return file_name
 
         return clean_name
 

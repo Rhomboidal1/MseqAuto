@@ -483,11 +483,18 @@ class FolderProcessor:
           clean_brace_file_name = re.sub(r'{.*?}', '', file_name)
           target_file_path = os.path.join(destination_folder, clean_brace_file_name)
 
-          # Check if file is a reinject
+          # Check if file is a reinject by presence in reinject list
           is_reinject = False
           if hasattr(self, 'reinject_list') and self.reinject_list:
                is_reinject = normalized_name in [self.file_dao.standardize_filename_for_matching(r) for r in
                                                   self.reinject_list]
+          
+          # IMPROVEMENT: Use the pattern from config
+          # Check for double well pattern (also triggers reinject logic)
+          if self.config.REGEX_PATTERNS['double_well'].match(file_name):
+               is_reinject = True
+               self.log(f"Double well pattern detected in: {file_name}")
+          
           self.log(f"Is reinject: {is_reinject}")
 
           # Handle file placement - same logic as before but much cleaner
@@ -499,19 +506,21 @@ class FolderProcessor:
                return self.file_dao.move_file(file_path, alt_file_path)
           elif is_reinject:
                # Handle reinjections
-               raw_name_idx = self.reinject_list.index(normalized_name)
-               raw_name = self.raw_reinject_list[raw_name_idx]
+               if is_reinject and normalized_name in [self.file_dao.standardize_filename_for_matching(r) for r in self.reinject_list]:
+                    # It's in the actual reinject list (not just double well pattern)
+                    raw_name_idx = self.reinject_list.index(normalized_name)
+                    raw_name = self.raw_reinject_list[raw_name_idx] if hasattr(self, 'raw_reinject_list') else self.reinject_list[raw_name_idx]
 
-               # Check for preemptive reinject
-               if '{!P}' in raw_name:
-                    # Preemptive reinject goes to main folder
-                    return self.file_dao.move_file(file_path, target_file_path)
-               else:
-                    # Regular reinject goes to alternate injections
-                    alt_inj_folder = os.path.join(destination_folder, "Alternate Injections")
-                    os.makedirs(alt_inj_folder, exist_ok=True)  # Simplified folder creation
-                    alt_file_path = os.path.join(alt_inj_folder, file_name)
-                    return self.file_dao.move_file(file_path, alt_file_path)
+                    # Check for preemptive reinject
+                    if '{!P}' in raw_name:
+                         # Preemptive reinject goes to main folder
+                         return self.file_dao.move_file(file_path, target_file_path)
+               
+               # Regular reinject or double well pattern goes to alternate injections
+               alt_inj_folder = os.path.join(destination_folder, "Alternate Injections")
+               os.makedirs(alt_inj_folder, exist_ok=True)  # Simplified folder creation
+               alt_file_path = os.path.join(alt_inj_folder, file_name)
+               return self.file_dao.move_file(file_path, alt_file_path)
           else:
                # Regular file, put in main folder
                return self.file_dao.move_file(file_path, target_file_path)
@@ -956,12 +965,8 @@ class FolderProcessor:
           # Debug output for troubleshooting
           self.log(f"PCR file normalized name: {normalized_name}")
 
-          # NEW: Check if file is a reinject by looking for double well location pattern
-          # Pattern: {XXX}{YYY}Sample_Name{PCR####exp#}{dilution} 
-          is_reinject = bool(re.match(r'^{\d+[A-Z]}{\d+[A-Z]}', file_name))
-          
-          if is_reinject:
-               self.log(f"Identified as reinject based on double well location pattern")
+          # NEW: Check if file is a reinject by double well pattern
+          is_reinject = bool(self.config.REGEX_PATTERNS['double_well'].match(file_name))
           
           # For completeness, also check against reinject list
           raw_name = None
@@ -1206,6 +1211,30 @@ class FolderProcessor:
           self.raw_reinject_list = raw_reinject_list
           return reinject_list
 
+     def debug_reinject_detection(self, file_name):
+          """Debug helper for reinject detection logic"""
+          # 1. Check if in reinject list
+          normalized_name = self.file_dao.standardize_filename_for_matching(file_name)
+          in_reinject_list = False
+          if hasattr(self, 'reinject_list') and self.reinject_list:
+               normalized_reinjects = [self.file_dao.standardize_filename_for_matching(r) for r in self.reinject_list]
+               in_reinject_list = normalized_name in normalized_reinjects
+          
+          # 2. Check for double well pattern
+          has_double_well = bool(self.config.REGEX_PATTERNS['double_well'].match(file_name))
+          
+          # 3. Final determination
+          is_reinject = in_reinject_list or has_double_well
+          
+          debug_info = {
+               'file_name': file_name,
+               'normalized_name': normalized_name,
+               'in_reinject_list': in_reinject_list,
+               'has_double_well': has_double_well,
+               'is_reinject': is_reinject
+          }
+          
+          return debug_info
      # def test_specific_pcr_sorting(self, pcr_number, folder_path=None):
      #      """Test PCR file sorting for a specific PCR number"""
      #      # Set up file output
