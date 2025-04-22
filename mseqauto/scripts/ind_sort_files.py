@@ -102,6 +102,9 @@ def main():
         logger.info(f"Processing folder {i+1}/{len(bio_folders)}: {os.path.basename(folder)}")
         processor.sort_ind_folder(folder, reinject_list, order_key)
     
+    # Final cleanup pass for the entire data folder
+    processor.final_cleanup(data_folder)
+
     logger.info("All folders processed")
     print("All done!")
 

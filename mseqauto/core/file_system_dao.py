@@ -114,13 +114,35 @@ class FileSystemDAO:
         self.log(f"Returning {len(folder_list)} matching folders: {[os.path.basename(f) for f in folder_list]}")  # Changed from print to self.log
         return folder_list
 
-    def get_files_by_extension(self, folder, extension): #KEEP
-        """Get all files with specified extension in a folder"""
-        files = []
-        for item in self.get_directory_contents(folder):
-            if item.endswith(extension):
-                files.append(os.path.join(folder, item))
-        return files
+    def get_files_by_extension(self, folder_path, extension, recursive=False):
+        """
+        Get all files with a specific extension in a folder
+        
+        Args:
+            folder_path (str): Path to the folder
+            extension (str): File extension to look for (e.g., '.ab1')
+            recursive (bool): Whether to search recursively in subfolders
+            
+        Returns:
+            list: List of file paths with the specified extension
+        """
+        if recursive:
+            # Use os.walk to get all files recursively
+            files = []
+            for root, dirs, filenames in os.walk(folder_path):
+                for filename in filenames:
+                    if filename.lower().endswith(extension.lower()):
+                        files.append(os.path.join(root, filename))
+            return files
+        else:
+            # Just search in the current folder
+            try:
+                return [os.path.join(folder_path, f) for f in os.listdir(folder_path) 
+                    if os.path.isfile(os.path.join(folder_path, f)) and 
+                    f.lower().endswith(extension.lower())]
+            except Exception as e:
+                self.log(f"Error getting files by extension {extension} in {folder_path}: {e}")
+                return []
 
     def contains_file_type(self, folder, extension): #KEEP
         """Check if folder contains files with specified extension"""
