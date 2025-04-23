@@ -580,17 +580,43 @@ class FolderProcessor:
                     self.log(f"Could not determine destination BioI folder, leaving in current location: {folder_name}")
 
      def get_pcr_folder_path(self, pcr_number, base_path):
-          """Get proper PCR folder path or create one if needed"""
-          pcr_folder_name = f"FB-PCR{pcr_number}"
+          """
+          Get proper PCR folder path or create one if needed.
+          
+          Args:
+               pcr_number: PCR number (without the 'PCR' prefix)
+               base_path: The base folder path to search in
+               
+          Returns:
+               str: Path to the PCR folder
+          """
+          self.log(f"Looking for PCR folder with PCR{pcr_number} in {base_path}")
 
-          # Check for existing folders with this PCR number
+          # Search for any folder containing the PCR number
+          pcr_pattern = re.compile(f'pcr{pcr_number}', re.IGNORECASE)
+          found_folders = []
+          
           for item in os.listdir(base_path):
-               if os.path.isdir(os.path.join(base_path, item)):
-                    if re.search(f'fb-pcr{pcr_number}', item.lower()):
-                         return os.path.join(base_path, item)
-
-          # If no folder exists, create one
+               item_path = os.path.join(base_path, item)
+               if os.path.isdir(item_path) and pcr_pattern.search(item.lower()):
+                    found_folders.append(item_path)
+          
+          if found_folders:
+               # If multiple matches found, prioritize ones with order numbers
+               order_pattern = re.compile(f'pcr{pcr_number}_\\d+', re.IGNORECASE)
+               for folder in found_folders:
+                    if order_pattern.search(folder.lower()):
+                         self.log(f"Found PCR folder with order number: {folder}")
+                         return folder
+               
+               # If no folder with order number, use the first match
+               self.log(f"Found PCR folder: {found_folders[0]}")
+               return found_folders[0]
+          
+          # No matching folder found, create a new one
+          pcr_folder_name = f"FB-PCR{pcr_number}"
           new_folder_path = os.path.join(base_path, pcr_folder_name)
+          self.log(f"Creating new PCR folder: {new_folder_path}")
           self.file_dao.create_folder_if_not_exists(new_folder_path)
           return new_folder_path
      
@@ -848,19 +874,29 @@ class FolderProcessor:
           file_name = os.path.basename(file_path)
           self.log(f"Processing PCR file: {file_name} with PCR Number: {pcr_number}")
 
-          # Get the day data folder
-          day_data_path = os.path.dirname(os.path.dirname(file_path))
-
-          # Create PCR folder name and path
-          pcr_folder_path = self.get_pcr_folder_path(pcr_number, day_data_path)
-
-          # Create PCR folder if it doesn't exist
-          if not os.path.exists(pcr_folder_path):
-               os.makedirs(pcr_folder_path)
-
           # Check if file is in a Not Needed folder
           is_from_nn = self.is_in_not_needed_folder(file_path)
           
+          # IMPORTANT: Always use the user-selected folder for consistency
+          # This is the key change - we always use the same base path
+          # If this is undefined, use the current_data_folder attribute which should be set
+          if hasattr(self, 'current_data_folder') and self.current_data_folder:
+               day_data_path = self.current_data_folder
+          else:
+               # Fallback to parent folder logic - should not normally be used
+               current_folder = os.path.dirname(file_path)
+               # For NN folder files, go up two levels instead of one
+               if is_from_nn:
+                    day_data_path = os.path.dirname(os.path.dirname(current_folder))
+               else:
+                    day_data_path = os.path.dirname(current_folder)
+          
+          self.log(f"Using day data path: {day_data_path}")
+
+          # Find or create PCR folder
+          pcr_folder_path = self.get_pcr_folder_path(pcr_number, day_data_path)
+          self.log(f"Target PCR folder: {pcr_folder_path}")
+
           # Use standard normalization
           normalized_name = self.file_dao.standardize_filename_for_matching(file_name)
 
