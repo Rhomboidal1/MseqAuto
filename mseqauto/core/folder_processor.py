@@ -1424,7 +1424,7 @@ class FolderProcessor:
           # If a reinject_path is provided, also check that Excel file
           if reinject_path and os.path.exists(reinject_path):
                try:
-                    import pylightxl as xl
+                    import pylightxl as xl  # type: ignore
 
                     # Read the Excel file
                     db = xl.readxl(reinject_path)

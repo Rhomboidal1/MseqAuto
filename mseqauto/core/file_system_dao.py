@@ -7,7 +7,7 @@ import re
 from datetime import datetime, timedelta
 from shutil import move, copyfile
 from zipfile import ZipFile, ZIP_DEFLATED
-from mseqauto.config import MseqConfig
+from mseqauto.config import MseqConfig  # type: ignore
 
 config = MseqConfig()
 
@@ -894,7 +894,7 @@ class FileSystemDAO:
 
 if __name__ == "__main__":
     # Simple test if run directly
-    from mseqauto.config import MseqConfig
+    from mseqauto.config import MseqConfig  # type: ignore
 
     config = MseqConfig()
     dao = FileSystemDAO(config)
