@@ -5,15 +5,9 @@ import tkinter as tk
 import sys
 from datetime import datetime
 from tkinter import filedialog
-
-# Add parent directory to PYTHONPATH for imports
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-# print(f"Current working directory: {os.getcwd()}")
-# print(f"Script directory: {os.path.dirname(os.path.abspath(__file__))}")
-# print(sys.path)
 import warnings
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
 
 def get_folder_from_user():
