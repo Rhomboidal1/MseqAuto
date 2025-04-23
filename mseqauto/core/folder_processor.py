@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 import time
 from datetime import datetime
 
-from mseqauto.config import MseqConfig
+from mseqauto.config import MseqConfig # type: ignore
 import warnings
 warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
 
@@ -1825,7 +1825,7 @@ class FolderProcessor:
 
 if __name__ == "__main__":
     # Simple test if run directly
-    from mseqauto.config import MseqConfig
+    from mseqauto.config import MseqConfig # type: ignore
     from file_system_dao import FileSystemDAO
     from datetime import datetime
 
