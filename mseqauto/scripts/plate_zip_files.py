@@ -1,65 +1,61 @@
 # plate_zip_files.py
-import os
-import sys
 import tkinter as tk
 from tkinter import filedialog
 import subprocess
-import re
+# Add parent directory to PYTHONPATH for imports
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import warnings
+warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
 
-from mseqauto.core import FileSystemDAO, FolderProcessor
-from mseqauto.utils import setup_logger
-from mseqauto.config import MseqConfig
-
-# Check for 32-bit Python requirement
-if sys.maxsize > 2**32:
-    py32_path = MseqConfig.PYTHON32_PATH
-    if os.path.exists(py32_path) and py32_path != sys.executable:
-        script_path = os.path.abspath(__file__)
-        subprocess.run([py32_path, script_path])
-        sys.exit(0)
-    else:
-        print("32-bit Python not specified or same as current interpreter")
-        print("Continuing with current Python interpreter")
+#print(sys.path)
 
 def get_folder_from_user():
-    """Get folder selection from user"""
     print("Opening folder selection dialog...")
     root = tk.Tk()
     root.withdraw()
+    root.update()  # Add this line - force an update
+    
     folder_path = filedialog.askdirectory(
-        title="Select folder containing plate folders to zip",
+        title="Select today's data folder to zip",
         mustexist=True
     )
-    root.destroy()
     
-    if folder_path:
-        print(f"Selected folder: {folder_path}")
-        return folder_path
-    else:
-        print("No folder selected")
-        return None
+    root.destroy()
+    return folder_path
+
 
 def main():
+    # Get folder path first before any package imports
+    data_folder = get_folder_from_user()
+    
+    if not data_folder:
+        print("No folder selected, exiting")
+        return
+
+    # ONLY NOW import package modules
+    from mseqauto.config import MseqConfig # type: ignore
+    from mseqauto.core import FileSystemDAO, FolderProcessor # type: ignore
+    from mseqauto.utils import setup_logger # type: ignore
+    
+    # Get the script directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    log_dir = os.path.join(script_dir, "logs")
+
     # Setup logger
-    logger = setup_logger("plate_zip_files")
-    logger.info("Starting plate zip files...")
+    logger = setup_logger("plate_zip_files", log_dir=log_dir)
+
+    logger.info("Starting Plate zip files...")
     
     # Initialize components
     config = MseqConfig()
     logger.info("Config loaded")
-    file_dao = FileSystemDAO(config)
+    REGEX = config.REGEX_PATTERNS
+    file_dao = FileSystemDAO(config, logger=logger)
     logger.info("FileSystemDAO initialized")
     processor = FolderProcessor(file_dao, None, config, logger=logger.info)
     logger.info("Folder processor initialized")
-    
-    # Select folder
-    data_folder = get_folder_from_user()
-    
-    if not data_folder:
-        logger.error("No folder selected, exiting")
-        print("No folder selected, exiting")
-        return
-    
     logger.info(f"Using folder: {data_folder}")
     
     # Create zip dump folder
