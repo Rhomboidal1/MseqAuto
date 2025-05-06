@@ -2,3 +2,4 @@
 __pycache__/
 *.pyc
 *.log
+mseqauto/scripts/temp/selected_folder.txt
