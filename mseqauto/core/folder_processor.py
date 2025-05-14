@@ -392,6 +392,14 @@ class FolderProcessor:
                          order_folders.append(item_path)
 
           return order_folders
+     
+     def _get_well_locations(self, filename):
+          """Extract well locations from a filename"""
+          well_locations = []
+          matches = re.finditer(r'{(\d+[A-H])}', filename)
+          for match in matches:
+               well_locations.append(match.group(1))
+          return well_locations
 
      def _move_file_to_destination(self, file_path, destination_folder, normalized_name):
           """Handle file placement including reinject and NN folder logic"""
@@ -403,7 +411,19 @@ class FolderProcessor:
           # Check if file is in reinject list
           is_reinject = False
           if hasattr(self, 'reinject_list') and self.reinject_list:
-               is_reinject = normalized_name in [self.file_dao.standardize_filename_for_matching(r) for r in self.reinject_list]
+               current_wells = self._get_well_locations(file_name)
+               if current_wells:
+                    current_well = current_wells[0]
+                    for raw_entry in self.raw_reinject_list:
+                         reinject_wells = self._get_well_locations(raw_entry)
+                         if len(reinject_wells) >= 2 and reinject_wells[1] == current_well:
+                              reinj_norm = self.file_dao.standardize_filename_for_matching(raw_entry)
+                              if normalized_name == reinj_norm:
+                                   is_reinject = True
+                                   break
+          # Only log the final decision if it's a reinject
+          if is_reinject:
+               self.log(f"File is in reinject list: {file_name}")
           
           # Check if file is a preemptive reinject
           is_preempt = self.is_preemptive(file_name)
@@ -440,10 +460,15 @@ class FolderProcessor:
                alt_inj_folder = os.path.join(destination_folder, "Alternate Injections")
                os.makedirs(alt_inj_folder, exist_ok=True)
                alt_file_path = os.path.join(alt_inj_folder, file_name)  # Keep original name with braces
-               return self.file_dao.move_file(file_path, alt_file_path)
+               success = self.file_dao.move_file(file_path, alt_file_path)
+               if success:
+                    self.log(f"Moved file to Alternate Injections: {file_name}")
+               return success
           else:
-               # Put in main folder
-               return self.file_dao.move_file(file_path, target_file_path)
+               success = self.file_dao.move_file(file_path, target_file_path)
+               if success:
+                    self.log(f"Moved file to main folder: {file_name}")
+               return success
 
      def _get_expected_file_count(self, order_number):
           """Get expected number of files for an order based on the order key"""
@@ -1061,31 +1086,37 @@ class FolderProcessor:
           import os
           import numpy as np
 
+          # Helper function to check if entry is just a well location
+          def is_valid_entry(raw_name):
+               if not raw_name or not isinstance(raw_name, str):
+                    return False
+               # Skip entries that are just well locations in braces
+               if re.match(r'^\{\d+[A-H]\}$', raw_name):
+                    return False
+               # Skip empty entries
+               if not raw_name.strip():
+                    return False
+               return True
+
           reinject_list = []
           raw_reinject_list = []
-
-          # Cache of processed text files to avoid reprocessing
           processed_files = set()
 
           # Process text files only once
           spreadsheets_path = r'G:\Lab\Spreadsheets'
           abi_path = os.path.join(spreadsheets_path, 'Individual Uploaded to ABI')
-
-          # Build a list of potential reinject files first
           reinject_files = []
 
-          # Scan directories once
+          # Build list of reinject files
           if os.path.exists(spreadsheets_path):
                for file in self.file_dao.get_directory_contents(spreadsheets_path):
                     if 'reinject' in file.lower() and file.endswith('.txt'):
-                         # Check if any of our I numbers are in the filename
                          if any(i_num in file for i_num in i_numbers):
                               reinject_files.append(os.path.join(spreadsheets_path, file))
 
           if os.path.exists(abi_path):
                for file in self.file_dao.get_directory_contents(abi_path):
                     if 'reinject' in file.lower() and file.endswith('.txt'):
-                         # Check if any of our I numbers are in the filename
                          if any(i_num in file for i_num in i_numbers):
                               reinject_files.append(os.path.join(abi_path, file))
 
@@ -1096,23 +1127,24 @@ class FolderProcessor:
                          continue
 
                     processed_files.add(file_path)
-                    data = np.loadtxt(file_path, dtype=str, delimiter='\t')
+                    self.log(f"Processing reinject file: {file_path}")
+                    data = np.loadtxt(file_path, dtype=str, delimiter='\t', skiprows=4)
 
-                    # Parse rows 5-101 (B6:B101 in Excel terms)
-                    for j in range(5, min(101, data.shape[0])):
+                    # Parse rows (no need to skip 5 rows since we already skipped headers)
+                    for j in range(0, min(96, data.shape[0])):  # Adjusted range since we skipped headers
                          if j < data.shape[0] and data.shape[1] > 1:
-                              raw_reinject_list.append(data[j, 1])
-                              cleaned_name = self.file_dao.standardize_filename_for_matching(data[j, 1])
-                              reinject_list.append(cleaned_name)
+                              raw_name = data[j, 1]
+                              if is_valid_entry(raw_name):
+                                   cleaned_name = self.file_dao.standardize_filename_for_matching(raw_name)
+                                   raw_reinject_list.append(raw_name)
+                                   reinject_list.append(cleaned_name)
                except Exception as e:
                     self.log(f"Error processing reinject file {file_path}: {e}")
 
-          # If a reinject_path is provided, also check that Excel file
+          # Excel file processing
           if reinject_path and os.path.exists(reinject_path):
                try:
-                    import pylightxl as xl  # type: ignore
-
-                    # Read the Excel file
+                    import pylightxl as xl
                     db = xl.readxl(reinject_path)
                     sheet = db.ws('Sheet1')
 
@@ -1131,7 +1163,6 @@ class FolderProcessor:
                     # Check for partial plate reinjects by comparing against reinject_prep_array
                     for i_num in i_numbers:
                          # Check all txt files for this I number
-                         # Fix: Change glob pattern to valid regex pattern
                          regex_pattern = f'.*{i_num}.*txt'
                          txt_files = []
 
@@ -1144,19 +1175,16 @@ class FolderProcessor:
                                    if re.search(regex_pattern, file, re.IGNORECASE) and not 'reinject' in file:
                                         txt_files.append(os.path.join(abi_path, file))
 
-                         # Check each txt file for matches against reinject_prep_array
+                         # Process each txt file
                          for file_path in txt_files:
                               try:
-                                   data = np.loadtxt(file_path, dtype=str, delimiter='\t')
-                                   for j in range(5, min(101, data.shape[0])):
+                                   data = np.loadtxt(file_path, dtype=str, delimiter='\t', skiprows=4)
+                                   for j in range(0, min(96, data.shape[0])):  # Adjusted range here too
                                         if j < data.shape[0] and data.shape[1] > 1:
-                                             # Check if this sample is in the reinject list
-                                             sample_name = data[j, 1][5:] if len(data[j, 1]) > 5 else data[j, 1]
-                                             indices = np.where(reinject_prep_array == sample_name)[0]
-
-                                             if len(indices) > 0:
-                                                  raw_reinject_list.append(data[j, 1])
-                                                  cleaned_name = self.file_dao.standardize_filename_for_matching(data[j, 1])
+                                             raw_name = data[j, 1]
+                                             if is_valid_entry(raw_name):
+                                                  raw_reinject_list.append(raw_name)
+                                                  cleaned_name = self.file_dao.standardize_filename_for_matching(raw_name)
                                                   reinject_list.append(cleaned_name)
                               except Exception as e:
                                    self.log(f"Error processing txt file {file_path}: {e}")
@@ -1164,7 +1192,7 @@ class FolderProcessor:
                except Exception as e:
                     self.log(f"Error processing reinject Excel file: {e}")
 
-          # Store the raw_reinject_list for reference in _move_file_to_destination
+          # Store the raw_reinject_list for reference
           self.raw_reinject_list = raw_reinject_list
           return reinject_list
 

@@ -141,12 +141,12 @@ def main():
         logger.info(f"Found {len(pcr_folders)} PCR folders")
         
         # List what will be processed
-        if bio_folders:
+        if bio_folders: # Overarching plate folders containing individual orders
             print("\nBioI folders to process:")
             for i, folder in enumerate(bio_folders):
                 print(f"{i+1}. {os.path.basename(folder)}")
                 
-        if immediate_orders:
+        if immediate_orders: # Individual customer order folders
             print("\nImmediate order folders to process:")
             for i, folder in enumerate(immediate_orders):
                 print(f"{i+1}. {os.path.basename(folder)}")

@@ -2,30 +2,21 @@ import os
 import sys
 import tkinter as tk
 from tkinter import filedialog
-import re
+from datetime import datetime
 # Add parent directory to PYTHONPATH for imports
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 
-def inspect_reinject_list(folder_path=None, i_numbers=None, show_normalized=True):
+def inspect_reinject_list(i_numbers=None, verbose=True):
     """
-    Helper function to display and inspect the reinject list
+    Detailed inspection of reinject list contents
     
     Args:
-        folder_path (str, optional): Path to data folder to find I-numbers from
-        i_numbers (list, optional): Specific I-numbers to check for reinjections
-        show_normalized (bool): Whether to show normalized versions alongside originals
-        
-    Returns:
-        None (prints information to console)
+        i_numbers: List of specific I-numbers to check (default: [22055, 22056])
+        verbose: Whether to show detailed debug information
     """
-    from datetime import datetime
-    import os
-    import re
-    
-    # Import required modules from MseqAuto
     from mseqauto.config import MseqConfig
     from mseqauto.core import FileSystemDAO, FolderProcessor
     
@@ -34,210 +25,114 @@ def inspect_reinject_list(folder_path=None, i_numbers=None, show_normalized=True
     file_dao = FileSystemDAO(config)
     processor = FolderProcessor(file_dao, None, config)
     
-    # Create output file with timestamp
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_file = f"reinject_inspection_{timestamp}.txt"
-    
-    # Function to write to both console and file
-    def log(message):
-        print(message)
-        with open(output_file, "a") as f:
-            f.write(message + "\n")
-    
-    log(f"\n=== Reinject List Inspection ===")
-    log(f"Output saved to: {output_file}")
-    
-    # Get I-numbers from folder if provided
-    if folder_path and not i_numbers:
-        i_numbers, _ = file_dao.get_folders_with_inumbers(folder_path)
-        log(f"Found I-numbers from folder: {i_numbers}")
-    
-    # If no I-numbers provided or found, use some defaults
+    # Use provided I-numbers or defaults
     if not i_numbers:
-        # Use recent I-numbers based on most recent from Data/Individuals 
-        most_recent = file_dao.get_most_recent_inumber('P:\\Data\\Individuals')
-        if most_recent:
-            # Create a range of I-numbers around the most recent
-            most_recent_int = int(most_recent)
-            i_numbers = [str(most_recent_int - i) for i in range(5, -5, -1)]
-            log(f"Using range of I-numbers around most recent ({most_recent}): {i_numbers}")
-        else:
-            # Fallback to hardcoded numbers if we can't find most recent
-            i_numbers = [str(21000 + i) for i in range(10)]
-            log(f"Using default I-numbers: {i_numbers}")
+        i_numbers = ['22055', '22056']
     
-    # Get reinject file path
-    reinject_path = f"P:\\Data\\Reinjects\\Reinject List_{datetime.now().strftime('%m-%d-%Y')}.xlsx"
+    print(f"\n=== Reinject List Inspection for I-numbers: {i_numbers} ===")
+    
+    # Get today's reinject file path
+    today = datetime.now().strftime('%#m-%d-%Y')
+    reinject_path = f"P:\\Data\\Reinjects\\Reinject List_{today}.xlsx"
+    
+    # Check paths that will be searched
+    paths_to_check = [
+        'G:\\Lab\\Spreadsheets\\Individual Uploaded to ABI',
+        'G:\\Lab\\Spreadsheets'
+    ]
+    
+    print("\nSearching for reinject information in:")
+    for path in paths_to_check:
+        print(f"- {path}")
+        if os.path.exists(path):
+            files = [f for f in os.listdir(path) if 'reinject' in f.lower() and f.endswith('.txt')]
+            if verbose:
+                print(f"  Found {len(files)} reinject-related files:")
+                for f in files:
+                    print(f"  - {f}")
+    
+    print(f"\nChecking for Excel reinject list: {reinject_path}")
     if os.path.exists(reinject_path):
-        log(f"Using reinject file: {reinject_path}")
+        print("Found today's reinject Excel file")
     else:
-        log(f"Warning: Reinject file not found at {reinject_path}")
-        # Try to find alternative reinject file
+        print("Today's reinject Excel file not found")
+        # Look for most recent reinject file
         reinject_dir = "P:\\Data\\Reinjects"
         if os.path.exists(reinject_dir):
             reinject_files = [f for f in os.listdir(reinject_dir) if f.startswith("Reinject List_")]
             if reinject_files:
-                # Use the most recent reinject file
-                reinject_path = os.path.join(reinject_dir, sorted(reinject_files)[-1])
-                log(f"Using alternative reinject file: {reinject_path}")
+                most_recent = sorted(reinject_files)[-1]
+                reinject_path = os.path.join(reinject_dir, most_recent)
+                print(f"Using most recent reinject file instead: {most_recent}")
     
-    # Get the reinject list
-    log("\nLoading reinject list...")
+    # Get the reinject list with detailed logging
+    class DebugLogger:
+        def info(self, msg):
+            if verbose:
+                print(f"DEBUG: {msg}")
+    
+    debug_logger = DebugLogger()
+    processor.logger = debug_logger
+    
+    print("\nGetting reinject list...")
     reinject_list = processor.get_reinject_list(i_numbers, reinject_path)
     raw_reinject_list = processor.raw_reinject_list
     
-    # Display statistics
-    log(f"Found {len(reinject_list)} reinjections")
+    print(f"\nFound {len(reinject_list)} total reinjections")
     
-    # Check for pre-emptive reinject markers
-    preemptive_count = sum(1 for item in raw_reinject_list if "{!P}" in item)
-    log(f"Pre-emptive reinjections: {preemptive_count}")
+    # Display the complete lists
+    print("\n=== Raw Reinject List ===")
+    for i, (raw, normalized) in enumerate(zip(raw_reinject_list, reinject_list)):
+        print(f"\n{i+1}. RAW: {raw}")
+        print(f"   NORM: {normalized}")
     
-    # Display full lists
-    log("\n=== Raw Reinject List ===")
-    for i, item in enumerate(raw_reinject_list):
-        if show_normalized:
-            normalized = file_dao.standardize_filename_for_matching(item)
-            log(f"{i+1:3}. RAW: {item}")
-            log(f"     NORM: {normalized}")
+    # Interactive testing function
+    def test_filename(filename):
+        print(f"\n=== Testing filename: {filename} ===")
+        
+        # Normalize the test filename
+        normalized_test = file_dao.standardize_filename_for_matching(filename)
+        print(f"Normalized to: {normalized_test}")
+        
+        # Check if it's in the reinject list
+        if normalized_test in reinject_list:
+            idx = reinject_list.index(normalized_test)
+            print(f"MATCH FOUND - Entry #{idx + 1}:")
+            print(f"  Raw entry: {raw_reinject_list[idx]}")
+            print(f"  Normalized entry: {reinject_list[idx]}")
         else:
-            log(f"{i+1:3}. {item}")
-    
-    # Check for common patterns in reinject list
-    log("\n=== Pattern Analysis ===")
-    
-    # Check for double well location pattern {XXX}{YYY}
-    double_well_pattern = re.compile(r'^{\d+[A-Z]}{\d+[A-Z]}')
-    double_well_count = sum(1 for item in raw_reinject_list if double_well_pattern.match(item))
-    log(f"Items with double well location pattern: {double_well_count}")
-    
-    # Compile regex patterns we'll use for testing
-    patterns = {
-        'double_well': double_well_pattern,
-        'pcr_number': re.compile(r'{pcr(\d+).+}', re.IGNORECASE),
-        'preemptive': re.compile(r'{!P}'),
-        'well_location': re.compile(r'{\d+[A-Z]}')
-    }
-    
-    # Function to test if a filename would be considered a reinject
-    def test_file(filename):
-        log(f"\nTesting file: {filename}")
+            print("Not found in reinject list")
         
-        # Check different methods that might flag a file as reinject
+        # Check for preemptive pattern
+        if processor.is_preemptive(filename):
+            print("File has preemptive pattern (double well location)")
         
-        # 1. Check against reinject list
-        normalized_name = file_dao.standardize_filename_for_matching(filename)
-        normalized_reinjects = [file_dao.standardize_filename_for_matching(r) for r in reinject_list]
-        in_reinject_list = normalized_name in normalized_reinjects
-        log(f"1. In reinject list: {in_reinject_list}")
-        
-        # 2. Check for double well location pattern
-        has_double_well = bool(patterns['double_well'].match(filename))
-        log(f"2. Has double well pattern: {has_double_well}")
-        
-        # 3. Check for pre-emptive marker
-        is_preemptive = bool(patterns['preemptive'].search(filename))
-        log(f"3. Is marked as pre-emptive: {is_preemptive}")
-        
-        # 4. Check for PCR number
-        pcr_match = patterns['pcr_number'].search(filename)
-        has_pcr = bool(pcr_match)
-        pcr_number = pcr_match.group(1) if pcr_match else None
-        log(f"4. Has PCR number: {has_pcr} {f'(PCR{pcr_number})' if pcr_number else ''}")
-        
-        # 5. Check for regular well location
-        has_well = bool(patterns['well_location'].search(filename))
-        log(f"5. Has well location: {has_well}")
-        
-        # 6. Check for suffix patterns
-        has_rtx_suffix = "_RTI" in filename
-        has_premixed_suffix = "_Premixed" in filename
-        log(f"6. Has special suffix: RTI={has_rtx_suffix}, Premixed={has_premixed_suffix}")
-        
-        # Overall determination
-        is_reinject = in_reinject_list or has_double_well
-        log(f"\nWould be considered a reinject: {is_reinject}")
-        
-        # How it would be processed
-        if is_reinject:
-            if is_preemptive:
-                log(f"Would be directed to: main folder (pre-emptive reinject)")
-            else:
-                log(f"Would be directed to: Alternate Injections folder (regular reinject)")
-        else:
-            log(f"Would be directed to: main folder (not a reinject)")
-        
-        # Normalized filename
-        log(f"\nOriginal filename: {filename}")
-        log(f"Normalized filename: {normalized_name}")
-        
-        # If in reinject list, show matching entry
-        if in_reinject_list:
-            match_indices = [i for i, norm in enumerate(normalized_reinjects) if norm == normalized_name]
-            for idx in match_indices:
-                log(f"\nMatched with reinject #{idx+1}: {raw_reinject_list[idx]}")
-                log(f"  Normalized to: {normalized_reinjects[idx]}")
-        
-        # Close match search - to catch near matches
-        if not in_reinject_list:
-            log("\nSearching for close matches in reinject list...")
-            
-            # Check for partial matches
-            close_matches = []
-            for i, norm in enumerate(normalized_reinjects):
-                # Check if normalized name is a substring of or contains a reinject entry
-                if normalized_name in norm or norm in normalized_name:
-                    close_matches.append((i, norm, raw_reinject_list[i]))
-            
-            if close_matches:
-                log(f"Found {len(close_matches)} close matches:")
-                for i, norm, raw in close_matches:
-                    log(f"  #{i+1}: {raw}")
-                    log(f"     Normalized to: {norm}")
-            else:
-                log("No close matches found")
-    
-    # Check if command-line argument was provided
-    import sys
-    if len(sys.argv) > 1 and sys.argv[1] != folder_path:
-        test_filename = sys.argv[1]
-        test_file(test_filename)
+        # Check if file would go to Alternate Injections
+        debug_info = processor.debug_reinject_detection(filename)
+        print("\nReinject Detection Analysis:")
+        for key, value in debug_info.items():
+            print(f"  {key}: {value}")
     
     # Interactive testing loop
-    log("\n=== Interactive File Testing ===")
-    log("Enter filenames to test if they would be considered a reinject")
-    log("Type 'quit', 'exit', or 'q' to end testing")
+    print("\n=== Interactive Testing ===")
+    print("Enter filenames to test why they might be flagged as reinjections")
+    print("Enter 'q' to quit")
     
     while True:
         try:
-            test_input = input("\nEnter filename to test (or 'quit' to exit): ")
-            if test_input.lower() in ('quit', 'exit', 'q'):
-                log("\nEnding interactive testing")
+            test_input = input("\nEnter filename to test (or 'q' to quit): ").strip()
+            if test_input.lower() in ('q', 'quit', 'exit'):
                 break
-            
             if test_input:
-                test_file(test_input)
-            else:
-                log("No filename entered, try again or type 'quit' to exit")
+                test_filename(test_input)
         except KeyboardInterrupt:
-            log("\nTesting interrupted by user")
             break
         except Exception as e:
-            log(f"Error testing file: {e}")
+            print(f"Error testing file: {e}")
     
-    log(f"\nInspection complete. Results saved to {output_file}")
-    print(f"\nInspection complete. Results saved to {output_file}")
-    return reinject_list, raw_reinject_list  # Return these for potential further analysis
+    return reinject_list, raw_reinject_list
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) > 1:
-        # If folder path is provided
-        inspect_reinject_list(folder_path=sys.argv[1])
-    else:
-        # Interactive mode
-        folder_path = input("Enter folder path to inspect (or press Enter to use defaults): ")
-        if folder_path:
-            inspect_reinject_list(folder_path=folder_path)
-        else:
-            inspect_reinject_list()
+    # Allow command-line specification of I-numbers
+    i_numbers = sys.argv[1:] if len(sys.argv) > 1 else None
+    inspect_reinject_list(i_numbers)

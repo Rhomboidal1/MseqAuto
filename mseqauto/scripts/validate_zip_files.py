@@ -10,16 +10,6 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-# Check for 32-bit Python requirement
-if sys.maxsize > 2 ** 32:
-    py32_path = MseqConfig.PYTHON32_PATH
-    if os.path.exists(py32_path) and py32_path != sys.executable:
-        script_path = os.path.abspath(__file__)
-        subprocess.run([py32_path, script_path])
-        sys.exit(0)
-    else:
-        print("32-bit Python not specified or same as current interpreter")
-        print("Continuing with current Python interpreter")
 
 
 def get_folder_from_user():

@@ -134,6 +134,7 @@ def main():
             logger.info(f"Copying zip to dump folder: {os.path.basename(zip_path)}")
             file_dao.copy_zip_to_dump(zip_path, zip_dump_folder)
             
+            order_count += 1  # Use the same count as order folders
             logger.info(f"Successfully processed {os.path.basename(pcr_folder)}")
         else:
             logger.warning(f"Failed to zip {os.path.basename(pcr_folder)}")
