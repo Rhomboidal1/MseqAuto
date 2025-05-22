@@ -66,11 +66,18 @@ mseqauto/
 │   ├── __init__.py
 │   ├── file_system_dao.py
 │   ├── folder_processor.py
+│   ├── os_compatibility.py
 │   └── ui_automation.py
 ├── scripts/            # Executable scripts
 │   ├── __init__.py
 │   ├── ind_sort_files.py
 │   ├── ind_auto_mseq.py
+│   ├── ind_zip_files.py
+│   ├── plate_sort_files.py
+│   ├── plate_sort_complete.py
+│   ├── plate_auto_mseq.py
+│   ├── plate_zip_files.py
+│   ├── full_plasmid_zip_files.py
 │   └── ...
 ├── utils/              # Utility functions
 │   ├── __init__.py
