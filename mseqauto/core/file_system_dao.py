@@ -445,6 +445,15 @@ class FileSystemDAO:
         # Apply translation
         return file_name.translate(translation_table)
 
+    def extract_order_number_from_filename(self, filename):
+        """Extract order number from filename braces if present"""
+        # Look for exactly 6-digit numbers in braces, which represent order numbers
+        matches = re.findall(r'{(\d{6})}', filename)
+        if matches:
+            # Return the first matching 6-digit number
+            return matches[0]
+        return None
+
     def normalize_filename(self, file_name, remove_extension=True, logger=None):
         #Move to path_utilities.py
         """Normalize filename with optional logging"""
@@ -860,31 +869,45 @@ class FileSystemDAO:
 
         return file_path
 
-    def standardize_filename_for_matching(self, file_name, remove_extension=True):
+    def standardize_filename_for_matching(self, file_name, remove_extension=True, preserve_order_number=True):
         """
         Standardized filename cleaning method for consistent matching across all code
         Used for PCR files, reinject lists, and any other string comparison operations
+        
+        Args:
+            file_name (str): The filename to standardize
+            remove_extension (bool): Whether to remove file extension
+            preserve_order_number (bool): Whether to preserve order number in result
         """
-        # Step 1: Remove file extension if needed
+        # Step 1: Extract order number if present before any cleaning
+        order_number = None
+        if preserve_order_number:
+            order_number = self.extract_order_number_from_filename(file_name)
+        
+        # Step 2: Remove file extension if needed
         if remove_extension and file_name.endswith(self.config.ABI_EXTENSION):
             clean_name = file_name[:-4]
         else:
             clean_name = file_name
 
-        # Step 2: Check if the name is just a well location (e.g., {01G})
+        # Step 3: Check if the name is just a well location (e.g., {01G})
         well_pattern = re.compile(r'^{\d+[A-Z]}$')
         if well_pattern.match(clean_name):
             # For well locations, keep them as is to avoid empty string normalization
             return clean_name
-            
-        # Step 3: Remove content in brackets (PCR numbers, well locations)
+                
+        # Step 4: Remove content in brackets
         clean_name = re.sub(r'{.*?}', '', clean_name)
 
-        # Step 4: Remove standard suffixes
+        # Step 5: Remove standard suffixes
         clean_name = clean_name.replace('_Premixed', '')
         clean_name = clean_name.replace('_RTI', '')
 
-        # Step 5: If after all cleaning we have an empty string, return the original
+        # Step 6: If we have an order number and want to preserve it, add it back
+        if preserve_order_number and order_number:
+            clean_name = f"{clean_name}#{order_number}"  # Use # as a delimiter that won't be in normal filenames
+
+        # Step 7: If after all cleaning we have an empty string, return the original
         # to avoid normalization conflicts
         if not clean_name.strip():
             return file_name

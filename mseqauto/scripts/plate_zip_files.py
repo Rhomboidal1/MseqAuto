@@ -87,11 +87,11 @@ def main():
         if has_fsa:
             # Zip FSA files only
             logger.info(f"Zipping FSA files in {os.path.basename(plate_folder)}")
-            zip_path = processor.zip_order_folder(plate_folder, fsa_only=True)
+            zip_path = processor.zip_order_folder(plate_folder, include_txt=True)
         else:
             # Zip AB1 and txt files
             logger.info(f"Zipping AB1 and txt files in {os.path.basename(plate_folder)}")
-            zip_path = processor.zip_order_folder(plate_folder, fsa_only=False)
+            zip_path = processor.zip_order_folder(plate_folder, include_txt=True)
         
         if zip_path:
             # Copy zip to dump folder

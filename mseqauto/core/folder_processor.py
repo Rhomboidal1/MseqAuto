@@ -64,7 +64,7 @@ class FolderProcessor:
           self.log(f"Built order key index with {len(self.order_key_index)} unique entries")
 
      def sort_customer_file(self, file_path, order_key):
-          """Sort a customer file based on order key using the index"""
+          """Sort a customer file based on order key using the index and considering embedded order numbers"""
           # Build index if not already done
           if self.order_key_index is None:
                self.build_order_key_index(order_key)
@@ -73,12 +73,31 @@ class FolderProcessor:
           # Only log once, not for each transformation step
           self.log(f"Processing customer file: {file_name}")
 
-          # Normalize the filename for matching
-          normalized_name = self.file_dao.normalize_filename(file_name)
+          # Extract order number from filename if present
+          embedded_order_number = self.file_dao.extract_order_number_from_filename(file_name)
+          
+          # Normalize the filename for matching - include order number if found
+          normalized_name = self.file_dao.standardize_filename_for_matching(file_name, preserve_order_number=True)
 
           # Check if we have this filename in our index
-          if normalized_name in self.order_key_index:
-               matches = self.order_key_index[normalized_name]
+          base_normalized_name = normalized_name
+          order_number_suffix = None
+          
+          # Check if the normalized name contains an embedded order number (format: name#ordernumber)
+          if '#' in normalized_name:
+               base_normalized_name, order_number_suffix = normalized_name.split('#', 1)
+          
+          if base_normalized_name in self.order_key_index:
+               matches = self.order_key_index[base_normalized_name]
+               
+               # First, try to find a match with the embedded order number
+               if embedded_order_number or order_number_suffix:
+                    order_to_match = embedded_order_number or order_number_suffix
+                    for i_num, acct_name, order_num in matches:
+                         if order_num == order_to_match:
+                              self.log(f"Found exact match with embedded order number: {order_to_match}")
+                              destination_folder = self.create_order_folder(i_num, acct_name, order_num)
+                              return self._move_file_to_destination(file_path, destination_folder, base_normalized_name)
 
                # Prioritize matches from current folder's I number
                current_i_num = self.file_dao.get_inumber_from_name(os.path.dirname(file_path))
@@ -87,15 +106,15 @@ class FolderProcessor:
                     # Prioritize current I number if available
                     if current_i_num and i_num == current_i_num:
                          destination_folder = self.create_order_folder(i_num, acct_name, order_num)
-                         return self._move_file_to_destination(file_path, destination_folder, normalized_name)
+                         return self._move_file_to_destination(file_path, destination_folder, base_normalized_name)
 
                # If no match with current I number, use the first match
                i_num, acct_name, order_num = matches[0]
                destination_folder = self.create_order_folder(i_num, acct_name, order_num)
-               return self._move_file_to_destination(file_path, destination_folder, normalized_name)
+               return self._move_file_to_destination(file_path, destination_folder, base_normalized_name)
 
           # No match found
-          self.log(f"No match found in order key for: {normalized_name}")
+          self.log(f"No match found in order key for: {base_normalized_name}")
           return False
 
      def create_order_folder(self, i_num, acct_name, order_num, base_path=None):
@@ -408,6 +427,11 @@ class FolderProcessor:
           # First check if file is in a Not Needed folder
           is_from_nn = self.is_in_not_needed_folder(file_path)
           
+          # Remove order number suffix if present (format: name#ordernumber)
+          base_normalized_name = normalized_name
+          if '#' in normalized_name:
+               base_normalized_name = normalized_name.split('#', 1)[0]
+          
           # Check if file is in reinject list
           is_reinject = False
           if hasattr(self, 'reinject_list') and self.reinject_list:
@@ -417,10 +441,15 @@ class FolderProcessor:
                     for raw_entry in self.raw_reinject_list:
                          reinject_wells = self._get_well_locations(raw_entry)
                          if len(reinject_wells) >= 2 and reinject_wells[1] == current_well:
+                              # Normalize the reinject entry for comparison, also handling order numbers
                               reinj_norm = self.file_dao.standardize_filename_for_matching(raw_entry)
-                              if normalized_name == reinj_norm:
+                              if '#' in reinj_norm:
+                                   reinj_norm = reinj_norm.split('#', 1)[0]
+                              
+                              if base_normalized_name == reinj_norm:
                                    is_reinject = True
-                                   break
+                              break
+          
           # Only log the final decision if it's a reinject
           if is_reinject:
                self.log(f"File is in reinject list: {file_name}")
@@ -443,7 +472,8 @@ class FolderProcessor:
                self.log(f"File is in reinject list: {file_name}")
           elif is_preempt and not is_reinject:
                # Look for matching files to see if this preemptive should be moved
-               matching_files = self.find_matching_files(destination_folder, normalized_name)
+               # Use the base normalized name without the order number
+               matching_files = self.find_matching_files(destination_folder, base_normalized_name)
                if matching_files:
                     go_to_alt_injections = True
                     self.log(f"Preemptive file has matching files in destination: {file_name}")
@@ -1072,11 +1102,20 @@ class FolderProcessor:
 
      def find_matching_files(self, folder_path, normalized_name):
           """Find files in folder that match the normalized name"""
+          # Remove order number suffix if present
+          base_normalized_name = normalized_name
+          if '#' in normalized_name:
+               base_normalized_name = normalized_name.split('#', 1)[0]
+               
           matching_files = []
           for item in os.listdir(folder_path):
                if item.endswith(self.config.ABI_EXTENSION):
                     item_norm = self.file_dao.normalize_filename(item)
-                    if item_norm == normalized_name:
+                    # Also handle potential order numbers in the normalized matched files
+                    if '#' in item_norm:
+                         item_norm = item_norm.split('#', 1)[0]
+                         
+                    if item_norm == base_normalized_name:
                          matching_files.append(item)
           return matching_files
 
@@ -1341,6 +1380,158 @@ class FolderProcessor:
                self.log(f"Error creating zip file for {folder_path}: {e}")
                return None
 
+     def zip_full_plasmid_order_folder(self, folder_path, order_key=None, order_number=None, use_7zip=False, compression_level=6):
+          """
+          Zip the contents of a full plasmid sequencing order folder.
+          
+          Args:
+               folder_path (str): Path to the order folder
+               order_key (array, optional): Order key data to extract sample names
+               order_number (str, optional): Order number to filter order key entries
+               use_7zip (bool, optional): Whether to try using 7-Zip for compression (default: False)
+               compression_level (int, optional): Compression level 0-9, where 9 is maximum (default: 6)
+               
+          Returns:
+               str: Path to created zip file, or None if failed
+          """
+          try:
+               folder_name = os.path.basename(folder_path)
+               self.log(f"Creating zip for full plasmid order: {folder_name}")
+               self.log(f"Compression settings: Method={'7-Zip' if use_7zip else 'Python zipfile'}, Level={compression_level}")
+               
+               # Set up the zip filename
+               zip_filename = f"{folder_name}.zip"
+               zip_path = os.path.join(folder_path, zip_filename)
+               
+               # Define file extensions to include
+               plasmid_extensions = [
+                    '.annotations.bed',
+                    '.annotations.gbk',
+                    '.assembly_stats.tsv',
+                    '.final.fasta',
+                    '.final.fastq',
+                    '.html'  # Include the validation report HTML
+               ]
+               
+               # Collect all files to zip
+               all_files = []
+               for item in os.listdir(folder_path):
+                    item_path = os.path.join(folder_path, item)
+                    if os.path.isfile(item_path) and any(item.endswith(ext) for ext in plasmid_extensions):
+                         all_files.append(item)
+               
+               if not all_files:
+                    self.log(f"No matching files found in {folder_path}")
+                    return None
+                         
+               self.log(f"Found {len(all_files)} matching files to include in zip")
+               
+               # Try to use 7-Zip if requested and available
+               if use_7zip:
+                    seven_zip_exe = r"G:\Lab\DATA Processing\7-Zip\7z.exe"
+                    
+                    self.log(f"Checking for 7-Zip at: {seven_zip_exe}")
+                    if os.path.exists(seven_zip_exe):
+                         self.log(f"Found 7-Zip at: {seven_zip_exe}")
+                         self.log("USING 7-ZIP FOR COMPRESSION")
+                         
+                         # Create a list file for 7-Zip
+                         list_file_path = os.path.join(folder_path, "files_to_zip.txt")
+                         
+                         with open(list_file_path, "w") as f:
+                              for item in all_files:
+                                   f.write(f"{item}\n")
+                         
+                         # Build 7-Zip command with the specified compression level
+                         command = [
+                              seven_zip_exe,
+                              "a",                      # Add files to archive
+                              "-tzip",                  # ZIP format
+                              f"-mx={compression_level}", # Use the specified compression level
+                              zip_path,                 # Output ZIP file
+                              "@" + list_file_path      # Input list of files
+                         ]
+                         
+                         self.log(f"7-Zip command: {' '.join(command)}")
+                         
+                         # Run 7-Zip
+                         import subprocess
+                         self.log("Executing 7-Zip subprocess...")
+                         
+                         try:
+                              process = subprocess.run(
+                              command, 
+                              cwd=folder_path,  # Set working directory to folder_path
+                              capture_output=True, 
+                              text=True,
+                              check=False  # Don't raise exception on non-zero return
+                              )
+                              
+                              self.log(f"7-Zip process return code: {process.returncode}")
+                              
+                              if process.returncode != 0:
+                                   self.log(f"7-Zip error: {process.stderr}")
+                                   self.log("Falling back to Python zipfile due to 7-Zip error")
+                              else:
+                                   # Verify the zip file was created
+                                   if os.path.exists(zip_path):
+                                        self.log(f"Successfully created zip file using 7-Zip: {zip_path}")
+                                        
+                                        # Clean up list file
+                                        try:
+                                             os.remove(list_file_path)
+                                        except Exception as e:
+                                             self.log(f"Warning: Failed to remove list file: {e}")
+                                             
+                                        return zip_path
+                                   else:
+                                        self.log(f"7-Zip reported success but zip file not found at: {zip_path}")
+                         except Exception as sub_e:
+                              self.log(f"Exception during 7-Zip subprocess execution: {sub_e}")
+                    else:
+                         self.log(f"7-Zip not found at: {seven_zip_exe}")
+               else:
+                    self.log("7-Zip compression not requested, using Python zipfile")
+               
+               # Use Python zipfile (either by choice or as fallback)
+               self.log("USING PYTHON ZIPFILE FOR COMPRESSION")
+               import zipfile
+               from datetime import datetime
+               
+               # Get current date/time for all files (Windows compatible format)
+               now = datetime.now()
+               date_time = (now.year, now.month, now.day, now.hour, now.minute, now.second)
+               
+               # Ensure compression level is within valid range
+               python_compression = max(0, min(9, compression_level))
+               
+               with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=python_compression) as zipf:
+                    for item in all_files:
+                         file_path = os.path.join(folder_path, item)
+                         
+                         # Create ZipInfo object for more control
+                         zipinfo = zipfile.ZipInfo(item, date_time)
+                         
+                         # Set Windows-compatible attributes (Archive bit set)
+                         zipinfo.external_attr = 0x20  # Archive bit for Windows
+                         
+                         # Set creation system to Windows
+                         zipinfo.create_system = 0  # 0 = Windows
+                         
+                         # Add the file with custom ZipInfo
+                         with open(file_path, 'rb') as f:
+                              file_data = f.read()
+                              zipf.writestr(zipinfo, file_data, zipfile.ZIP_DEFLATED)
+               
+               self.log(f"Successfully created zip file using Python zipfile: {zip_path}")
+               return zip_path
+                    
+          except Exception as e:
+               self.log(f"Error creating zip file for {folder_path}: {e}")
+               import traceback
+               self.log(traceback.format_exc())
+               return None
+    
      def find_zip_file(self, folder_path):
           """Find zip file in a folder"""
           for item in os.listdir(folder_path):
