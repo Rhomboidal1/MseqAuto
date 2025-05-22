@@ -232,8 +232,8 @@ def debug_reinject_detection(folder_path=None, i_numbers=None, target_files=None
                 if test_input:
                     test_files.append(test_input)
                     # Deep trace through the actual file processing logic
-                    mock_path = os.path.join(folder_path or "C:\\MOCK", test_input)
-                    mock_destination = "C:\\MOCK\\DESTINATION"
+                    mock_path = os.path.join(folder_path or "P:\\Data\\Testing\\MOCK", test_input)
+                    mock_destination = "P:\\Data\\Testing\\MOCK\\DESTINATION"
                     log(f"Simulating processing {test_input}...")
                     processor._move_file_to_destination(mock_path, mock_destination, 
                                                        file_dao.standardize_filename_for_matching(test_input))
@@ -252,24 +252,24 @@ def debug_reinject_detection(folder_path=None, i_numbers=None, target_files=None
     
     # Test processing the non-reinject file, then the reinject file, then the non-reinject again
     # This will reveal if there's a state persistence issue
-    test_non_reinject = "{08H}dnaG20_2_oJW772_Premixed.ab1"
-    test_reinject = "{08F}{08H}dnaG20_2_oJW772_Premixed{2_28}.ab1"
+    test_non_reinject = "{09A}1_FWDPARP1_Premixed.ab1"
+    test_reinject = "{01A}{09A}1_FWDPARP1_Premixed{2_18}{I-22082}.ab1"
     
     log("\nTesting sequence to detect state persistence issues:")
     
     log(f"\n1. First testing non-reinject file: {test_non_reinject}")
-    mock_path = os.path.join(folder_path or "C:\\MOCK", test_non_reinject)
-    mock_destination = "C:\\MOCK\\DESTINATION"
+    mock_path = os.path.join(folder_path or "P:\\Data\\Testing\\MOCK", test_non_reinject)
+    mock_destination = "P:\\Data\\Testing\\MOCK\\DESTINATION"
     norm_name = file_dao.standardize_filename_for_matching(test_non_reinject)
     processor._move_file_to_destination(mock_path, mock_destination, norm_name)
     
     log(f"\n2. Now testing reinject file: {test_reinject}")
-    mock_path = os.path.join(folder_path or "C:\\MOCK", test_reinject)
+    mock_path = os.path.join(folder_path or "P:\\Data\\Testing\\MOCK", test_reinject)
     processor._move_file_to_destination(mock_path, mock_destination, 
                                        file_dao.standardize_filename_for_matching(test_reinject))
     
     log(f"\n3. Testing non-reinject file again: {test_non_reinject}")
-    mock_path = os.path.join(folder_path or "C:\\MOCK", test_non_reinject)
+    mock_path = os.path.join(folder_path or "P:\\Data\\Testing\\MOCK", test_non_reinject)
     processor._move_file_to_destination(mock_path, mock_destination, norm_name)
     
     # Finally, check for duplicates or conflicts in normalized names

@@ -424,6 +424,17 @@ class FolderProcessor:
           """Handle file placement including reinject and NN folder logic"""
           file_name = os.path.basename(file_path)
           
+          # DEBUG: Add logging for the specific file we're debugging
+          # if "1_FWDPARP1_Premixed" in file_name:
+          #     self.log(f"DEBUG: Processing file: {file_name}")
+          #     self.log(f"DEBUG: Normalized name: {normalized_name}")
+          #     self.log(f"DEBUG: Has reinject_list: {hasattr(self, 'reinject_list')}")
+          #     if hasattr(self, 'reinject_list'):
+          #         self.log(f"DEBUG: Reinject list length: {len(self.reinject_list) if self.reinject_list else 0}")
+          #         self.log(f"DEBUG: Has raw_reinject_list: {hasattr(self, 'raw_reinject_list')}")
+          #         if hasattr(self, 'raw_reinject_list'):
+          #             self.log(f"DEBUG: Raw reinject list length: {len(self.raw_reinject_list) if self.raw_reinject_list else 0}")
+          
           # First check if file is in a Not Needed folder
           is_from_nn = self.is_in_not_needed_folder(file_path)
           
@@ -436,23 +447,51 @@ class FolderProcessor:
           is_reinject = False
           if hasattr(self, 'reinject_list') and self.reinject_list:
                current_wells = self._get_well_locations(file_name)
+               
+               # DEBUG: Add logging for well location extraction
+               # if "1_FWDPARP1_Premixed" in file_name:
+               #     self.log(f"DEBUG: Current wells extracted: {current_wells}")
+               
                if current_wells:
                     current_well = current_wells[0]
-                    for raw_entry in self.raw_reinject_list:
+                    
+                    # DEBUG: Add logging for current well
+                    # if "1_FWDPARP1_Premixed" in file_name:
+                    #     self.log(f"DEBUG: Current well: {current_well}")
+                    #     self.log(f"DEBUG: Checking against {len(self.raw_reinject_list)} raw entries")
+                    
+                    for i, raw_entry in enumerate(self.raw_reinject_list):
                          reinject_wells = self._get_well_locations(raw_entry)
+                         
+                         # DEBUG: Add logging for each comparison
+                         # if "1_FWDPARP1_Premixed" in file_name:
+                         #     if "1_FWDPARP1_Premixed" in raw_entry:  # Only log for matching entries
+                         #         self.log(f"DEBUG: Entry {i}: {raw_entry}")
+                         #         self.log(f"DEBUG: Entry wells: {reinject_wells}")
+                         #         self.log(f"DEBUG: Wells check: len >= 2? {len(reinject_wells) >= 2}, second well matches? {len(reinject_wells) >= 2 and reinject_wells[1] == current_well}")
+                         
                          if len(reinject_wells) >= 2 and reinject_wells[1] == current_well:
                               # Normalize the reinject entry for comparison, also handling order numbers
                               reinj_norm = self.file_dao.standardize_filename_for_matching(raw_entry)
                               if '#' in reinj_norm:
                                    reinj_norm = reinj_norm.split('#', 1)[0]
                               
+                              # DEBUG: Add logging for name comparison
+                              # if "1_FWDPARP1_Premixed" in file_name:
+                              #     self.log(f"DEBUG: Normalized raw entry: {reinj_norm}")
+                              #     self.log(f"DEBUG: Name match? {base_normalized_name} == {reinj_norm}: {base_normalized_name == reinj_norm}")
+                              
                               if base_normalized_name == reinj_norm:
                                    is_reinject = True
-                              break
+                                   # if "1_FWDPARP1_Premixed" in file_name:
+                                   #     self.log(f"DEBUG: MATCH FOUND! Setting is_reinject = True")
+                                   break
           
           # Only log the final decision if it's a reinject
           if is_reinject:
                self.log(f"File is in reinject list: {file_name}")
+          # elif "1_FWDPARP1_Premixed" in file_name:
+          #     self.log(f"DEBUG: Final is_reinject = False for {file_name}")
           
           # Check if file is a preemptive reinject
           is_preempt = self.is_preemptive(file_name)
@@ -485,6 +524,11 @@ class FolderProcessor:
                go_to_alt_injections = True
                self.log(f"File already exists at destination: {file_name}")
           
+          # DEBUG: Final decision logging
+          # if "1_FWDPARP1_Premixed" in file_name:
+          #     self.log(f"DEBUG: Final decision for {file_name}: go_to_alt_injections = {go_to_alt_injections}")
+          #     self.log(f"DEBUG: Reasons - is_from_nn: {is_from_nn}, is_reinject: {is_reinject}, is_preempt: {is_preempt}")
+          
           # Move the file to the appropriate location
           if go_to_alt_injections:
                alt_inj_folder = os.path.join(destination_folder, "Alternate Injections")
@@ -499,6 +543,7 @@ class FolderProcessor:
                if success:
                     self.log(f"Moved file to main folder: {file_name}")
                return success
+    
 
      def _get_expected_file_count(self, order_number):
           """Get expected number of files for an order based on the order key"""
@@ -1242,12 +1287,12 @@ class FolderProcessor:
           # Check all conditions
           is_from_nn = self.is_in_not_needed_folder(file_path)
           
-          # Check if in reinject list
+          # Check if in reinject list - FIXED: Don't double-normalize
           normalized_name = self.file_dao.standardize_filename_for_matching(file_name)
           is_reinject = False
           if hasattr(self, 'reinject_list') and self.reinject_list:
-               normalized_reinjects = [self.file_dao.standardize_filename_for_matching(r) for r in self.reinject_list]
-               is_reinject = normalized_name in normalized_reinjects
+               # reinject_list already contains normalized entries, so compare directly
+               is_reinject = normalized_name in self.reinject_list
           
           # Check for preemptive pattern
           is_preempt = self.is_preemptive(file_name)

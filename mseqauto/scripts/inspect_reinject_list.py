@@ -27,7 +27,7 @@ def inspect_reinject_list(i_numbers=None, verbose=True):
     
     # Use provided I-numbers or defaults
     if not i_numbers:
-        i_numbers = ['22055', '22056']
+        i_numbers = ['22082']
     
     print(f"\n=== Reinject List Inspection for I-numbers: {i_numbers} ===")
     
