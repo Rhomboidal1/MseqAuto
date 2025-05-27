@@ -81,17 +81,9 @@ def main():
             logger.info(f"Skipping {os.path.basename(plate_folder)} - already has zip file")
             continue
         
-        # Check if this is an FSA plate
-        has_fsa = file_dao.contains_file_type(plate_folder, config.FSA_EXTENSION)
-        
-        if has_fsa:
-            # Zip FSA files only
-            logger.info(f"Zipping FSA files in {os.path.basename(plate_folder)}")
-            zip_path = processor.zip_order_folder(plate_folder, include_txt=True)
-        else:
-            # Zip AB1 and txt files
-            logger.info(f"Zipping AB1 and txt files in {os.path.basename(plate_folder)}")
-            zip_path = processor.zip_order_folder(plate_folder, include_txt=True)
+        # The zip_order_folder method will automatically detect and handle FSA files
+        logger.info(f"Zipping {os.path.basename(plate_folder)}")
+        zip_path = processor.zip_order_folder(plate_folder, include_txt=True)
         
         if zip_path:
             # Copy zip to dump folder

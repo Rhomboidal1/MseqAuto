@@ -21,20 +21,29 @@ class FolderProcessor:
           self.ui_automation = ui_automation
           self.config = config
           
-          # Create a unified logging interface regardless of input type
+          # Create a unified logging interface with support for different levels
           import logging
           if logger is None:
                # No logger provided, use default
                self._logger = logging.getLogger(__name__)
                self.log = self._logger.info
+               self.debug = self._logger.debug
+               self.warning = self._logger.warning
+               self.error = self._logger.error
           elif isinstance(logger, logging.Logger):
                # It's a Logger object
                self._logger = logger
                self.log = logger.info
+               self.debug = logger.debug
+               self.warning = logger.warning
+               self.error = logger.error
           else:
-               # Assume it's a callable function
+               # Assume it's a callable function - in this case, we don't have level differentiation
                self._logger = None
                self.log = logger
+               self.debug = logger
+               self.warning = logger
+               self.error = logger
                
           # Keep original reference for backward compatibility
           self.logger = logger
@@ -1400,11 +1409,21 @@ class FolderProcessor:
                     zip_filename = f"{folder_name}.zip"
                
                zip_path = os.path.join(folder_path, zip_filename)
+
+               # Check if this folder contains FSA files
+               has_fsa_files = self.file_dao.contains_file_type(folder_path, self.config.FSA_EXTENSION)
                
-               # Determine which files to include
-               file_extensions = [self.config.ABI_EXTENSION]
-               if include_txt:
-                    file_extensions.extend(self.config.TEXT_FILES)
+               # Determine which files to include based on file types present
+               if has_fsa_files:
+                    # FSA folders: include only .fsa files
+                    file_extensions = [self.config.FSA_EXTENSION]
+                    self.log(f"FSA folder detected, including only .fsa files: {zip_filename}")
+               else:
+                    # Regular folders: include .ab1 files and optionally .txt files
+                    file_extensions = [self.config.ABI_EXTENSION]
+                    if include_txt:
+                         file_extensions.extend(self.config.TEXT_FILES)
+                    self.log(f"Regular folder, including .ab1 files{' and .txt files' if include_txt else ''}: {zip_filename}")
                     
                # Create zip file
                self.log(f"Creating zip file: {zip_filename}")
