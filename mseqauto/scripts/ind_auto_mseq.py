@@ -17,29 +17,9 @@ warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", mo
 # Configuration settings
 use_confirmation = False  # Set to False to skip the confirmation prompt
 
-def get_folder_from_user(is_relaunched=False):
-    """
-    Get folder from user with a simple dialog
-    
-    Args:
-        is_relaunched: True if this is running after a Python relaunch
-    """
-    # Only check for stored path if we're in a relaunched session
-    if is_relaunched:
-        temp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp")
-        temp_file = os.path.join(temp_dir, "selected_folder.txt")
-        
-        if os.path.exists(temp_file):
-            try:
-                with open(temp_file, "r") as f:
-                    stored_path = f.read().strip()
-                    if stored_path and os.path.exists(stored_path):
-                        print(f"Using stored folder path: {stored_path}")
-                        return stored_path
-            except Exception as e:
-                print(f"Error reading stored folder path: {e}")
-    
-    # Always prompt for folder selection on new runs
+def get_folder_from_user():
+    """Get folder from user with a simple dialog"""
+    print("Opening folder selection dialog...")
     root = tk.Tk()
     root.withdraw()
     root.update()  # Force update to ensure dialog shows
@@ -50,53 +30,59 @@ def get_folder_from_user(is_relaunched=False):
     )
     
     root.destroy()
-    
-    # Store the path in a temporary file for potential relaunch
-    if folder_path:
-        temp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp")
-        os.makedirs(temp_dir, exist_ok=True)
-        temp_file = os.path.join(temp_dir, "selected_folder.txt")
-        with open(temp_file, "w") as f:
-            f.write(folder_path)
-            
     return folder_path
 
 def check_relaunch_status():
-    """Check if we're after a relaunch and clean up temp files if needed"""
-    # If this is the 32-bit Python process after relaunch, we'll know by environment variable
-    is_relaunched = os.environ.get('MSEQ_RELAUNCHED', '') == 'True'
+    """Check if we're after a relaunch"""
+    return os.environ.get('MSEQ_RELAUNCHED', '') == 'True'
+
+def main(provided_folder=None):
+    """Main function with improved 32-bit check logic"""
+    # Check if we're in a relaunched process
+    is_relaunched = check_relaunch_status()
+    
+    # Check if we're in 32-bit Python FIRST, before folder selection
+    if not is_relaunched and provided_folder is None and sys.maxsize > 2 ** 32:
+        print("Detected 64-bit Python, need to relaunch in 32-bit for mSeq automation...")
+        
+        # Set environment variable before relaunching
+        os.environ['MSEQ_RELAUNCHED'] = 'True'
+        
+        # Import and use the relaunch logic
+        from mseqauto.core import OSCompatibilityManager  # type: ignore
+        
+        # This will relaunch in 32-bit Python and exit current process
+        OSCompatibilityManager.py32_check(
+            script_path=__file__,
+            logger=None  # No logger yet since we haven't selected folder
+        )
+        return  # Should not reach here as py32_check exits
+    
+    # If we get here, we're either:
+    # 1. Already in 32-bit Python from the start, OR 
+    # 2. In the relaunched 32-bit process, OR
+    # 3. Using a provided folder (from combined script)
     
     if is_relaunched:
         print("Running in relaunched 32-bit Python process")
+    elif provided_folder is None:
+        print("Already running in 32-bit Python")
     
-    return is_relaunched
-
-def cleanup_temp_files():
-    """Clean up temporary files after successful run"""
-    try:
-        temp_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp")
-        temp_file = os.path.join(temp_dir, "selected_folder.txt")
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
-            print("Cleaned up temporary folder selection file")
-    except Exception as e:
-        print(f"Error cleaning up temp files: {e}")
-
-def main():
-    # Check if we're in a relaunched process
-    is_relaunched = check_relaunch_status()
-
-    # Get folder path FIRST before any imports, passing relaunch status
-    data_folder = get_folder_from_user(is_relaunched)
+    # Get folder path (only once, in the correct Python version)
+    if provided_folder:
+        data_folder = provided_folder
+        print(f"Using provided folder: {data_folder}")
+    else:
+        data_folder = get_folder_from_user()
     
     if not data_folder:
         print("No folder selected, exiting")
         return
     
-    # NOW import package modules
-    from mseqauto.utils import setup_logger # type: ignore
-    from mseqauto.config import MseqConfig # type: ignore
-    from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor # type: ignore
+    # NOW import package modules (after folder selection and 32-bit check)
+    from mseqauto.utils import setup_logger  # type: ignore
+    from mseqauto.config import MseqConfig  # type: ignore
+    from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor  # type: ignore
     
     # Get the script directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -107,18 +93,6 @@ def main():
     logger.info("Starting IND auto mSeq...")
     logger.info(f"Using folder: {data_folder}")
     data_folder = os.path.normpath(data_folder)
-    
-    # Only check for 32-bit Python if we haven't already relaunched
-    if not is_relaunched:
-        # Set environment variable before relaunching
-        os.environ['MSEQ_RELAUNCHED'] = 'True'
-        
-        # Check for 32-bit Python requirement and potentially relaunch
-        # This will exit the current process if it relaunches
-        OSCompatibilityManager.py32_check(
-            script_path=__file__,
-            logger=logger
-        )
     
     # Log OS information
     OSCompatibilityManager.log_environment_info(logger)
@@ -141,12 +115,12 @@ def main():
         logger.info(f"Found {len(pcr_folders)} PCR folders")
         
         # List what will be processed
-        if bio_folders: # Overarching plate folders containing individual orders
+        if bio_folders:  # Overarching plate folders containing individual orders
             print("\nBioI folders to process:")
             for i, folder in enumerate(bio_folders):
                 print(f"{i+1}. {os.path.basename(folder)}")
                 
-        if immediate_orders: # Individual customer order folders
+        if immediate_orders:  # Individual customer order folders
             print("\nImmediate order folders to process:")
             for i, folder in enumerate(immediate_orders):
                 print(f"{i+1}. {os.path.basename(folder)}")
@@ -164,13 +138,11 @@ def main():
             
         if not proceed:
             print("Cancelled by user")
-            cleanup_temp_files()  # Clean up temp files before exiting
             return
             
         # If no folders found at all
         if not bio_folders and not immediate_orders and not pcr_folders:
             print("No folders found to process, exiting")
-            cleanup_temp_files()
             return
             
         # Process BioI folders
@@ -208,11 +180,6 @@ def main():
                 ui_automation.close()
         except Exception as e:
             logger.error(f"Error closing mSeq: {e}")
-            
-        # Clean up temp files after successful run
-        # Only clean up if we're in the main process, not in the relaunched process
-        if not is_relaunched:
-            cleanup_temp_files()
 
 if __name__ == "__main__":
     main()

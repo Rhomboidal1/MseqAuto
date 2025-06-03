@@ -3,5 +3,6 @@ __pycache__/
 *.pyc
 *.log
 *.lnk
+*.xml
 mseqauto/mseqauto/scripts/temp/selected_folder.txt
 mseqauto/scripts/temp/selected_folder.txt
