@@ -4,5 +4,6 @@ __pycache__/
 *.log
 *.lnk
 *.xml
+/.idea/
 mseqauto/mseqauto/scripts/temp/selected_folder.txt
 mseqauto/scripts/temp/selected_folder.txt
