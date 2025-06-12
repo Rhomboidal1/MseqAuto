@@ -34,9 +34,9 @@ def main():
         return
 
     # NOW import package modules
-    from mseqauto.utils import setup_logger
-    from mseqauto.config import MseqConfig
-    from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor
+    from mseqauto.utils import setup_logger  # type: ignore
+    from mseqauto.config import MseqConfig  # type: ignore
+    from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor  # type: ignore
 
     # Setup logger
     logger = setup_logger("ind_auto_mseq")
