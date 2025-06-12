@@ -12,6 +12,9 @@ from datetime import datetime
 # Add parent directory to PYTHONPATH for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Check if running under GUI
+GUI_MODE = os.environ.get('MSEQAUTO_GUI_MODE', 'False') == 'True'
+
 def setup_logger(name):
     """Set up a logger with file and console output"""
     # Create logs directory if it doesn't exist
@@ -44,7 +47,11 @@ def setup_logger(name):
 
 def get_folder_from_user():
     """Open a dialog to select today's data folder"""
-    print("Opening folder selection dialog...")
+    # Check for GUI-provided folder first
+
+    if GUI_MODE and 'MSEQAUTO_DATA_FOLDER' in os.environ:
+        return os.environ['MSEQAUTO_DATA_FOLDER']
+    
     root = tk.Tk()
     root.withdraw()
     root.update()  # Force an update to ensure dialog shows

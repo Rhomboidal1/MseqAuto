@@ -1,0 +1,25 @@
+Selected folder: P:/Data/06.10.25
+
+============================================================
+Starting: ind_auto_mseq.py
+============================================================
+Already running in 32-bit Python
+
+BioI folders to process:
+1. BioI-22129
+2. BioI-22130
+
+PCR folders to process:
+1. FB-PCR3037_149502
+2. FB-PCR3038_149525
+
+ALL DONE
+
+✓ Completed successfully
+
+============================================================
+Starting: ind_zip_files.py
+============================================================
+All done! 10 orders zipped.
+
+✓ Completed successfully

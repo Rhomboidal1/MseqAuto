@@ -17,8 +17,13 @@ warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", mo
 # Configuration settings
 use_confirmation = False  # Set to False to skip the confirmation prompt
 
+# Check if running under GUI
+GUI_MODE = os.environ.get('MSEQAUTO_GUI_MODE', 'False') == 'True'
+
 def get_folder_from_user():
-    """Get folder from user with a simple dialog"""
+    # Check for GUI-provided folder first
+    if GUI_MODE and 'MSEQAUTO_DATA_FOLDER' in os.environ:
+        return os.environ['MSEQAUTO_DATA_FOLDER']
     print("Opening folder selection dialog...")
     root = tk.Tk()
     root.withdraw()
@@ -41,27 +46,31 @@ def main(provided_folder=None):
     # Check if we're in a relaunched process
     is_relaunched = check_relaunch_status()
     
-    # Check if we're in 32-bit Python FIRST, before folder selection
-    if not is_relaunched and provided_folder is None and sys.maxsize > 2 ** 32:
-        print("Detected 64-bit Python, need to relaunch in 32-bit for mSeq automation...")
-        
-        # Set environment variable before relaunching
-        os.environ['MSEQ_RELAUNCHED'] = 'True'
-        
-        # Import and use the relaunch logic
-        from mseqauto.core import OSCompatibilityManager  # type: ignore
-        
-        # This will relaunch in 32-bit Python and exit current process
-        OSCompatibilityManager.py32_check(
-            script_path=__file__,
-            logger=None  # No logger yet since we haven't selected folder
-        )
-        return  # Should not reach here as py32_check exits
+    # SKIP the 32-bit check entirely when running under GUI
+    # The GUI is already launching us with 32-bit Python
+    if not GUI_MODE:
+        # Only do the 32-bit check in standalone mode
+        if not is_relaunched and provided_folder is None and sys.maxsize > 2 ** 32:
+            print("Detected 64-bit Python, need to relaunch in 32-bit for mSeq automation...")
+            
+            # Set environment variable before relaunching
+            os.environ['MSEQ_RELAUNCHED'] = 'True'
+            
+            # Import and use the relaunch logic
+            from mseqauto.core import OSCompatibilityManager  # type: ignore
+            
+            # This will relaunch in 32-bit Python and exit current process
+            OSCompatibilityManager.py32_check(
+                script_path=__file__,
+                logger=None  # No logger yet since we haven't selected folder
+            )
+            return  # Should not reach here as py32_check exits
     
     # If we get here, we're either:
     # 1. Already in 32-bit Python from the start, OR 
     # 2. In the relaunched 32-bit process, OR
     # 3. Using a provided folder (from combined script)
+    # 4. Running under GUI (which handles 32-bit Python for us)
     
     if is_relaunched:
         print("Running in relaunched 32-bit Python process")

@@ -10,9 +10,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 import warnings
 warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
 
-# print(sys.path)
+# Check if running under GUI
+GUI_MODE = os.environ.get('MSEQAUTO_GUI_MODE', 'False') == 'True'
 
 def get_folder_from_user():
+    # Check for GUI-provided folder first
+    if GUI_MODE and 'MSEQAUTO_DATA_FOLDER' in os.environ:
+        return os.environ['MSEQAUTO_DATA_FOLDER']
     print("Opening folder selection dialog...")
     root = tk.Tk()
     root.withdraw()
