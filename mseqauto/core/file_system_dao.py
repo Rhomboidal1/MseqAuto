@@ -84,7 +84,7 @@ class FileSystemDAO:
     
         # If pattern is a compiled regex, print its pattern attribute
         if hasattr(pattern, 'pattern'):
-            print(f"Regex pattern string: {pattern.pattern}")
+            print(f"Regex pattern string: {pattern.pattern}") #type: ignore
         self.log(f"Using pattern: {pattern}")
 
         contents = self.get_directory_contents(path)
@@ -651,8 +651,8 @@ class FileSystemDAO:
         pcr_num = ''
         # Look for PCR pattern in brackets - only this matters for folder sorting
         if re.search('{pcr\\d+.+}', filename.lower()):
-            pcr_bracket = re.search("{pcr\\d+.+}", filename.lower()).group()
-            pcr_num = re.search("pcr(\\d+)", pcr_bracket).group(1)
+            pcr_bracket = re.search("{pcr\\d+.+}", filename.lower()).group() #type: ignore
+            pcr_num = re.search("pcr(\\d+)", pcr_bracket).group(1) #type: ignore
         return pcr_num
 
     def is_control_file(self, file_name, control_list):
