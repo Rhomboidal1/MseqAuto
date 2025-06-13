@@ -97,7 +97,7 @@ class FolderProcessor:
                base_normalized_name, order_number_suffix = normalized_name.split('#', 1)
           
           if base_normalized_name in self.order_key_index:
-               matches = self.order_key_index[base_normalized_name]
+               matches = self.order_key_index[base_normalized_name]  #type: ignore
                
                # First, try to find a match with the embedded order number
                if embedded_order_number or order_number_suffix:
@@ -989,8 +989,8 @@ class FolderProcessor:
           # IMPORTANT: Always use the user-selected folder for consistency
           # This is the key change - we always use the same base path
           # If this is undefined, use the current_data_folder attribute which should be set
-          if hasattr(self, 'current_data_folder') and self.current_data_folder:
-               day_data_path = self.current_data_folder
+          if hasattr(self, 'current_data_folder') and self.current_data_folder: #type: ignore
+               day_data_path = self.current_data_folder #type: ignore
           else:
                # Fallback to parent folder logic - should not normally be used
                current_folder = os.path.dirname(file_path)
@@ -1130,7 +1130,7 @@ class FolderProcessor:
           folder_name = os.path.basename(folder_path)
           match = re.search(r'_\d+$', folder_name)
           if match:
-               order_number = re.search(r'\d+', match.group(0)).group(0)
+               order_number = re.search(r'\d+', match.group(0)).group(0) #type: ignore
                return order_number
           return None
 
@@ -1248,7 +1248,7 @@ class FolderProcessor:
                               sample = sheet.index(row, 1)  # Use index instead of address
                               primer = sheet.index(row, 2)  # Use index instead of address
                               if sample and primer:
-                                   reinject_prep_list.append(sample + primer)
+                                   reinject_prep_list.append(sample + primer) #type: ignore
 
                     # Convert to numpy array for easier searching
                     reinject_prep_array = np.array(reinject_prep_list)
