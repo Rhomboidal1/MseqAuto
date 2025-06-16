@@ -38,6 +38,9 @@ class MseqConfig:
         'pcr_number': re.compile(r'{pcr(\d+).+}', re.IGNORECASE),
         'brace_content': re.compile(r'{.*?}'),
         'bioi_folder': re.compile(r'^bioi-\d+$', re.IGNORECASE),
+        'order_number_extract': re.compile(r'_(\d+)$'),  # Extract order number from end of folder name
+        'raw_data_zip': re.compile(r'rd\d+\.zip$', re.IGNORECASE),  # Raw data zip files
+        'plate_folder': re.compile(r'^P\d+_.+$', re.IGNORECASE),  # For plate folders
         'ind_blank_file': re.compile(r'{\d+[A-H]}.ab1$', re.IGNORECASE),  # Individual blanks pattern
         'plate_blank_file': re.compile(r'^\d{2}[A-H]__.ab1$', re.IGNORECASE),  # Plate blanks pattern
         'order_folder': re.compile(r'bioi-\d+_.+_\d+', re.IGNORECASE),  # For BioI order folders
