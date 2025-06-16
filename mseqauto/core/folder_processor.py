@@ -88,16 +88,16 @@ class FolderProcessor:
           # Normalize the filename for matching - include order number if found
           normalized_name = self.file_dao.standardize_filename_for_matching(file_name, preserve_order_number=True)
 
-          # Check if we have this filename in our index
-          base_normalized_name = normalized_name
-          order_number_suffix = None
+          # Get base name without order number for order key lookup - use DAO function consistently
+          base_normalized_name = self.file_dao.standardize_filename_for_matching(file_name, preserve_order_number=False)
           
-          # Check if the normalized name contains an embedded order number (format: name#ordernumber)
+          # Extract order number suffix if present in normalized name
+          order_number_suffix = None
           if '#' in normalized_name:
-               base_normalized_name, order_number_suffix = normalized_name.split('#', 1)
+               _, order_number_suffix = normalized_name.split('#', 1)
           
           if base_normalized_name in self.order_key_index:
-               matches = self.order_key_index[base_normalized_name]  #type: ignore
+               matches = self.order_key_index[base_normalized_name] # type: ignore
                
                # First, try to find a match with the embedded order number
                if embedded_order_number or order_number_suffix:
@@ -106,7 +106,7 @@ class FolderProcessor:
                          if order_num == order_to_match:
                               self.log(f"Found exact match with embedded order number: {order_to_match}")
                               destination_folder = self.create_order_folder(i_num, acct_name, order_num)
-                              return self._move_file_to_destination(file_path, destination_folder, base_normalized_name)
+                              return self._place_customer_file(file_path, destination_folder, normalized_name)
 
                # Prioritize matches from current folder's I number
                current_i_num = self.file_dao.get_inumber_from_name(os.path.dirname(file_path))
@@ -115,12 +115,12 @@ class FolderProcessor:
                     # Prioritize current I number if available
                     if current_i_num and i_num == current_i_num:
                          destination_folder = self.create_order_folder(i_num, acct_name, order_num)
-                         return self._move_file_to_destination(file_path, destination_folder, base_normalized_name)
+                         return self._place_customer_file(file_path, destination_folder, normalized_name)
 
                # If no match with current I number, use the first match
                i_num, acct_name, order_num = matches[0]
                destination_folder = self.create_order_folder(i_num, acct_name, order_num)
-               return self._move_file_to_destination(file_path, destination_folder, base_normalized_name)
+               return self._place_customer_file(file_path, destination_folder, normalized_name)
 
           # No match found
           self.log(f"No match found in order key for: {base_normalized_name}")
@@ -429,131 +429,186 @@ class FolderProcessor:
                well_locations.append(match.group(1))
           return well_locations
 
-     def _move_file_to_destination(self, file_path, destination_folder, normalized_name):
-          """Handle file placement including reinject and NN folder logic"""
-          file_name = os.path.basename(file_path)
+     # def _move_file_to_destination(self, file_path, destination_folder, normalized_name):
+     #      """Handle file placement including reinject and NN folder logic"""
+     #      file_name = os.path.basename(file_path)
           
-          # DEBUG: Add logging for the specific file we're debugging
-          # if "1_FWDPARP1_Premixed" in file_name:
-          #     self.log(f"DEBUG: Processing file: {file_name}")
-          #     self.log(f"DEBUG: Normalized name: {normalized_name}")
-          #     self.log(f"DEBUG: Has reinject_list: {hasattr(self, 'reinject_list')}")
-          #     if hasattr(self, 'reinject_list'):
-          #         self.log(f"DEBUG: Reinject list length: {len(self.reinject_list) if self.reinject_list else 0}")
-          #         self.log(f"DEBUG: Has raw_reinject_list: {hasattr(self, 'raw_reinject_list')}")
-          #         if hasattr(self, 'raw_reinject_list'):
-          #             self.log(f"DEBUG: Raw reinject list length: {len(self.raw_reinject_list) if self.raw_reinject_list else 0}")
+     #      # First check if file is in a Not Needed folder
+     #      is_from_nn = self.is_in_not_needed_folder(file_path)
           
-          # First check if file is in a Not Needed folder
-          is_from_nn = self.is_in_not_needed_folder(file_path)
+     #      # Remove order number suffix if present (format: name#ordernumber)
+     #      base_normalized_name = normalized_name
+     #      if '#' in normalized_name:
+     #           base_normalized_name = normalized_name.split('#', 1)[0]
           
-          # Remove order number suffix if present (format: name#ordernumber)
-          base_normalized_name = normalized_name
-          if '#' in normalized_name:
-               base_normalized_name = normalized_name.split('#', 1)[0]
-          
-          # Check if file is in reinject list
-          is_reinject = False
-          if hasattr(self, 'reinject_list') and self.reinject_list:
-               current_wells = self._get_well_locations(file_name)
+     #      # Check if file is in reinject list
+     #      is_reinject = False
+     #      if hasattr(self, 'reinject_list') and self.reinject_list:
+     #           current_wells = self._get_well_locations(file_name)
                
-               # DEBUG: Add logging for well location extraction
-               # if "1_FWDPARP1_Premixed" in file_name:
-               #     self.log(f"DEBUG: Current wells extracted: {current_wells}")
-               
-               if current_wells:
-                    current_well = current_wells[0]
+     #           if current_wells:
+     #                current_well = current_wells[0]
                     
-                    # DEBUG: Add logging for current well
-                    # if "1_FWDPARP1_Premixed" in file_name:
-                    #     self.log(f"DEBUG: Current well: {current_well}")
-                    #     self.log(f"DEBUG: Checking against {len(self.raw_reinject_list)} raw entries")
-                    
-                    for i, raw_entry in enumerate(self.raw_reinject_list):
-                         reinject_wells = self._get_well_locations(raw_entry)
+     #                for i, raw_entry in enumerate(self.raw_reinject_list):
+     #                     reinject_wells = self._get_well_locations(raw_entry)
                          
-                         # DEBUG: Add logging for each comparison
-                         # if "1_FWDPARP1_Premixed" in file_name:
-                         #     if "1_FWDPARP1_Premixed" in raw_entry:  # Only log for matching entries
-                         #         self.log(f"DEBUG: Entry {i}: {raw_entry}")
-                         #         self.log(f"DEBUG: Entry wells: {reinject_wells}")
-                         #         self.log(f"DEBUG: Wells check: len >= 2? {len(reinject_wells) >= 2}, second well matches? {len(reinject_wells) >= 2 and reinject_wells[1] == current_well}")
-                         
-                         if len(reinject_wells) >= 2 and reinject_wells[1] == current_well:
-                              # Normalize the reinject entry for comparison, also handling order numbers
-                              reinj_norm = self.file_dao.standardize_filename_for_matching(raw_entry)
-                              if '#' in reinj_norm:
-                                   reinj_norm = reinj_norm.split('#', 1)[0]
+     #                     if len(reinject_wells) >= 2 and reinject_wells[1] == current_well:
+     #                          # Normalize the reinject entry for comparison, also handling order numbers
+     #                          reinj_norm = self.file_dao.standardize_filename_for_matching(raw_entry)
+     #                          if '#' in reinj_norm:
+     #                               reinj_norm = reinj_norm.split('#', 1)[0]
                               
-                              # DEBUG: Add logging for name comparison
-                              # if "1_FWDPARP1_Premixed" in file_name:
-                              #     self.log(f"DEBUG: Normalized raw entry: {reinj_norm}")
-                              #     self.log(f"DEBUG: Name match? {base_normalized_name} == {reinj_norm}: {base_normalized_name == reinj_norm}")
-                              
-                              if base_normalized_name == reinj_norm:
-                                   is_reinject = True
-                                   # if "1_FWDPARP1_Premixed" in file_name:
-                                   #     self.log(f"DEBUG: MATCH FOUND! Setting is_reinject = True")
-                                   break
+     #                          if base_normalized_name == reinj_norm:
+     #                               is_reinject = True
+     #                               break
           
-          # Only log the final decision if it's a reinject
-          if is_reinject:
-               self.log(f"File is in reinject list: {file_name}")
-          # elif "1_FWDPARP1_Premixed" in file_name:
-          #     self.log(f"DEBUG: Final is_reinject = False for {file_name}")
+     #      # Only log the final decision if it's a reinject
+     #      if is_reinject:
+     #           self.log(f"File is in reinject list: {file_name}")
           
-          # Check if file is a preemptive reinject
-          is_preempt = self.is_preemptive(file_name)
+     #      # Check if file is a preemptive reinject
+     #      is_preempt = self.is_preemptive(file_name)
           
-          # Clean filename for destination (remove braces)
-          clean_brace_file_name = re.sub(r'{.*?}', '', file_name)
-          target_file_path = os.path.join(destination_folder, clean_brace_file_name)
+     #      # Clean filename for destination (remove braces)
+     #      clean_brace_file_name = re.sub(r'{.*?}', '', file_name)
+     #      target_file_path = os.path.join(destination_folder, clean_brace_file_name)
           
-          # Determine if file should go to Alternate Injections
-          go_to_alt_injections = False
+     #      # Determine if file should go to Alternate Injections
+     #      go_to_alt_injections = False
           
-          if is_from_nn:
-               go_to_alt_injections = True
-               self.log(f"File is from NN folder: {file_name}")
-          elif is_reinject:
-               go_to_alt_injections = True
-               self.log(f"File is in reinject list: {file_name}")
-          elif is_preempt and not is_reinject:
-               # Look for matching files to see if this preemptive should be moved
-               # Use the base normalized name without the order number
-               matching_files = self.find_matching_files(destination_folder, base_normalized_name)
-               if matching_files:
-                    go_to_alt_injections = True
-                    self.log(f"Preemptive file has matching files in destination: {file_name}")
-               else:
-                    self.log(f"Preemptive file has no matching files, will be primary: {file_name}")
+     #      if is_from_nn:
+     #           go_to_alt_injections = True
+     #           self.log(f"File is from NN folder: {file_name}")
+     #      elif is_reinject:
+     #           go_to_alt_injections = True
+     #           self.log(f"File is in reinject list: {file_name}")
+     #      elif is_preempt and not is_reinject:
+     #           # Look for matching files to see if this preemptive should be moved
+     #           # Use the base normalized name without the order number
+     #           matching_files = self.find_matching_files(destination_folder, base_normalized_name)
+     #           if matching_files:
+     #                go_to_alt_injections = True
+     #                self.log(f"Preemptive file has matching files in destination: {file_name}")
+     #           else:
+     #                self.log(f"Preemptive file has no matching files, will be primary: {file_name}")
           
-          # Additional check: if file already exists at destination, use Alternate Injections
-          if os.path.exists(target_file_path):
-               go_to_alt_injections = True
-               self.log(f"File already exists at destination: {file_name}")
+     #      # Additional check: if file already exists at destination, use Alternate Injections
+     #      if os.path.exists(target_file_path):
+     #           go_to_alt_injections = True
+     #           self.log(f"File already exists at destination: {file_name}")
+             
+     #      # Move the file to the appropriate location
+     #      if go_to_alt_injections:
+     #           alt_inj_folder = os.path.join(destination_folder, "Alternate Injections")
+     #           os.makedirs(alt_inj_folder, exist_ok=True)
+     #           alt_file_path = os.path.join(alt_inj_folder, file_name)  # Keep original name with braces
+     #           success = self.file_dao.move_file(file_path, alt_file_path)
+     #           if success:
+     #                self.log(f"Moved file to Alternate Injections: {file_name}")
+     #           return success
+     #      else:
+     #           success = self.file_dao.move_file(file_path, target_file_path)
+     #           if success:
+     #                self.log(f"Moved file to main folder: {file_name}")
+     #           return success
+     def _place_customer_file(self, file_path, destination_folder, normalized_name):
+          """Place customer file in main folder or Alternate Injections based on file characteristics"""
           
-          # DEBUG: Final decision logging
-          # if "1_FWDPARP1_Premixed" in file_name:
-          #     self.log(f"DEBUG: Final decision for {file_name}: go_to_alt_injections = {go_to_alt_injections}")
-          #     self.log(f"DEBUG: Reasons - is_from_nn: {is_from_nn}, is_reinject: {is_reinject}, is_preempt: {is_preempt}")
-          
-          # Move the file to the appropriate location
-          if go_to_alt_injections:
-               alt_inj_folder = os.path.join(destination_folder, "Alternate Injections")
-               os.makedirs(alt_inj_folder, exist_ok=True)
-               alt_file_path = os.path.join(alt_inj_folder, file_name)  # Keep original name with braces
-               success = self.file_dao.move_file(file_path, alt_file_path)
-               if success:
-                    self.log(f"Moved file to Alternate Injections: {file_name}")
-               return success
+          if self._should_use_alternate_injections(file_path, destination_folder, normalized_name):
+               return self._move_to_alternate_injections(file_path, destination_folder)
           else:
-               success = self.file_dao.move_file(file_path, target_file_path)
-               if success:
-                    self.log(f"Moved file to main folder: {file_name}")
-               return success
-    
+               return self._move_to_main_folder(file_path, destination_folder)
 
+     def _should_use_alternate_injections(self, file_path, destination_folder, normalized_name):
+          """Check if customer file should be placed in Alternate Injections folder"""
+          file_name = os.path.basename(file_path)
+          # Use existing DAO function to get base name without order number
+          base_name = self.file_dao.standardize_filename_for_matching(file_name, preserve_order_number=False)
+          
+          placement_reasons = []
+          
+          if self.is_in_not_needed_folder(file_path):
+               placement_reasons.append("from NN folder")
+               
+          if self._is_customer_file_in_reinject_list(file_name, base_name):
+               placement_reasons.append("in reinject list")
+               
+          if self._has_preemptive_conflicts(file_name, destination_folder, base_name):
+               placement_reasons.append("preemptive with conflicts")
+               
+          if self._would_overwrite_existing_file(file_path, destination_folder):
+               placement_reasons.append("would overwrite existing")
+          
+          if placement_reasons:
+               reason_text = ', '.join(placement_reasons)
+               self.log(f"Customer file goes to Alternate Injections ({reason_text}): {file_name}")
+               return True
+               
+          return False
+
+     def _is_customer_file_in_reinject_list(self, file_name, base_normalized_name):
+          """Check if customer file is in reinject list using well location matching"""
+          if not (hasattr(self, 'reinject_list') and self.reinject_list and hasattr(self, 'raw_reinject_list')):
+               return False
+               
+          current_wells = self._get_well_locations(file_name)
+          if not current_wells:
+               return False
+               
+          current_well = current_wells[0]
+          
+          # Customer files use complex well-based matching (different from PCR files)
+          for raw_entry in self.raw_reinject_list:
+               reinject_wells = self._get_well_locations(raw_entry)
+               if len(reinject_wells) >= 2 and reinject_wells[1] == current_well:
+                    # Use existing DAO function consistently
+                    reinj_base = self.file_dao.standardize_filename_for_matching(raw_entry, preserve_order_number=False)
+                    
+                    if base_normalized_name == reinj_base:
+                         return True
+                         
+          return False
+
+     def _has_preemptive_conflicts(self, file_name, destination_folder, base_normalized_name):
+          """Check if preemptive file would conflict with existing files"""
+          if not self.is_preemptive(file_name):
+               return False
+               
+          matching_files = self.find_matching_files(destination_folder, base_normalized_name)
+          return len(matching_files) > 0
+
+     def _would_overwrite_existing_file(self, file_path, destination_folder):
+          """Check if cleaned filename would overwrite existing file"""
+          file_name = os.path.basename(file_path)
+          # Use existing DAO function instead of manual regex
+          clean_name = self.file_dao.clean_braces_format(file_name)
+          target_path = os.path.join(destination_folder, clean_name)
+          return os.path.exists(target_path)
+
+     def _move_to_alternate_injections(self, file_path, destination_folder):
+          """Move file to Alternate Injections folder preserving original name"""
+          file_name = os.path.basename(file_path)
+          alt_folder = os.path.join(destination_folder, "Alternate Injections")
+          os.makedirs(alt_folder, exist_ok=True)
+          
+          alt_path = os.path.join(alt_folder, file_name)  # Keep original name with braces
+          success = self.file_dao.move_file(file_path, alt_path)
+          if success:
+               self.log(f"Moved to Alternate Injections: {file_name}")
+          return success
+
+     def _move_to_main_folder(self, file_path, destination_folder):
+          """Move file to main folder with cleaned filename"""
+          file_name = os.path.basename(file_path)
+          # Use existing DAO function instead of manual regex
+          clean_name = self.file_dao.clean_braces_format(file_name)
+          
+          target_path = os.path.join(destination_folder, clean_name)
+          success = self.file_dao.move_file(file_path, target_path)
+          if success:
+               self.log(f"Moved to main folder: {file_name}")
+          return success
+     
      def _get_expected_file_count(self, order_number):
           """Get expected number of files for an order based on the order key"""
           # Load the order key file
@@ -822,7 +877,7 @@ class FolderProcessor:
                                         
                                         # Create destination folder and move file
                                         destination_folder = self.create_order_folder(i_num, acct_name, order_num)
-                                        self._move_file_to_destination(file_path, destination_folder, normalized_name)
+                                        self._place_customer_file(file_path, destination_folder, normalized_name)
                                    else:
                                         self.log(f"No order key match for nested NN file: {file_name}")
                               
@@ -1791,6 +1846,9 @@ class FolderProcessor:
                self._try_delete_if_empty(folder)
           
           self.log("Final cleanup complete")
+
+
+
 
 if __name__ == "__main__":
     # Simple test if run directly
