@@ -63,7 +63,8 @@ class FolderProcessor:
           # Process each entry in the order key
           for entry in order_key:
                i_num, acct_name, order_num, sample_name = entry[0:4]
-               normalized_name = self.file_dao.normalize_filename(sample_name, remove_extension=False)
+               # Use customer-specific normalization for order key
+               normalized_name = self.file_dao.standardize_for_customer_files(sample_name, remove_extension=False)
 
                # Create entry in index (handle multiple entries with same normalized name)
                if normalized_name not in self.order_key_index:
@@ -79,34 +80,24 @@ class FolderProcessor:
                self.build_order_key_index(order_key)
 
           file_name = os.path.basename(file_path)
-          # Only log once, not for each transformation step
           self.log(f"Processing customer file: {file_name}")
 
           # Extract order number from filename if present
           embedded_order_number = self.file_dao.extract_order_number_from_filename(file_name)
           
-          # Normalize the filename for matching - include order number if found
-          normalized_name = self.file_dao.standardize_filename_for_matching(file_name, preserve_order_number=True)
-
-          # Get base name without order number for order key lookup - use DAO function consistently
-          base_normalized_name = self.file_dao.standardize_filename_for_matching(file_name, preserve_order_number=False)
-          
-          # Extract order number suffix if present in normalized name
-          order_number_suffix = None
-          if '#' in normalized_name:
-               _, order_number_suffix = normalized_name.split('#', 1)
+          # Use customer-specific normalization (removes well locations completely)
+          base_normalized_name = self.file_dao.standardize_for_customer_files(file_name, remove_extension=True)
           
           if base_normalized_name in self.order_key_index:
-               matches = self.order_key_index[base_normalized_name] # type: ignore
+               matches = self.order_key_index[base_normalized_name] #type: ignore
                
                # First, try to find a match with the embedded order number
-               if embedded_order_number or order_number_suffix:
-                    order_to_match = embedded_order_number or order_number_suffix
+               if embedded_order_number:
                     for i_num, acct_name, order_num in matches:
-                         if order_num == order_to_match:
-                              self.log(f"Found exact match with embedded order number: {order_to_match}")
+                         if order_num == embedded_order_number:
+                              self.log(f"Found exact match with embedded order number: {embedded_order_number}")
                               destination_folder = self.create_order_folder(i_num, acct_name, order_num)
-                              return self._place_customer_file(file_path, destination_folder, normalized_name)
+                              return self._place_customer_file(file_path, destination_folder, base_normalized_name)
 
                # Prioritize matches from current folder's I number
                current_i_num = self.file_dao.get_inumber_from_name(os.path.dirname(file_path))
@@ -115,12 +106,12 @@ class FolderProcessor:
                     # Prioritize current I number if available
                     if current_i_num and i_num == current_i_num:
                          destination_folder = self.create_order_folder(i_num, acct_name, order_num)
-                         return self._place_customer_file(file_path, destination_folder, normalized_name)
+                         return self._place_customer_file(file_path, destination_folder, base_normalized_name)
 
                # If no match with current I number, use the first match
                i_num, acct_name, order_num = matches[0]
                destination_folder = self.create_order_folder(i_num, acct_name, order_num)
-               return self._place_customer_file(file_path, destination_folder, normalized_name)
+               return self._place_customer_file(file_path, destination_folder, base_normalized_name)
 
           # No match found
           self.log(f"No match found in order key for: {base_normalized_name}")
@@ -429,88 +420,6 @@ class FolderProcessor:
                well_locations.append(match.group(1))
           return well_locations
 
-     # def _move_file_to_destination(self, file_path, destination_folder, normalized_name):
-     #      """Handle file placement including reinject and NN folder logic"""
-     #      file_name = os.path.basename(file_path)
-          
-     #      # First check if file is in a Not Needed folder
-     #      is_from_nn = self.is_in_not_needed_folder(file_path)
-          
-     #      # Remove order number suffix if present (format: name#ordernumber)
-     #      base_normalized_name = normalized_name
-     #      if '#' in normalized_name:
-     #           base_normalized_name = normalized_name.split('#', 1)[0]
-          
-     #      # Check if file is in reinject list
-     #      is_reinject = False
-     #      if hasattr(self, 'reinject_list') and self.reinject_list:
-     #           current_wells = self._get_well_locations(file_name)
-               
-     #           if current_wells:
-     #                current_well = current_wells[0]
-                    
-     #                for i, raw_entry in enumerate(self.raw_reinject_list):
-     #                     reinject_wells = self._get_well_locations(raw_entry)
-                         
-     #                     if len(reinject_wells) >= 2 and reinject_wells[1] == current_well:
-     #                          # Normalize the reinject entry for comparison, also handling order numbers
-     #                          reinj_norm = self.file_dao.standardize_filename_for_matching(raw_entry)
-     #                          if '#' in reinj_norm:
-     #                               reinj_norm = reinj_norm.split('#', 1)[0]
-                              
-     #                          if base_normalized_name == reinj_norm:
-     #                               is_reinject = True
-     #                               break
-          
-     #      # Only log the final decision if it's a reinject
-     #      if is_reinject:
-     #           self.log(f"File is in reinject list: {file_name}")
-          
-     #      # Check if file is a preemptive reinject
-     #      is_preempt = self.is_preemptive(file_name)
-          
-     #      # Clean filename for destination (remove braces)
-     #      clean_brace_file_name = re.sub(r'{.*?}', '', file_name)
-     #      target_file_path = os.path.join(destination_folder, clean_brace_file_name)
-          
-     #      # Determine if file should go to Alternate Injections
-     #      go_to_alt_injections = False
-          
-     #      if is_from_nn:
-     #           go_to_alt_injections = True
-     #           self.log(f"File is from NN folder: {file_name}")
-     #      elif is_reinject:
-     #           go_to_alt_injections = True
-     #           self.log(f"File is in reinject list: {file_name}")
-     #      elif is_preempt and not is_reinject:
-     #           # Look for matching files to see if this preemptive should be moved
-     #           # Use the base normalized name without the order number
-     #           matching_files = self.find_matching_files(destination_folder, base_normalized_name)
-     #           if matching_files:
-     #                go_to_alt_injections = True
-     #                self.log(f"Preemptive file has matching files in destination: {file_name}")
-     #           else:
-     #                self.log(f"Preemptive file has no matching files, will be primary: {file_name}")
-          
-     #      # Additional check: if file already exists at destination, use Alternate Injections
-     #      if os.path.exists(target_file_path):
-     #           go_to_alt_injections = True
-     #           self.log(f"File already exists at destination: {file_name}")
-             
-     #      # Move the file to the appropriate location
-     #      if go_to_alt_injections:
-     #           alt_inj_folder = os.path.join(destination_folder, "Alternate Injections")
-     #           os.makedirs(alt_inj_folder, exist_ok=True)
-     #           alt_file_path = os.path.join(alt_inj_folder, file_name)  # Keep original name with braces
-     #           success = self.file_dao.move_file(file_path, alt_file_path)
-     #           if success:
-     #                self.log(f"Moved file to Alternate Injections: {file_name}")
-     #           return success
-     #      else:
-     #           success = self.file_dao.move_file(file_path, target_file_path)
-     #           if success:
-     #                self.log(f"Moved file to main folder: {file_name}")
-     #           return success
      def _place_customer_file(self, file_path, destination_folder, normalized_name):
           """Place customer file in main folder or Alternate Injections based on file characteristics"""
           
@@ -561,8 +470,8 @@ class FolderProcessor:
           for raw_entry in self.raw_reinject_list:
                reinject_wells = self._get_well_locations(raw_entry)
                if len(reinject_wells) >= 2 and reinject_wells[1] == current_well:
-                    # Use existing DAO function consistently
-                    reinj_base = self.file_dao.standardize_filename_for_matching(raw_entry, preserve_order_number=False)
+                    # Use customer-specific normalization consistently
+                    reinj_base = self.file_dao.standardize_for_customer_files(raw_entry, remove_extension=True)
                     
                     if base_normalized_name == reinj_base:
                          return True
@@ -598,10 +507,10 @@ class FolderProcessor:
           return success
 
      def _move_to_main_folder(self, file_path, destination_folder):
-          """Move file to main folder with cleaned filename"""
+          """Move file to main folder with cleaned filename (braces removed only)"""
           file_name = os.path.basename(file_path)
-          # Use existing DAO function instead of manual regex
-          clean_name = self.file_dao.clean_braces_format(file_name)
+          # Remove only braces, keep suffixes like _Premixed and _RTI
+          clean_name = re.sub(r'{.*?}', '', file_name)
           
           target_path = os.path.join(destination_folder, clean_name)
           success = self.file_dao.move_file(file_path, target_path)
@@ -1665,18 +1574,63 @@ class FolderProcessor:
                     return worksheet.cell(row=row, column=8).value
           return None
 
+     def get_order_folders_for_validation(self, data_folder):
+          """
+          Get both BioI order folders and immediate order folders for validation
+          
+          Args:
+               data_folder (str): Path to data folder
+               
+          Returns:
+               list: List of tuples (order_folder_path, i_number)
+          """
+          order_folders = []
+          
+          # Get BioI folders
+          bio_folders = self.file_dao.get_folders(data_folder, pattern=self.config.REGEX_PATTERNS['bioi_folder'].pattern)
+          
+          for bio_folder in bio_folders:
+               folder_name = os.path.basename(bio_folder)
+               i_number = self.file_dao.get_inumber_from_name(folder_name)
+               
+               if not i_number:
+                    continue
+                    
+               # Get order folders within this BioI folder
+               for item in os.listdir(bio_folder):
+                    item_path = os.path.join(bio_folder, item)
+                    if (os.path.isdir(item_path) and 
+                         self.config.REGEX_PATTERNS['order_folder'].search(item.lower()) and
+                         not self.config.REGEX_PATTERNS['reinject'].search(item.lower())):
+                         order_folders.append((item_path, i_number))
+          
+          # Get immediate order folders (orders directly in data folder)
+          immediate_orders = self.file_dao.get_folders(data_folder, pattern=self.config.REGEX_PATTERNS['order_folder'].pattern)
+          # Filter out reinject folders
+          immediate_orders = [folder for folder in immediate_orders 
+                              if not self.config.REGEX_PATTERNS['reinject'].search(os.path.basename(folder).lower())]
+          
+          for order_folder in immediate_orders:
+               # Extract I-number from folder name for immediate orders
+               i_number = self.file_dao.get_inumber_from_name(os.path.basename(order_folder))
+               if i_number:
+                    order_folders.append((order_folder, i_number))
+          
+          return order_folders
+
+
      def validate_zip_contents(self, zip_path, i_number, order_number, order_key):
           """
           Validate zip file contents against order key
-
+          
           Args:
                zip_path (str): Path to the zip file
-               i_number (str): I number
+               i_number (str): I number for the order
                order_number (str): Order number
                order_key (array): Order key data
-
+               
           Returns:
-               dict: Validation results
+               dict: Validation results with match/mismatch details
           """
           import zipfile
           import numpy as np
@@ -1687,86 +1641,125 @@ class FolderProcessor:
                'mismatch_count': 0,
                'txt_count': 0,
                'expected_count': 0,
+               'extra_ab1_count': 0,
                'matches': [],
                'mismatches_in_zip': [],
                'mismatches_in_order': [],
                'txt_files': []
           }
 
-          # Get expected files from order key for this order
-          order_items = []
+          try:
+               # Get expected files from order key for this order
+               order_items = []
 
-          # Handle NumPy array properly
-          if isinstance(order_key, np.ndarray):
-               # Use NumPy's boolean indexing for efficient filtering
-               mask = (order_key[:, 0] == i_number) & (order_key[:, 2] == order_number)
-               matching_rows = order_key[mask]
+               # Handle NumPy array properly
+               if isinstance(order_key, np.ndarray):
+                    # Use NumPy's boolean indexing for efficient filtering
+                    mask = (order_key[:, 0] == i_number) & (order_key[:, 2] == order_number)
+                    matching_rows = order_key[mask]
 
-               for row in matching_rows:
-                    raw_name = row[3]
-                    adjusted_name = self.file_dao.normalize_filename(raw_name)
-                    order_items.append({'raw_name': raw_name, 'adjusted_name': adjusted_name})
-          else:
-               # Fallback for non-NumPy arrays
-               for entry in order_key:
-                    if entry[0] == i_number and entry[2] == order_number:
-                         raw_name = entry[3]
-                         adjusted_name = self.file_dao.normalize_filename(raw_name)
+                    for row in matching_rows:
+                         raw_name = row[3]
+                         # Use customer-specific normalization (same as order key)
+                         adjusted_name = self.file_dao.standardize_for_customer_files(raw_name, remove_extension=True)
                          order_items.append({'raw_name': raw_name, 'adjusted_name': adjusted_name})
+                         self.log(f"DEBUG: Order key entry - Raw: '{raw_name}' -> Adjusted: '{adjusted_name}'")
+               else:
+                    # Fallback for non-NumPy arrays
+                    for entry in order_key:
+                         if entry[0] == i_number and entry[2] == order_number:
+                              raw_name = entry[3]
+                              adjusted_name = self.file_dao.standardize_for_customer_files(raw_name, remove_extension=True)
+                              order_items.append({'raw_name': raw_name, 'adjusted_name': adjusted_name})
+                              self.log(f"DEBUG: Order key entry - Raw: '{raw_name}' -> Adjusted: '{adjusted_name}'")
 
-          validation_result['expected_count'] = len(order_items)
+               validation_result['expected_count'] = len(order_items)
 
-          # Get actual files from zip
-          with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-               zip_contents = zip_ref.namelist()
+               # Get actual files from zip
+               with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_contents = zip_ref.namelist()
 
-          # Check for text files
-          txt_extensions = self.config.TEXT_FILES
+               # Get only AB1 files from zip for matching
+               zip_ab1_files = [f for f in zip_contents if f.endswith('.ab1')]
+               
+               self.log(f"DEBUG: Starting match process for {len(order_items)} expected items vs {len(zip_ab1_files)} AB1 files in zip")
+               self.log(f"DEBUG: Expected items: {[item['adjusted_name'] for item in order_items]}")
+               self.log(f"DEBUG: Zip AB1 files: {zip_ab1_files}")
+               
+               # Track which items have been matched
+               matched_order_indices = set()
+               matched_zip_indices = set()
+               
+               # Find matches using index-based approach to avoid list modification issues
+               for order_idx, order_item in enumerate(order_items):
+                    if order_idx in matched_order_indices:
+                         continue
+                         
+                    adjusted_name = order_item['adjusted_name']
+                    raw_name = order_item['raw_name']
+                    self.log(f"DEBUG: Looking for match for '{adjusted_name}'...")
 
-          for item in zip_contents:
-               for ext in txt_extensions:
-                    if item.endswith(ext):
-                         validation_result['txt_count'] += 1
-                         validation_result['txt_files'].append(ext)
-                         break
-
-          # Check for matches
-          zip_contents_to_check = list(zip_contents)  # Create a copy to modify safely
-
-          for order_item in order_items:
-               adjusted_name = order_item['adjusted_name']
-               raw_name = order_item['raw_name']
-
-               found_match = False
-               for zip_item in zip_contents_to_check[:]:  # Iterate over a copy
-                    if zip_item.endswith(config.ABI_EXTENSION):
-                         # Remove braces and extension for comparison
-                         clean_zip_item = re.sub(r'{.*?}', '', zip_item)[:-4]  # Remove .ab1
-
-                         if clean_zip_item == adjusted_name:
+                    for zip_idx, zip_item in enumerate(zip_ab1_files):
+                         if zip_idx in matched_zip_indices:
+                              continue
+                              
+                         # Use customer-specific normalization consistently
+                         clean_zip_item = self.file_dao.standardize_for_customer_files(zip_item, remove_extension=True)
+                         
+                         self.log(f"DEBUG:   Checking against: '{zip_item}' -> '{clean_zip_item}'")
+                         
+                         if clean_zip_item == adjusted_name:  # Match found
+                              self.log(f"DEBUG:   ! MATCH FOUND! '{raw_name}' matches '{zip_item}'")
                               validation_result['matches'].append({
                                    'raw_name': raw_name,
                                    'file_name': zip_item
                               })
                               validation_result['match_count'] += 1
-                              found_match = True
-                              zip_contents_to_check.remove(zip_item)  # Remove to avoid duplicates
+                              
+                              # Mark both items as matched
+                              matched_order_indices.add(order_idx)
+                              matched_zip_indices.add(zip_idx)
                               break
 
-               if not found_match:
-                    validation_result['mismatches_in_order'].append({
-                    'raw_name': raw_name
-                    })
-                    validation_result['mismatch_count'] += 1
+               # Record unmatched order items as mismatches
+               for order_idx, order_item in enumerate(order_items):
+                    if order_idx not in matched_order_indices:
+                         self.log(f"DEBUG: X NO MATCH found for '{order_item['raw_name']}' (adjusted: '{order_item['adjusted_name']}')")
+                         validation_result['mismatches_in_order'].append({
+                              'raw_name': order_item['raw_name']
+                         })
+                         validation_result['mismatch_count'] += 1
 
-          # Remaining unmatched AB1 files in zip
-          for item in zip_contents_to_check:
-               if item.endswith(config.ABI_EXTENSION):
-                    validation_result['mismatches_in_zip'].append(item)
-                    validation_result['mismatch_count'] += 1
+               # Record unmatched zip files as extra files
+               for zip_idx, zip_item in enumerate(zip_ab1_files):
+                    if zip_idx not in matched_zip_indices:
+                         self.log(f"DEBUG: Found extra AB1 file in zip: {zip_item}")
+                         validation_result['mismatches_in_zip'].append(zip_item)
+                         validation_result['extra_ab1_count'] += 1
+                         validation_result['mismatch_count'] += 1
 
-          return validation_result
+               self.log(f"DEBUG: Final match summary:")
+               self.log(f"DEBUG: - Expected files: {len(order_items)}")
+               self.log(f"DEBUG: - Zip AB1 files: {len(zip_ab1_files)}")
+               self.log(f"DEBUG: - Successful matches: {len(matched_order_indices)}")
+               self.log(f"DEBUG: - Unmatched order items: {len(order_items) - len(matched_order_indices)}")
+               self.log(f"DEBUG: - Extra zip files: {len(zip_ab1_files) - len(matched_zip_indices)}")
 
+               # Check for text files
+               txt_extensions = self.config.TEXT_FILES
+               for txt_ext in txt_extensions:
+                    for zip_item in zip_contents:
+                         if zip_item.endswith(txt_ext):
+                              validation_result['txt_count'] += 1
+                              validation_result['txt_files'].append(txt_ext)
+                              break  # Only count each extension once
+
+               return validation_result
+
+          except Exception as e:
+               self.log(f"Error validating zip file {zip_path}: {e}")
+               return None
+          
      def _try_delete_if_empty(self, folder_path, depth=0):
           """
           Recursively check if a folder is empty or contains only empty folders,

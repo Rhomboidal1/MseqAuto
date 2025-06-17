@@ -15,23 +15,6 @@ def setup_logger(name, log_dir=None):
     
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    
-    # # Alternative way to set up the logger into a parent \logs directory
-    # # Uncomment if needed
-    # logger = logging.getLogger(name)
-    # logger.setLevel(logging.DEBUG)
-    
-    # # Get the directory where the logger module is located
-    # module_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # # Move up to the parent directory (mseqauto)
-    # parent_dir = os.path.dirname(os.path.dirname(module_dir))
-    
-    # # Create logs directory in the parent directory
-    # log_dir = os.path.join(parent_dir, "logs")
-    # if not os.path.exists(log_dir):
-    #     os.makedirs(log_dir)
-    
 
     # File handler - logs to file
     log_file = os.path.join(log_dir, f"{name}_{datetime.now().strftime('%Y%m%d')}.log")

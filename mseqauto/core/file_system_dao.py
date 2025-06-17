@@ -869,10 +869,11 @@ class FileSystemDAO:
 
         return file_path
 
+
     def standardize_filename_for_matching(self, file_name, remove_extension=True, preserve_order_number=True):
         """
         Standardized filename cleaning method for consistent matching across all code
-        Used for PCR files, reinject lists, and any other string comparison operations
+        Used for PCR files, reinject lists, validation, and any other string comparison operations
         
         Args:
             file_name (str): The filename to standardize
@@ -891,24 +892,106 @@ class FileSystemDAO:
             clean_name = file_name
 
         # Step 3: Check if the name is just a well location (e.g., {01G})
-        well_pattern = re.compile(r'^{\d+[A-Z]}$')
+        well_pattern = re.compile(r'^{\d+[A-Z]}$')  # Added $ to match ONLY well locations
         if well_pattern.match(clean_name):
             # For well locations, keep them as is to avoid empty string normalization
             return clean_name
                 
-        # Step 4: Remove content in brackets
+        # Step 4: Apply ABI character adjustments - ENSURE SPACES ARE REMOVED
+        clean_name = self.adjust_abi_chars(clean_name)
+        
+        # Step 4.5: EXPLICITLY remove spaces if adjust_abi_chars didn't do it
+        clean_name = clean_name.replace(' ', '')
+        
+        # Step 5: Remove content in brackets
         clean_name = re.sub(r'{.*?}', '', clean_name)
 
-        # Step 5: Remove standard suffixes
-        clean_name = clean_name.replace('_Premixed', '')
-        clean_name = clean_name.replace('_RTI', '')
+        # Step 6: Remove standard suffixes
+        clean_name = self.neutralize_suffixes(clean_name)
 
-        # Step 6: If we have an order number and want to preserve it, add it back
+        # Step 7: If we have an order number and want to preserve it, add it back
         if preserve_order_number and order_number:
             clean_name = f"{clean_name}#{order_number}"  # Use # as a delimiter that won't be in normal filenames
 
-        # Step 7: If after all cleaning we have an empty string, return the original
+        # Step 8: If after all cleaning we have an empty string, return the original
         # to avoid normalization conflicts
+        if not clean_name.strip():
+            return file_name
+
+        return clean_name
+
+    def standardize_for_customer_files(self, file_name, remove_extension=True):
+        """
+        Specialized method for customer file matching in order key
+        Removes well locations and normalizes for order key lookup
+        
+        Args:
+            file_name (str): The filename to standardize
+            remove_extension (bool): Whether to remove file extension
+            
+        Returns:
+            str: Cleaned filename for order key matching
+        """
+        # Step 1: Remove file extension if needed
+        if remove_extension and file_name.endswith(self.config.ABI_EXTENSION):
+            clean_name = file_name[:-4]
+        else:
+            clean_name = file_name
+            
+        # Step 2: Apply ABI character adjustments and remove spaces
+        clean_name = self.adjust_abi_chars(clean_name)
+        clean_name = clean_name.replace(' ', '')
+        
+        # Step 3: Remove ALL content in brackets (including well locations)
+        clean_name = re.sub(r'{.*?}', '', clean_name)
+
+        # Step 4: Remove standard suffixes
+        clean_name = self.neutralize_suffixes(clean_name)
+
+        # Step 5: If after all cleaning we have an empty string, return the original
+        if not clean_name.strip():
+            return file_name
+
+        return clean_name
+
+    # Remove this method - we'll use standardize_for_customer_files directly
+
+    def standardize_for_reinject_matching(self, file_name, remove_extension=True):
+        """
+        Specialized method for reinject list matching
+        Preserves well locations for complex well-based matching
+        
+        Args:
+            file_name (str): The filename to standardize
+            remove_extension (bool): Whether to remove file extension
+            
+        Returns:
+            str: Cleaned filename for reinject matching
+        """
+        # Step 1: Remove file extension if needed
+        if remove_extension and file_name.endswith(self.config.ABI_EXTENSION):
+            clean_name = file_name[:-4]
+        else:
+            clean_name = file_name
+
+        # Step 2: Check if the name is just a well location (e.g., {01G})
+        well_pattern = re.compile(r'^{\d+[A-Z]}$')
+        if well_pattern.match(clean_name):
+            # For well locations, keep them as is
+            return clean_name
+                
+        # Step 3: Apply ABI character adjustments and remove spaces
+        clean_name = self.adjust_abi_chars(clean_name)
+        clean_name = clean_name.replace(' ', '')
+        
+        # Step 4: For reinject matching, we may want to preserve some bracket content
+        # Remove only outer brackets but preserve structure for well matching
+        # This is where reinject-specific logic would go
+        
+        # Step 5: Remove standard suffixes
+        clean_name = self.neutralize_suffixes(clean_name)
+
+        # Step 6: If after all cleaning we have an empty string, return the original
         if not clean_name.strip():
             return file_name
 

@@ -71,7 +71,7 @@ def main():
         return
     
     # Store the selected folder in the processor for later reference
-    processor.current_data_folder = data_folder
+    processor.current_data_folder = data_folder #type: ignore
 
     # Get today's I numbers and BioI folders
     i_numbers, bio_folders = file_dao.get_folders_with_inumbers(data_folder)
