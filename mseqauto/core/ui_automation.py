@@ -112,7 +112,7 @@ class MseqAutomation:
         self._close_all_read_info_dialogs()
         
         # Connect to mSeq and get main window
-        self.app, self.main_window = self.connect_or_start_mseq()
+        self.app, self.main_window = self.connect_or_start_mseq() #type: ignore
         self.main_window.set_focus()
         
         # Start new project (Ctrl+N)
@@ -215,28 +215,28 @@ class MseqAutomation:
         try:
             if dialog_type == "browse_dialog":
                 return timings.wait_until(timeout=timeout, retry_interval=0.1,
-                                        func=lambda: self.app.window(title_re='Browse.*Folder').exists(),
+                                        func=lambda: self.app.window(title_re='Browse.*Folder').exists(), #type: ignore
                                         value=True)
             elif dialog_type == "preferences":
                 return timings.wait_until(timeout=timeout, retry_interval=0.1,
-                                        func=lambda: (self.app.window(title='Mseq Preferences').exists() or
-                                                    self.app.window(title='mSeq Preferences').exists()),
+                                        func=lambda: (self.app.window(title='Mseq Preferences').exists() or #type: ignore
+                                                    self.app.window(title='mSeq Preferences').exists()), #type: ignore
                                         value=True)
             elif dialog_type == "copy_files":
                 return timings.wait_until(timeout=timeout, retry_interval=0.1,
-                                        func=lambda: self.app.window(title_re='Copy.*sequence files').exists(),
+                                        func=lambda: self.app.window(title_re='Copy.*sequence files').exists(), #type: ignore
                                         value=True)
             elif dialog_type == "error_window":
                 return timings.wait_until(timeout=timeout, retry_interval=0.3,
-                                        func=lambda: self.app.window(title_re='.*[Ee]rror.*').exists(),
+                                        func=lambda: self.app.window(title_re='.*[Ee]rror.*').exists(), #type: ignore
                                         value=True)
             elif dialog_type == "call_bases":
                 return timings.wait_until(timeout=timeout, retry_interval=0.3,
-                                        func=lambda: self.app.window(title_re='Call bases.*').exists(),
+                                        func=lambda: self.app.window(title_re='Call bases.*').exists(), #type: ignore
                                         value=True)
             elif dialog_type == "read_info":
                 return timings.wait_until(timeout=timeout, retry_interval=0.1,
-                                        func=lambda: self.app.window(title_re='Read information for.*').exists(),
+                                        func=lambda: self.app.window(title_re='Read information for.*').exists(), #type: ignore
                                         value=True)
             return False
         except timings.TimeoutError:
@@ -246,7 +246,7 @@ class MseqAutomation:
         """Get browse dialog window with better reliability"""
         for title in ['Browse For Folder', 'Browse for Folder']:
             try:
-                dialog = self.app.window(title=title)
+                dialog = self.app.window(title=title) #type: ignore
                 if dialog.exists():
                     return dialog
             except:
@@ -254,7 +254,7 @@ class MseqAutomation:
         
         # Last resort: try with regex
         try:
-            return self.app.window(title_re='Browse.*Folder')
+            return self.app.window(title_re='Browse.*Folder') #type: ignore
         except:
             return None
     
@@ -262,7 +262,7 @@ class MseqAutomation:
         """Try to get a dialog window by multiple possible titles"""
         for title in titles:
             try:
-                dialog = self.app.window(title=title)
+                dialog = self.app.window(title=title) #type: ignore
                 if dialog.exists():
                     return dialog
             except:
@@ -485,7 +485,7 @@ class MseqAutomation:
         while elapsed < max_wait:
             # Check for low quality dialog
             for title in ["Low quality files skipped", "Quality files skipped"]:
-                dialog = self.app.window(title=title)
+                dialog = self.app.window(title=title) #type: ignore
                 if dialog.exists():
                     self._click_dialog_button(dialog, ["OK"])
                     return True

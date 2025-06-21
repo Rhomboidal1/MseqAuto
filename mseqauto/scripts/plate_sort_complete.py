@@ -119,12 +119,12 @@ def is_control_file(file_name, controls):
 
 def is_blank_file(file_name):
     """Check if file is a blank sample using various patterns"""
-    # Pattern for plate blanks: 01A__.ab1, 02B__.ab1
-    if re.match(r'^\d{2}[A-H]__.ab1$', file_name, re.IGNORECASE):
-        return True
+    # # Pattern for plate blanks: 01A__.ab1, 02B__.ab1
+    # if re.match(r'^\d{2}[A-H]__.ab1$', file_name, re.IGNORECASE):
+    #     return True
     
     # Alternative pattern sometimes used
-    if '__' in file_name and file_name.endswith('.ab1'):
+    if re.match(r'^.*__.ab1$', file_name, re.IGNORECASE):
         return True
         
     return False

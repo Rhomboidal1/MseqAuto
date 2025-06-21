@@ -27,9 +27,9 @@ def get_folder_from_user():
 class EndOfDayOrganizer:
     def __init__(self, data_folder, dry_run=True):
         # Import after path setup
-        from mseqauto.config import MseqConfig
-        from mseqauto.core import FileSystemDAO
-        from mseqauto.utils import setup_logger
+        from mseqauto.config import MseqConfig #type: ignore
+        from mseqauto.core import FileSystemDAO #type: ignore
+        from mseqauto.utils import setup_logger #type: ignore
         
         self.data_folder = data_folder
         self.dry_run = dry_run

@@ -73,7 +73,7 @@ class OSCompatibilityManager:
             if use_venv:
                 config = __import__('mseqauto.config', fromlist=['MseqConfig']).MseqConfig
                 venv_path = getattr(config, 'VENV32_PATH', 
-                                os.path.join(os.path.dirname(py32_path), "venv32"))
+                                os.path.join(os.path.dirname(py32_path), "venv32")) #type: ignore
                 venv_activate = os.path.join(venv_path, "Scripts", "activate.bat")
             
             # Only relaunch if we have a valid 32-bit Python path
@@ -87,7 +87,7 @@ class OSCompatibilityManager:
                     logger.info(f"Restarting with 32-bit Python: {py32_path}")
                     
                 # Use batch file approach for proper path handling
-                if use_venv and os.path.exists(venv_path):
+                if use_venv and os.path.exists(venv_path): #type: ignore
                     # Create and run a batch file for venv activation
                     batch_file = os.path.join(os.environ.get('TEMP', os.getcwd()), 
                                             'run_script.bat')
