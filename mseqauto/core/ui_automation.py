@@ -260,11 +260,14 @@ class MseqAutomation:
     
     def _get_dialog_by_titles(self, titles):
         """Try to get a dialog window by multiple possible titles"""
+        if not self.app:
+            return None
         for title in titles:
             try:
-                dialog = self.app.window(title=title) #type: ignore
-                if dialog.exists():
-                    return dialog
+                if self.app is not None:
+                    dialog = self.app.window(title=title) #type: ignore
+                    if dialog.exists():
+                        return dialog
             except:
                 pass
         return None
@@ -477,38 +480,79 @@ class MseqAutomation:
         return True
     
     def _wait_for_completion(self, folder_path):
-        """Wait for mSeq processing to complete"""
+        """Wait for mSeq processing to complete - wait for files after read info appears"""
         max_wait = self.timeouts["process_completion"]
+        post_read_timeout = self.config.TIMEOUTS.get("post_read_dialog", 15)
         interval = 0.5
         elapsed = 0
         
+        # Track if we've seen the read info dialog
+        read_dialog_appeared = False
+        read_dialog_start_time = None
+        
         while elapsed < max_wait:
-            # Check for low quality dialog
+            # Check for low quality dialog (immediate completion)
             for title in ["Low quality files skipped", "Quality files skipped"]:
                 dialog = self.app.window(title=title) #type: ignore
                 if dialog.exists():
                     self._click_dialog_button(dialog, ["OK"])
                     return True
             
-            # Check for read info dialog (handle possible multiple windows)
-            if self._close_all_read_info_dialogs():
-                # If we found and closed any read dialogs, consider it a completion signal
-                return True
+            # Check for read info dialog but DON'T close it yet
+            read_dialog_found = False
+            try:
+                from pywinauto import findwindows
+                if self.app:
+                    read_windows = findwindows.find_elements(
+                        title_re='Read information for.*', 
+                        process=self.app.process
+                    )
+                    if read_windows:
+                        read_dialog_found = True
+                        if not read_dialog_appeared:
+                            read_dialog_appeared = True
+                            read_dialog_start_time = time.time()
+                            self.logger.info(f"Read information dialog appeared - waiting up to {post_read_timeout}s for all 5 text files")
+            except Exception as e:
+                self.logger.warning(f"Error checking for read dialog: {e}")
             
-            # Check for output text files - most reliable completion signal
-            txt_count = 0
-            for item in os.listdir(folder_path):
-                if any(item.endswith(ext) for ext in self.config.TEXT_FILES):
-                    txt_count += 1
-            
-            if txt_count >= 5:
-                return True
+            # If read dialog has appeared, check for all 5 text files
+            if read_dialog_appeared:
+                txt_count = 0
+                for item in os.listdir(folder_path):
+                    if any(item.endswith(ext) for ext in self.config.TEXT_FILES):
+                        txt_count += 1
+                
+                if read_dialog_start_time is not None:
+                    time_since_read_dialog = time.time() - read_dialog_start_time
+                else:
+                    time_since_read_dialog = 0.0
+                self.logger.info(f"After read dialog (+{time_since_read_dialog:.1f}s): {txt_count}/5 text files found")
+                
+                # Once we have all 5 files, close the dialog and return success
+                if txt_count >= 5:
+                    self.logger.info("All 5 text files found - closing read dialog")
+                    self._close_all_read_info_dialogs()
+                    return True
+                
+                # Check if we've exceeded the post-read-dialog timeout
+                if time_since_read_dialog > post_read_timeout:
+                    self.logger.error(f"Post-read-dialog timeout ({post_read_timeout}s) exceeded with only {txt_count}/5 files - FAILURE")
+                    self._close_all_read_info_dialogs()
+                    return False  # FAILURE - we need all 5 files
             
             # Wait before checking again
             time.sleep(interval)
             elapsed += interval
         
-        return False
+        # Overall timeout - close any remaining dialogs and check final state
+        txt_count = sum(1 for item in os.listdir(folder_path) 
+                    if any(item.endswith(ext) for ext in self.config.TEXT_FILES))
+        
+        self.logger.error(f"Overall timeout reached. Final file count: {txt_count}/5 - FAILURE")
+        self._close_all_read_info_dialogs()  # Clean up any remaining dialogs
+        
+        return txt_count >= 5  # SUCCESS only if we have all 5 files
     
     def close(self):
         """Close the mSeq application"""
