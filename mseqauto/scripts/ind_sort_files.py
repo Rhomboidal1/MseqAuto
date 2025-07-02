@@ -63,8 +63,7 @@ def main():
     # Run batch file to generate order key
     try:
         logger.info(f"Running batch file: {config.BATCH_FILE_PATH}")
-        batch_file_path = str(config.BATCH_FILE_PATH)  # Convert Path to string
-        subprocess.run(batch_file_path, shell=True, check=True)
+        subprocess.run(config.BATCH_FILE_PATH, shell=True, check=True)
         logger.info("Batch file completed successfully")
     except subprocess.CalledProcessError:
         logger.error(f"Batch file {config.BATCH_FILE_PATH} failed to run")
@@ -85,7 +84,7 @@ def main():
     )
     
     # Load order key and adjust characters
-    order_key = file_dao.load_order_key(str(config.KEY_FILE_PATH))
+    order_key = file_dao.load_order_key(config.KEY_FILE_PATH)
     logger.info("Order key loaded")
     
     # Get complete list of reinjects
