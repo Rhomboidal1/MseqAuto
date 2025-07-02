@@ -32,7 +32,7 @@ def inspect_reinject_list(i_numbers=None, verbose=True):
     print(f"\n=== Reinject List Inspection for I-numbers: {i_numbers} ===")
     
     # Get today's reinject file path
-    today = datetime.now().strftime('%#m-%d-%Y')
+    today = datetime.now().strftime('%m-%d-%Y')
     reinject_path = f"P:\\Data\\Reinjects\\Reinject List_{today}.xlsx"
     
     # Check paths that will be searched

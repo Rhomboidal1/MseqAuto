@@ -62,7 +62,7 @@ def main():
     # Run batch file to generate order key
     try:
         logger.info(f"Running batch file: {config.BATCH_FILE_PATH}")
-        subprocess.run(config.BATCH_FILE_PATH, shell=True, check=True)
+        subprocess.run(config.BATCH_FILE_PATH, check=True)
         logger.info("Batch file completed successfully")
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         logger.error(f"Batch file error: {e}")
