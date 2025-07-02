@@ -6,9 +6,10 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import filedialog
 import warnings
+from pathlib import Path
 
 # Add parent directory to PYTHONPATH for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(str(Path(__file__).parents[2]))
 warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
 
 
@@ -47,8 +48,8 @@ def main():
     from mseqauto.utils import setup_logger, ExcelDAO # type: ignore
     
     # Setup logging
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    log_dir = os.path.join(script_dir, "logs")
+    script_dir = Path(__file__).parent.resolve()
+    log_dir = script_dir / "logs"
     logger = setup_logger("validate_zip_files", log_dir=log_dir)
     logger.info("Starting zip file validation...")
     
@@ -79,8 +80,8 @@ def main():
 
     # Setup Excel files
     excel_filename = f"zip order summary - {datetime.now().strftime('%Y-%m-%d')}.xlsx"
-    excel_path = os.path.join(data_folder, excel_filename)
-    summary_exists = os.path.exists(excel_path)
+    excel_path = Path(data_folder) / excel_filename
+    summary_exists = excel_path.exists()
     logger.info(f"Summary exists: {summary_exists}")
 
     # Load existing workbook if it exists
@@ -111,13 +112,13 @@ def main():
         # Find zip file using existing FolderProcessor method
         zip_path = processor.find_zip_file(order_folder)  # Use existing method
         if not zip_path:
-            logger.info(f"Skipping {os.path.basename(order_folder)} - no zip file")
+            logger.info(f"Skipping {Path(order_folder).name} - no zip file")
             continue
 
         # Get order number
         order_number = processor.get_order_number_from_folder_name(order_folder)
         if not order_number:
-            logger.warning(f"Could not extract order number from {os.path.basename(order_folder)}")
+            logger.warning(f"Could not extract order number from {Path(order_folder).name}")
             continue
 
         logger.info(f"Processing order: I-{i_number}, Order: {order_number}")
@@ -125,10 +126,10 @@ def main():
         # Check if order already validated with current or newer zip
         if summary_exists:
             _, _, existing_mod_time = excel_dao.find_order_in_summary(existing_worksheet, order_number)
-            current_mod_time = os.path.getmtime(zip_path)
+            current_mod_time = zip_path.stat().st_mtime
             
             if existing_mod_time and float(existing_mod_time) >= current_mod_time:
-                logger.info(f"Skipping {os.path.basename(order_folder)} - already validated with current or newer zip")
+                logger.info(f"Skipping {Path(order_folder).name} - already validated with current or newer zip")
                 continue
 
         # Validate zip contents using FolderProcessor method
@@ -139,7 +140,7 @@ def main():
             order_count += 1
             
             # Check if this is an Andreev order
-            is_andreev = config.ANDREEV_NAME.lower() in os.path.basename(order_folder).lower()
+            is_andreev = config.ANDREEV_NAME.lower() in Path(order_folder).name.lower()
             
             # Add validation results to new worksheet
             new_row_count = excel_dao.add_validation_result(

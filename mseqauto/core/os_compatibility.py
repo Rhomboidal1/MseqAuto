@@ -1,15 +1,13 @@
 # os_compatibility.py
-import os
+from pathlib import Path
 import platform
 import logging
 import sys
 import subprocess
 from typing import Dict, Any, Optional
-
-# Add parent directory to PYTHONPATH for imports
 import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+# Add parent directory to PYTHONPATH for imports
+sys.path.append(str(Path(__file__).parents[3]))
 
 class OSCompatibilityManager:
     """
@@ -73,11 +71,11 @@ class OSCompatibilityManager:
             if use_venv:
                 config = __import__('mseqauto.config', fromlist=['MseqConfig']).MseqConfig
                 venv_path = getattr(config, 'VENV32_PATH', 
-                                os.path.join(os.path.dirname(py32_path), "venv32")) #type: ignore
-                venv_activate = os.path.join(venv_path, "Scripts", "activate.bat")
+                                str(Path(py32_path).parent / "venv32")) #type: ignore
+                venv_activate = str(Path(venv_path) / "Scripts" / "activate.bat")
             
             # Only relaunch if we have a valid 32-bit Python path
-            if (script_path and py32_path and os.path.exists(py32_path) 
+            if (script_path and py32_path and Path(py32_path).exists() 
                     and py32_path != sys.executable):
                 
                 # Set the environment variable to prevent recursive relaunching
@@ -87,9 +85,9 @@ class OSCompatibilityManager:
                     logger.info(f"Restarting with 32-bit Python: {py32_path}")
                     
                 # Use batch file approach for proper path handling
-                if use_venv and os.path.exists(venv_path): #type: ignore
+                if use_venv and Path(venv_path).exists(): #type: ignore
                     # Create and run a batch file for venv activation
-                    batch_file = os.path.join(os.environ.get('TEMP', os.getcwd()), 
+                    batch_file = str(Path(os.environ.get('TEMP', Path.cwd())) / 
                                             'run_script.bat')
                     with open(batch_file, 'w') as f:
                         f.write(f'@echo off\n')

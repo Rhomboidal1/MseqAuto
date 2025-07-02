@@ -3,7 +3,9 @@ import re
 # Add parent directory to PYTHONPATH for imports
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import numpy as np
+from pathlib import Path
+sys.path.append(str(Path(__file__).parents[2]))
 
 #print(sys.path)
 import time
@@ -369,6 +371,96 @@ class FolderProcessor:
                self.log(f"Error during folder cleanup: {e}")
 
           return new_folder_path
+
+     def sort_plate_folder(self, folder_path):
+          """Sort all files in a plate folder - much simpler than ind folder processing"""
+          self.log(f"Processing plate folder: {folder_path}")
+
+          # Get all .ab1 files in the folder (no recursive search needed for plates)
+          ab1_files = []
+          for file in os.listdir(folder_path):
+               if file.endswith(".ab1"):
+                    ab1_files.append(os.path.join(folder_path, file))
+          
+          self.log(f"Found {len(ab1_files)} .ab1 files in folder")
+
+          # Group files by type for batch processing
+          control_files = []
+          blank_files = []
+          brace_files = []
+
+          # Classify files
+          for file_path in ab1_files:
+               file_name = os.path.basename(file_path)
+
+               # Check for control files (use PLATE_CONTROLS)
+               if self.file_dao.is_control_file(file_name, self.config.PLATE_CONTROLS):
+                    self.log(f"Identified control file: {file_name}")
+                    control_files.append(file_path)
+                    continue
+
+               # Check for blank files
+               if self.file_dao.is_blank_file(file_name):
+                    self.log(f"Identified blank file: {file_name}")
+                    blank_files.append(file_path)
+                    continue
+
+               # Check for files with braces (need cleaning)
+               if '{' in file_name or '}' in file_name:
+                    brace_files.append(file_path)
+
+          # Detailed logging
+          self.log(f"Classified {len(control_files)} controls, {len(blank_files)} blanks, "
+                    f"{len(brace_files)} files with braces")
+
+          # Process controls
+          if control_files:
+               self.log(f"Processing {len(control_files)} control files")
+               controls_folder = os.path.join(folder_path, "Controls")
+               if not os.path.exists(controls_folder):
+                    os.makedirs(controls_folder)
+
+               for file_path in control_files:
+                    target_path = os.path.join(controls_folder, os.path.basename(file_path))
+                    moved = self.file_dao.move_file(file_path, target_path)
+                    if moved:
+                         self.log(f"Moved control file {os.path.basename(file_path)} to Controls")
+                    else:
+                         self.log(f"Failed to move control file {os.path.basename(file_path)}")
+
+          # Process blanks
+          if blank_files:
+               self.log(f"Processing {len(blank_files)} blank files")
+               blank_folder = os.path.join(folder_path, "Blank")
+               if not os.path.exists(blank_folder):
+                    os.makedirs(blank_folder)
+
+               for file_path in blank_files:
+                    target_path = os.path.join(blank_folder, os.path.basename(file_path))
+                    moved = self.file_dao.move_file(file_path, target_path)
+                    if moved:
+                         self.log(f"Moved blank file {os.path.basename(file_path)} to Blank")
+                    else:
+                         self.log(f"Failed to move blank file {os.path.basename(file_path)}")
+
+          # Remove braces from remaining files
+          if brace_files:
+               self.log(f"Removing braces from {len(brace_files)} files")
+               braces_count = 0
+               for file_path in brace_files:
+                    # Skip if file was already moved to Controls or Blank folders
+                    if not os.path.exists(file_path):
+                         continue
+                         
+                    new_path = self.file_dao.rename_file_without_braces(file_path)
+                    if new_path != file_path:
+                         braces_count += 1
+                         self.log(f"Removed braces from {os.path.basename(file_path)}")
+               
+               self.log(f"Successfully removed braces from {braces_count} files")
+
+          self.log(f"Completed processing plate folder: {os.path.basename(folder_path)}")
+          return folder_path
 
      def get_destination_for_order(self, order_identifier, base_path=None):
           """
@@ -1142,6 +1234,7 @@ class FolderProcessor:
           import re
           import os
           import numpy as np
+          from pathlib import Path
 
           # Helper function to check if entry is just a well location
           def is_valid_entry(raw_name):
@@ -1160,22 +1253,24 @@ class FolderProcessor:
           processed_files = set()
 
           # Process text files only once
-          spreadsheets_path = r'G:\Lab\Spreadsheets'
-          abi_path = os.path.join(spreadsheets_path, 'Individual Uploaded to ABI')
+          spreadsheets_path = Path(r'G:\Lab\Spreadsheets')
+          abi_path = spreadsheets_path / 'Individual Uploaded to ABI'
           reinject_files = []
 
           # Build list of reinject files
-          if os.path.exists(spreadsheets_path):
-               for file in self.file_dao.get_directory_contents(spreadsheets_path):
-                    if 'reinject' in file.lower() and file.endswith('.txt'):
-                         if any(i_num in file for i_num in i_numbers):
-                              reinject_files.append(os.path.join(spreadsheets_path, file))
+          if spreadsheets_path.exists():
+               for file_path in self.file_dao.get_directory_contents(spreadsheets_path):
+                    # file_path is now a Path object
+                    if 'reinject' in file_path.name.lower() and file_path.suffix == '.txt':
+                         if any(i_num in file_path.name for i_num in i_numbers):
+                              reinject_files.append(str(file_path))  # Convert to string for numpy
 
-          if os.path.exists(abi_path):
-               for file in self.file_dao.get_directory_contents(abi_path):
-                    if 'reinject' in file.lower() and file.endswith('.txt'):
-                         if any(i_num in file for i_num in i_numbers):
-                              reinject_files.append(os.path.join(abi_path, file))
+          if abi_path.exists():
+               for file_path in self.file_dao.get_directory_contents(abi_path):
+                    # file_path is now a Path object
+                    if 'reinject' in file_path.name.lower() and file_path.suffix == '.txt':
+                         if any(i_num in file_path.name for i_num in i_numbers):
+                              reinject_files.append(str(file_path))  # Convert to string for numpy
 
           # Process each found reinject file
           for file_path in reinject_files:
@@ -1199,23 +1294,14 @@ class FolderProcessor:
                     self.log(f"Error processing reinject file {file_path}: {e}")
 
           # Excel file processing
-          if reinject_path and os.path.exists(reinject_path):
+          if reinject_path and Path(reinject_path).exists():
                try:
                     import pylightxl as xl
                     db = xl.readxl(reinject_path)
                     sheet = db.ws('Sheet1')
 
-                    # Get reinject entries from Excel
-                    reinject_prep_list = []
-                    for row in range(1, sheet.maxrow + 1):
-                         if sheet.maxcol >= 2:  # Ensure we have at least 2 columns
-                              sample = sheet.index(row, 1)  # Use index instead of address
-                              primer = sheet.index(row, 2)  # Use index instead of address
-                              if sample and primer:
-                                   reinject_prep_list.append(sample + primer) #type: ignore
-
-                    # Convert to numpy array for easier searching
-                    reinject_prep_array = np.array(reinject_prep_list)
+                    # Note: Excel file exists but we process all txt files for the I-numbers
+                    # rather than filtering by Excel contents
 
                     # Check for partial plate reinjects by comparing against reinject_prep_array
                     for i_num in i_numbers:
@@ -1223,14 +1309,16 @@ class FolderProcessor:
                          regex_pattern = f'.*{i_num}.*txt'
                          txt_files = []
 
-                         for file in self.file_dao.get_directory_contents(spreadsheets_path):
-                              if re.search(regex_pattern, file, re.IGNORECASE) and not 'reinject' in file:
-                                   txt_files.append(os.path.join(spreadsheets_path, file))
+                         for file_path in self.file_dao.get_directory_contents(spreadsheets_path):
+                              # file_path is now a Path object
+                              if re.search(regex_pattern, file_path.name, re.IGNORECASE) and 'reinject' not in file_path.name:
+                                   txt_files.append(str(file_path))  # Convert to string for numpy
 
-                         if os.path.exists(abi_path):
-                              for file in self.file_dao.get_directory_contents(abi_path):
-                                   if re.search(regex_pattern, file, re.IGNORECASE) and not 'reinject' in file:
-                                        txt_files.append(os.path.join(abi_path, file))
+                         if abi_path.exists():
+                              for file_path in self.file_dao.get_directory_contents(abi_path):
+                                   # file_path is now a Path object
+                                   if re.search(regex_pattern, file_path.name, re.IGNORECASE) and 'reinject' not in file_path.name:
+                                        txt_files.append(str(file_path))  # Convert to string for numpy
 
                          # Process each txt file
                          for file_path in txt_files:
@@ -1300,42 +1388,43 @@ class FolderProcessor:
                     - has_braces: True if any files have brace tags (e.g., {tag})
                     - has_ab1_files: True if folder contains .ab1 files
           """
+
           was_mseqed = False
           has_braces = False
           has_ab1_files = False
 
-          # Get all files in the folder
-          folder_contents = self.file_dao.get_directory_contents(folder_path)
+          folder_path = Path(folder_path)
+          folder_contents = list(self.file_dao.get_directory_contents(folder_path))
 
           # Check for mSeq directory structure
           mseq_set = {'chromat_dir', 'edit_dir', 'phd_dir', 'mseq4.ini'}
-          current_proj = [item for item in folder_contents if item in mseq_set]
+          current_proj = [item.name if hasattr(item, "name") else str(item) for item in folder_contents if (item.name if hasattr(item, "name") else str(item)) in mseq_set]
 
-          # A folder has been mSeqed if it contains all the required directories/files
           if set(current_proj) == mseq_set:
                was_mseqed = True
 
           # Check for the 5 txt files as an additional verification
           txt_file_count = 0
           for item in folder_contents:
-               item_path = os.path.join(folder_path, item)
-               if os.path.isfile(item_path):
-                    if (item.endswith('.raw.qual.txt') or
-                              item.endswith('.raw.seq.txt') or
-                              item.endswith('.seq.info.txt') or
-                              item.endswith('.seq.qual.txt') or
-                              item.endswith('.seq.txt')):
+               item_name = item.name if hasattr(item, "name") else str(item)
+               item_path = folder_path / item_name
+               if item_path.is_file():
+                    if (item_name.endswith('.raw.qual.txt') or
+                              item_name.endswith('.raw.seq.txt') or
+                              item_name.endswith('.seq.info.txt') or
+                              item_name.endswith('.seq.qual.txt') or
+                              item_name.endswith('.seq.txt')):
                          txt_file_count += 1
 
-          # If all 5 txt files are present, that's another indicator it was mSeqed
           if txt_file_count == 5:
                was_mseqed = True
 
           # Check for .ab1 files and braces
           for item in folder_contents:
-               if item.endswith(config.ABI_EXTENSION):
+               item_name = item.name if hasattr(item, "name") else str(item)
+               if item_name.endswith(config.ABI_EXTENSION):
                     has_ab1_files = True
-                    if '{' in item or '}' in item:
+                    if '{' in item_name or '}' in item_name:
                          has_braces = True
 
           return was_mseqed, has_braces, has_ab1_files
@@ -1352,7 +1441,8 @@ class FolderProcessor:
                str: Path to created zip file, or None if failed
           """
           try:
-               folder_name = os.path.basename(folder_path)
+               folder_path_obj = Path(folder_path)
+               folder_name = folder_path_obj.name
                is_andreev_order = self.config.ANDREEV_NAME.lower() in folder_name.lower()
                
                # For Andreev orders, use different naming and never include txt files
@@ -1372,7 +1462,7 @@ class FolderProcessor:
                     # Use standard naming format: "BioI-20000_Customer_123456.zip"
                     zip_filename = f"{folder_name}.zip"
                
-               zip_path = os.path.join(folder_path, zip_filename)
+               zip_path = folder_path_obj / zip_filename
 
                # Check if this folder contains FSA files
                has_fsa_files = self.file_dao.contains_file_type(folder_path, self.config.FSA_EXTENSION)
@@ -1392,15 +1482,15 @@ class FolderProcessor:
                # Create zip file
                self.log(f"Creating zip file: {zip_filename}")
                success = self.file_dao.zip_files(
-                    source_folder=folder_path,
-                    zip_path=zip_path,
+                    source_folder=str(folder_path_obj),  # Convert Path object to string
+                    zip_path=str(zip_path), # Convert Path object back to string
                     file_extensions=file_extensions,
                     exclude_extensions=None
                )
 
                if success:
                     self.log(f"Successfully created zip file: {zip_path}")
-                    return zip_path
+                    return str(zip_path) # Convert Path object back to string
                else:
                     self.log(f"Failed to create zip file: {zip_path}")
                     return None               
@@ -1766,18 +1856,18 @@ class FolderProcessor:
           and delete it if so.
           
           Args:
-               folder_path (str): Path to the folder to check
+               folder_path (pathlib.Path): Path to the folder to check
                depth (int): Current recursion depth (for logging)
                
           Returns:
                bool: True if the folder was empty or successfully deleted, False otherwise
           """
-          if not os.path.exists(folder_path):
+          if not folder_path.exists():
                return True
                
           # Get list of items in the folder
           try:
-               items = os.listdir(folder_path)
+               items = list(folder_path.iterdir())
           except Exception as e:
                self.log(f"Error listing directory {folder_path}: {e}")
                return False
@@ -1785,7 +1875,7 @@ class FolderProcessor:
           # If folder is already empty, try to delete it
           if not items:
                try:
-                    os.rmdir(folder_path)
+                    folder_path.rmdir()
                     self.log(f"Deleted empty folder in final cleanup: {folder_path}")
                     return True
                except Exception as e:
@@ -1795,10 +1885,9 @@ class FolderProcessor:
           # Check if all items are directories that can be deleted
           all_removable = True
           for item in items:
-               item_path = os.path.join(folder_path, item)
-               if os.path.isdir(item_path):
+               if item.is_dir():
                     # Recursively check if this subdirectory can be deleted
-                    if not self._try_delete_if_empty(item_path, depth + 1):
+                    if not self._try_delete_if_empty(item, depth + 1):
                          all_removable = False
                else:
                     # It's a file, so this directory cannot be removed
@@ -1807,9 +1896,9 @@ class FolderProcessor:
           # If all subdirectories were removed, try to delete this directory too
           if all_removable:
                # Check again if the folder is now empty
-               if not os.listdir(folder_path):
+               if not list(folder_path.iterdir()):
                     try:
-                         os.rmdir(folder_path)
+                         folder_path.rmdir()
                          self.log(f"Deleted empty folder in final cleanup: {folder_path}")
                          return True
                     except Exception as e:
@@ -1823,16 +1912,15 @@ class FolderProcessor:
           Final cleanup pass to delete any empty folders that might have been missed.
           
           Args:
-               root_folder (str): Root folder to start cleanup from
+               root_folder (pathlib.Path): Root folder to start cleanup from
           """
           self.log(f"Running final cleanup on: {root_folder}")
           
           # Get all folders in the root directory
           folders_to_check = []
-          for item in os.listdir(root_folder):
-               item_path = os.path.join(root_folder, item)
-               if os.path.isdir(item_path):
-                    folders_to_check.append(item_path)
+          for item in root_folder.iterdir():
+               if item.is_dir():
+                    folders_to_check.append(item)
           
           # Process each folder to see if it's empty or contains only empty folders
           for folder in folders_to_check:

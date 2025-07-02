@@ -1,5 +1,6 @@
 # excel_dao.py - Simplified version
 import os
+from pathlib import Path
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill, Font, Alignment
 from openpyxl.utils import get_column_letter
@@ -24,7 +25,7 @@ class ExcelDAO:
 
     def load_workbook(self, file_path):
         """Load an existing workbook with error handling"""
-        if not os.path.exists(file_path):
+        if not Path(file_path).exists():
             return None
         try:
             return load_workbook(file_path)
@@ -38,7 +39,7 @@ class ExcelDAO:
             workbook.save(file_path)
             return True
         except PermissionError:
-            print(f"Error: Cannot save Excel file. Please close {os.path.basename(file_path)} in Excel and try again.")
+            print(f"Error: Cannot save Excel file. Please close {Path(file_path).name} in Excel and try again.")
             return False
         except Exception as e:
             print(f"Error saving Excel file: {e}")
@@ -158,8 +159,8 @@ class ExcelDAO:
         # Set basic information
         self.set_cell_value(worksheet, row_count, 1, i_number)
         self.set_cell_value(worksheet, row_count, 2, order_number)
-        self.set_cell_value(worksheet, row_count, 4, os.path.basename(zip_path))
-        self.set_cell_value(worksheet, row_count, 8, str(int(os.path.getmtime(zip_path))))
+        self.set_cell_value(worksheet, row_count, 4, Path(zip_path).name)
+        self.set_cell_value(worksheet, row_count, 8, str(int(Path(zip_path).stat().st_mtime)))
 
         order_row = row_count
         row_count += 1

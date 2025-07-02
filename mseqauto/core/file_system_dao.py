@@ -1,7 +1,8 @@
 # file_system_dao.py
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from pathlib import Path
+sys.path.append(str(Path(__file__).parents[2]))
 
 import re
 from datetime import datetime, timedelta
@@ -47,24 +48,26 @@ class FileSystemDAO:
             'brace_content': re.compile(r'{.*?}'),
             'bioi_folder': re.compile(r'.+bioi-\d+.+', re.IGNORECASE),
             'ind_blank_file': re.compile(r'{\d+[A-H]}.ab1$', re.IGNORECASE),  # Individual blanks pattern
-            'plate_blank_file': re.compile(r'^\d{2}[A-H]__.ab1$', re.IGNORECASE)  # Plate blanks pattern
+            'plate_blank_file': re.compile(r'^\d{2}[A-H]__.ab1$', re.IGNORECASE),  # Plate blanks pattern
+            'plate_well_prefix': re.compile(r'^\d{2}[a-z]_(.+)$', re.IGNORECASE),  # NEW: Plate well position pattern
             # Add other patterns as needed
         }
+        
     # Directory Operations
-    def get_directory_contents(self, path, refresh=False): #KEEP
+    def get_directory_contents(self, path, refresh=False):
         """Get directory contents with caching"""
+        path = Path(path)  # Convert to Path object
+        
         if path not in self.directory_cache or refresh:
-            if not os.path.exists(path):
+            if not path.exists():  # Remove duplicate parameter
                 self.directory_cache[path] = []
                 return []
-
             try:
-                contents = os.listdir(path)
+                contents = list(path.iterdir())
                 self.directory_cache[path] = contents
             except Exception as e:
                 print(f"Error reading directory {path}: {e}")
                 self.directory_cache[path] = []
-
         return self.directory_cache[path]
 
     def get_folders(self, path, pattern=None): #KEEP
@@ -91,9 +94,9 @@ class FileSystemDAO:
         self.log(f"Found {len(contents)} items in directory")
         
         for item in contents:
-            full_path = os.path.join(path, item)
-            
-            if os.path.isdir(full_path):
+            full_path = Path(path) / item
+
+            if full_path.is_dir():
                 if pattern is None:
                     self.log(f"  No pattern provided, adding {item}")  # Changed from print to self.log
                     folder_list.append(full_path)
@@ -103,7 +106,7 @@ class FileSystemDAO:
                         match = pattern.search(item.lower())
                         match_method = "using compiled regex search"
                     else:  # String pattern
-                        match = re.search(pattern, item.lower())
+                        match = re.search(pattern, item.name.lower())
                         match_method = "using re.search"
                     
                     if match:
@@ -111,52 +114,54 @@ class FileSystemDAO:
                     else:
                         self.log(f"  No match for {item}")  # Changed from print to self.log
         
-        self.log(f"Returning {len(folder_list)} matching folders: {[os.path.basename(f) for f in folder_list]}")  # Changed from print to self.log
+        self.log(f"Returning {len(folder_list)} matching folders: {[f.name for f in folder_list]}")  # Changed from print to self.log
         return folder_list
 
-    def get_files_by_extension(self, folder_path, extension, recursive=False):
+    def get_files_by_extension(self, folder_path_str, extension, recursive=False):
         """
         Get all files with a specific extension in a folder
         
         Args:
-            folder_path (str): Path to the folder
+            folder_path_str (str): Path to the folder
             extension (str): File extension to look for (e.g., '.ab1')
             recursive (bool): Whether to search recursively in subfolders
             
         Returns:
             list: List of file paths with the specified extension
         """
+        folder_path = Path(folder_path_str)
         if recursive:
-            # Use os.walk to get all files recursively
+            # Use pathlib.rglob to get all files recursively
             files = []
-            for root, dirs, filenames in os.walk(folder_path):
-                for filename in filenames:
-                    if filename.lower().endswith(extension.lower()):
-                        files.append(os.path.join(root, filename))
+            for item in folder_path.rglob(f'*{extension}'):
+                if item.is_file():
+                    files.append(str(item))
             return files
         else:
             # Just search in the current folder
             try:
-                return [os.path.join(folder_path, f) for f in os.listdir(folder_path) 
-                    if os.path.isfile(os.path.join(folder_path, f)) and 
-                    f.lower().endswith(extension.lower())]
+                return [str(f) for f in folder_path.iterdir() 
+                    if f.is_file() and 
+                    f.name.lower().endswith(extension.lower())]
             except Exception as e:
-                self.log(f"Error getting files by extension {extension} in {folder_path}: {e}")
+                self.log(f"Error getting files by extension {extension} in {folder_path_str}: {e}")
                 return []
 
     def contains_file_type(self, folder, extension): #KEEP
         """Check if folder contains files with specified extension"""
         for item in self.get_directory_contents(folder):
-            if item.endswith(extension):
+            if item.name.endswith(extension):
                 return True
         return False
 
-    def create_folder_if_not_exists(self, path): #KEEP
+    def create_folder_if_not_exists(self, path_str): #KEEP
         """Create folder if it doesn't exist"""
-        if not os.path.exists(path):
-            os.mkdir(path)
-        return path
-    def move_folder(self, source, destination, max_retries=3, delay=1.0):
+        path = Path(path_str)
+        if not path.exists():
+            path.mkdir()
+        return str(path)
+    
+    def move_folder(self, source, destination, max_retries=3, delay=0.1):
         """
         Move folder with proper error handling and retries
         
@@ -164,215 +169,52 @@ class FileSystemDAO:
             source: Source folder path
             destination: Destination folder path
             max_retries: Maximum number of retries (default 3)
-            delay: Delay between retries in seconds (default 1.0)
+            delay: Delay between retries in seconds (default 0.1)
             
         Returns:
             bool: True if successful, False otherwise
         """
         import time
-        import gc
         import shutil
+        from pathlib import Path
         
-        # Check if destination already exists
-        if os.path.exists(destination):
-            self.warning(f"Destination already exists: {destination}")
-            
-            # If both source and destination exist, we need to handle carefully
-            if os.path.isdir(source) and os.path.isdir(destination):
-                source_files = os.listdir(source)
-                
-                # If source is empty, just try to delete it
-                if len(source_files) == 0:
-                    self.log(f"Source folder {os.path.basename(source)} is empty, deleting it")
-                    try:
-                        os.rmdir(source)
-                        return True
-                    except Exception as e:
-                        self.warning(f"Error removing empty source folder: {e}")
-                        return False
-                
-                # Move contents file by file
-                self.log(f"Moving individual files from {os.path.basename(source)} to existing destination")
-                success = True
-                
-                for item in source_files:
-                    source_item = os.path.join(source, item)
-                    dest_item = os.path.join(destination, item)
-                    
-                    # Skip if destination already exists
-                    if os.path.exists(dest_item):
-                        self.log(f"File {item} already exists in destination, skipping")
-                        continue
-                    
-                    # Copy file or folder
-                    try:
-                        if os.path.isdir(source_item):
-                            # Check if we're creating a recursive structure - AVOID THIS
-                            if os.path.basename(source_item) == os.path.basename(destination):
-                                self.warning(f"Avoiding recursive folder creation: {source_item} -> {dest_item}")
-                                continue
-                            
-                            shutil.copytree(source_item, dest_item)
-                        else:
-                            shutil.copy2(source_item, dest_item)
-                    except Exception as e:
-                        self.warning(f"Error copying {item}: {e}")
-                        success = False
-                
-                # If all files copied successfully, try to delete the source folder
-                if success:
-                    try:
-                        # Try to delete the source folder
-                        for retry in range(3):
-                            try:
-                                # Force closure of any file handles
-                                gc.collect()
-                                
-                                # Try to delete the folder
-                                if os.path.exists(source) and os.path.isdir(source):
-                                    # Check if folder is now empty
-                                    if len(os.listdir(source)) == 0:
-                                        os.rmdir(source)
-                                    else:
-                                        # If not empty, use rmtree
-                                        shutil.rmtree(source)
-                                    
-                                self.log(f"Successfully moved contents and removed source folder")
-                                return True
-                            except Exception as e:
-                                self.warning(f"Retry {retry+1}/3: Error removing source folder: {e}")
-                                time.sleep(1)
-                        
-                        self.warning(f"Could not remove source folder after copying contents")
-                        return True  # Return true anyway since files were copied
-                    except Exception as e:
-                        self.warning(f"Error removing source folder after copying contents: {e}")
-                        return True  # Return true anyway since files were copied
-                
-                return success
+        source_path = Path(source)
+        destination_path = Path(destination)
         
-        # Make sure destination parent folder exists
-        dest_parent = os.path.dirname(destination)
-        if not os.path.exists(dest_parent):
+        # Ensure the parent directory exists
+        destination_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Simple move operation with retries
+        for retry in range(max_retries):
             try:
-                os.makedirs(dest_parent)
-            except Exception as e:
-                self.warning(f"Error creating destination parent folder: {e}")
-                return False
-        
-        # Try standard move with retries
-        for attempt in range(max_retries):
-            try:
-                # Force garbage collection to release file handles
-                gc.collect()
-                
-                # Attempt to move the folder
-                shutil.move(source, destination)
-                self.log(f"Successfully moved {os.path.basename(source)} to {os.path.basename(destination)}")
+                # Use shutil.move for the actual move operation
+                shutil.move(str(source_path), str(destination_path))
+                self.log(f"Successfully moved {source_path.name} to {destination_path}")
                 return True
+                
             except Exception as e:
-                self.warning(f"Error moving folder on attempt {attempt+1}/{max_retries}: {e}")
-                
-                # Special handling for "already exists" error - critical to avoid nested folders
-                if "already exists" in str(e):
-                    # This means destination folder exists but may be empty
-                    # Try to copy contents individually instead
-                    self.log(f"Destination exists error, trying file-by-file copy")
-                    
-                    # Check if source exists and has files
-                    if os.path.isdir(source) and os.path.exists(source):
-                        source_files = os.listdir(source)
-                        
-                        # If source is empty, just try to delete it
-                        if len(source_files) == 0:
-                            try:
-                                os.rmdir(source)
-                                self.log(f"Source was empty, deleted it")
-                                return True
-                            except Exception as e_inner:
-                                self.warning(f"Error removing empty source folder: {e_inner}")
-                        else:
-                            # Copy files one by one, avoiding recursive structures
-                            success = True
-                            for item in source_files:
-                                source_item = os.path.join(source, item)
-                                dest_item = os.path.join(destination, item)
-                                
-                                # Skip if destination already exists
-                                if os.path.exists(dest_item):
-                                    continue
-                                
-                                # Copy file or folder
-                                try:
-                                    if os.path.isdir(source_item):
-                                        # Avoid creating nested folders with same name
-                                        if os.path.basename(source_item) == os.path.basename(destination):
-                                            continue
-                                        shutil.copytree(source_item, dest_item)
-                                    else:
-                                        shutil.copy2(source_item, dest_item)
-                                except Exception as e_copy:
-                                    self.warning(f"Error copying {item}: {e_copy}")
-                                    success = False
-                            
-                            # Try to delete source if all files copied
-                            if success:
-                                try:
-                                    shutil.rmtree(source)
-                                    self.log(f"Copied files and removed source directory")
-                                    return True
-                                except Exception as e_rm:
-                                    self.warning(f"Error removing source after copy: {e_rm}")
-                                    return True  # Return true anyway since files were copied
-                
-                # Wait before next attempt
-                if attempt < max_retries - 1:
+                self.warning(f"Retry {retry+1}/{max_retries}: Error moving folder: {e}")
+                if retry < max_retries - 1:
                     time.sleep(delay)
+                else:
+                    self.error(f"Failed to move folder after {max_retries} attempts: {e}")
+                    return False
         
-        # If we get here, standard move failed - try manual copy/delete as last resort
-        if os.path.isdir(source) and os.path.exists(source):
-            if not os.path.exists(destination):
-                try:
-                    # Create destination first to avoid nested folder issues
-                    os.makedirs(destination)
-                    
-                    # Copy files individually
-                    for item in os.listdir(source):
-                        source_item = os.path.join(source, item)
-                        dest_item = os.path.join(destination, item)
-                        
-                        if os.path.isdir(source_item):
-                            shutil.copytree(source_item, dest_item)
-                        else:
-                            shutil.copy2(source_item, dest_item)
-                    
-                    # Try to remove source
-                    try:
-                        shutil.rmtree(source)
-                    except:
-                        pass
-                    
-                    self.log(f"Manual copy/delete succeeded")
-                    return True
-                except Exception as e:
-                    self.warning(f"Manual copy/delete failed: {e}")
-        
-        self.error(f"Failed to move folder after {max_retries} attempts: {os.path.basename(source)}")
         return False
 
-    def get_folder_name(self, path): #Rename to get_basename and move to path_utilities.py
+    def get_folder_name(self, path_str): #Rename to get_basename and move to path_utilities.py
         """Get the folder name from a path"""
-        return os.path.basename(path)
+        return Path(path_str).name
 
-    def get_parent_folder(self, path): 
+    def get_parent_folder(self, path_str): 
         #Rename to get_dirname and move to path_utilities.py
         """Get the parent folder path"""
-        return os.path.dirname(path)
+        return str(Path(path_str).parent)
 
-    def join_paths(self, base_path, *args): 
+    def join_paths(self, base_path_str, *args): 
         #Move to path_utilities.py
         """Join path components"""
-        return os.path.join(base_path, *args)
+        return str(Path(base_path_str, *args))
     
     #################### Data Loading ####################
 
@@ -387,35 +229,36 @@ class FileSystemDAO:
             return None
         
     #################### File Existence Checks ####################
-    def file_exists(self, path): 
+    def file_exists(self, path_str): 
         #KEEP
         """Check if a file exists"""
-        return os.path.isfile(path)
+        return Path(path_str).is_file()
 
-    def folder_exists(self, path): 
+    def folder_exists(self, path_str): 
         #KEEP
         """Check if a folder exists"""
-        return os.path.isdir(path)
+        return Path(path_str).is_dir()
     
     #################### File Statistics ####################
     def count_files_by_extensions(self, folder, extensions):
         """Count files with specific extensions in a folder"""
         counts = {ext: 0 for ext in extensions}
+        folder_path = Path(folder)
         for item in self.get_directory_contents(folder):
-            file_path = os.path.join(folder, item)
-            if os.path.isfile(file_path):
+            file_path = folder_path / item
+            if file_path.is_file():
                 for ext in extensions:
-                    if item.endswith(ext):
+                    if item.name.endswith(ext):
                         counts[ext] += 1
         return counts
 
     def get_folder_creation_time(self, folder):
         """Get the creation time of a folder"""
-        return os.path.getctime(folder)
+        return Path(folder).stat().st_ctime
 
     def get_folder_modification_time(self, folder):
         """Get the last modification time of a folder"""
-        return os.path.getmtime(folder)
+        return Path(folder).stat().st_mtime
 
     def clean_braces_format(self, file_name): 
         #Move to path_utilities.py
@@ -493,37 +336,43 @@ class FileSystemDAO:
     def remove_extension(self, file_name, extension=None):
         #Move to FileProcessor
         """Remove file extension"""
-        if extension and file_name.endswith(extension):
-            return file_name[:-len(extension)]
-        return os.path.splitext(file_name)[0]
+        # Convert to string if it's a Path object
+        if hasattr(file_name, 'name'):
+            file_name_str = file_name.name
+        else:
+            file_name_str = str(file_name)
+            
+        if extension and file_name_str.endswith(extension):
+            return file_name_str[:-len(extension)]
+        return Path(file_name_str).stem
 
     #################### Zip operations ####################
     def check_for_zip(self, folder_path):
         #Keep
         """Check if folder contains any zip files"""
+        folder_path_obj = Path(folder_path)
         for item in self.get_directory_contents(folder_path):
-            file_path = os.path.join(folder_path, item)
-            if os.path.isfile(file_path) and file_path.endswith(self.config.ZIP_EXTENSION):
+            file_path = folder_path_obj / item
+            if file_path.is_file() and item.name.endswith(self.config.ZIP_EXTENSION):
                 return True
         return False
 
     def zip_files(self, source_folder: str, zip_path: str, file_extensions=None, exclude_extensions=None):
         #Keep
         """Create a zip file from files in source_folder matching extensions"""
+        source_folder_path = Path(source_folder)
         with ZipFile(zip_path, 'w') as zip_file:
             for item in self.get_directory_contents(source_folder):
-                # Convert item to string if needed
-                item_str = str(item)
-                file_path = os.path.join(source_folder, item_str)
-                if not os.path.isfile(file_path):
+                file_path = source_folder_path / item
+                if not file_path.is_file():
                     continue
-                if file_extensions and not any(item_str.endswith(ext) for ext in file_extensions):
+                if file_extensions and not any(item.name.endswith(ext) for ext in file_extensions):
                     continue
 
-                if exclude_extensions and any(item_str.endswith(ext) for ext in exclude_extensions):
+                if exclude_extensions and any(item.name.endswith(ext) for ext in exclude_extensions):
                     continue
 
-                zip_file.write(file_path, arcname=item_str, compress_type=ZIP_DEFLATED)
+                zip_file.write(file_path, arcname=item.name, compress_type=ZIP_DEFLATED)
 
         return True
 
@@ -540,102 +389,112 @@ class FileSystemDAO:
     def copy_zip_to_dump(self, zip_path, dump_folder):
         #Keep
         """Copy zip file to dump folder"""
-        if not os.path.exists(dump_folder):
-            os.makedirs(dump_folder)
+        dump_folder_path = Path(dump_folder)
+        if not dump_folder_path.exists():
+            dump_folder_path.mkdir(parents=True)
 
-        dest_path = os.path.join(dump_folder, os.path.basename(zip_path))
+        dest_path = dump_folder_path / Path(zip_path).name
         copyfile(zip_path, dest_path)
-        return dest_path
+        return str(dest_path)
 
     def find_recent_zips(self, folder_path, max_age_minutes=15):
         """
-        Find recently created/modified zip files in a folder
+        Finds recently created or modified zip files within a specified folder.
         
         Args:
-            folder_path (str): Path to search for zip files
-            max_age_minutes (int): Maximum age in minutes for a zip to be considered recent
+            folder_path (str): The path to the folder to search for zip files.
+            max_age_minutes (int): The maximum age in minutes for a zip file to be considered recent.
             
         Returns:
-            list: List of paths to recently created zip files
+            list: A list of Path objects representing the paths to recently created zip files.
         """
         from datetime import datetime, timedelta
         
-        self.log(f"Checking for recently created zip files in {os.path.basename(folder_path)}")
+        folder_path_obj = Path(folder_path)
+        self.log(f"Checking for recently created zip files in {folder_path_obj.name}")
         
-        # Calculate the cutoff time
+        # Calculate the cutoff time for determining recent files
         now = datetime.now()
         cutoff_time = now - timedelta(minutes=max_age_minutes)
         recent_zips = []
         
-        # Ensure folder exists
-        if not os.path.exists(folder_path):
+        # Ensure the folder exists before proceeding
+        if not folder_path_obj.exists():
             return recent_zips
         
-        # Check each file in the folder
+        # Iterate through items in the specified folder
         for item in self.get_directory_contents(folder_path):
-            if item.endswith(self.config.ZIP_EXTENSION):
-                zip_path = os.path.join(folder_path, item)
+            # Check if the item is a zip file based on the configured extension
+            if item.name.endswith(self.config.ZIP_EXTENSION):
+                zip_path_obj = folder_path_obj / item
                 
-                # Skip if not a file
-                if not os.path.isfile(zip_path):
+                # Skip if the item is not a file
+                if not zip_path_obj.is_file():
                     continue
                     
-                # Check if file is recent
-                modified_time = datetime.fromtimestamp(os.path.getmtime(zip_path))
+                # Get the modification time of the zip file
+                modified_time = datetime.fromtimestamp(zip_path_obj.stat().st_mtime)
+                
+                # Check if the file's modification time is within the specified age limit
                 if modified_time >= cutoff_time:
-                    recent_zips.append(zip_path)
+                    recent_zips.append(zip_path_obj)
                     self.debug(f"Found recent zip: {item}")
         
         return recent_zips
 
+
     def copy_recent_zips_to_dump(self, folder_list, zip_dump_folder, max_age_minutes=15):
         """
-        Copy recently created zip files to the zip dump folder
+        Copies recently created zip files found in specified folders to a designated dump folder.
         
         Args:
-            folder_list (list): List of folders to check for zips
-            zip_dump_folder (str): Target folder to copy zips to
-            max_age_minutes (int): Maximum age in minutes for a zip to be considered recent
+            folder_list (list): A list of folder paths to check for zip files.
+            zip_dump_folder (str): The path to the target folder where recent zip files will be copied.
+            max_age_minutes (int): The maximum age in minutes for a zip file to be considered recent.
             
         Returns:
-            int: Number of zip files copied
+            int: The number of zip files successfully copied to the dump folder.
         """
         self.log(f"Checking for recently created zip files (within {max_age_minutes} minutes)")
         
-        # Create zip dump folder if it doesn't exist
-        if not os.path.exists(zip_dump_folder):
-            os.makedirs(zip_dump_folder)
+        zip_dump_folder_obj = Path(zip_dump_folder)
+        
+        # Create the zip dump folder if it does not already exist
+        if not zip_dump_folder_obj.exists():
+            zip_dump_folder_obj.mkdir()
         
         copied_count = 0
         
-        # Process each folder
+        # Process each folder in the provided list
         for parent_folder in folder_list:
-            # For BioI folders, check order folders within
-            if os.path.basename(parent_folder).lower().startswith("bioi-"):
-                # Get list of order folders 
+            parent_folder_obj = Path(parent_folder)
+            
+            # Special handling for folders starting with "bioi-" (assuming they contain order subfolders)
+            if parent_folder_obj.name.lower().startswith("bioi-"):
+                # Iterate through subfolders within the BioI folder
                 for item in self.get_directory_contents(parent_folder):
-                    order_path = os.path.join(parent_folder, item)
-                    if os.path.isdir(order_path):
-                        # Find recent zips in this order folder
-                        recent_zips = self.find_recent_zips(order_path, max_age_minutes)
+                    order_path_obj = parent_folder_obj / item
+                    if order_path_obj.is_dir():
+                        # Find recent zip files within this order subfolder
+                        recent_zips = self.find_recent_zips(order_path_obj, max_age_minutes)
                         
-                        # Copy each recent zip to the dump folder
+                        # Copy each found recent zip file to the dump folder if it doesn't already exist
                         for zip_path in recent_zips:
-                            dump_path = os.path.join(zip_dump_folder, os.path.basename(zip_path))
-                            if not os.path.exists(dump_path):
+                            dump_path_obj = zip_dump_folder_obj / zip_path.name
+                            if not dump_path_obj.exists():
                                 try:
                                     self.copy_zip_to_dump(zip_path, zip_dump_folder)
                                     copied_count += 1
                                 except Exception as e:
                                     self.warning(f"Failed to copy zip to dump: {e}")
             else:
-                # For other folders (like PCR), check directly
-                recent_zips = self.find_recent_zips(parent_folder, max_age_minutes)
+                # For other folders (e.g., PCR), find recent zip files directly
+                recent_zips = self.find_recent_zips(parent_folder_obj, max_age_minutes)
                 
-                # Copy each recent zip to the dump folder
+                # Copy each found recent zip file to the dump folder if it doesn't already exist
                 for zip_path in recent_zips:
-                    dump_path = os.path.join(zip_dump_folder, os.path.basename(zip_path))
-                    if not os.path.exists(dump_path):
+                    dump_path_obj = zip_dump_folder_obj / zip_path.name
+                    if not dump_path_obj.exists():
                         try:
                             self.copy_zip_to_dump(zip_path, zip_dump_folder)
                             copied_count += 1
@@ -655,11 +514,31 @@ class FileSystemDAO:
             pcr_num = re.search("pcr(\\d+)", pcr_bracket).group(1) #type: ignore
         return pcr_num
 
+
     def is_control_file(self, file_name, control_list):
         """Check if file is a control sample"""
         clean_name = self.clean_braces_format(file_name)
         clean_name = self.remove_extension(clean_name)
-        return clean_name.lower() in [control.lower() for control in control_list]
+        clean_name_lower = clean_name.lower()
+        
+        # Check each control pattern
+        for control in control_list:
+            control_lower = control.lower()
+            
+            # Direct match (for individual sequencing controls)
+            if clean_name_lower == control_lower:
+                return True
+                
+            # For plate controls: check if filename matches pattern [2digits][letter]_[control_name]
+            # Example: "12a_pgem_m13f-20" should match "pgem_m13f-20"
+            well_match = self.regex_patterns['plate_well_prefix'].match(clean_name_lower)
+            if well_match:
+                # Extract the part after the well position
+                name_after_well = well_match.group(1)
+                if name_after_well == control_lower:
+                    return True
+        
+        return False
 
     def is_blank_file(self, file_name):
         """
@@ -677,9 +556,9 @@ class FileSystemDAO:
             return True
 
         return False
+    
     #################### Advanced Directory Operations ####################
     def get_inumber_from_name(self, name):
-        #I think we should keep
         """Extract I number from a name using precompiled regex"""
         match = self.regex_patterns['inumber'].search(str(name).lower())
         if match:
@@ -785,9 +664,10 @@ class FileSystemDAO:
                 return None
                 
             # Sort folders by modification time (newest first)
+            path_obj = Path(path)
             sorted_folders = sorted(
-                [f for f in folders if os.path.isdir(os.path.join(path, f))],
-                key=lambda f: os.path.getmtime(os.path.join(path, f)), 
+                [f for f in folders if (path_obj / f).is_dir()],
+                key=lambda f: (path_obj / f).stat().st_mtime, 
                 reverse=True
             )
             
@@ -813,25 +693,26 @@ class FileSystemDAO:
         """
         if exclude_patterns is None:
             exclude_patterns = ['reinject']
-            
+        
+        path = Path(path)  # Ensure path is a Path object 
         matching_folders = []
         
         # Scan the directory for matching folders
         for item in self.get_directory_contents(path):
-            item_path = os.path.join(path, item)
-            if not os.path.isdir(item_path):
+            item_path = path / item.name
+            if not item_path.is_dir():
                 continue
                 
             # Check if folder matches pattern
-            if self.regex_patterns[folder_pattern].search(item):
+            if self.regex_patterns[folder_pattern].search(item.name):
                 # Check exclusion patterns
-                if not any(exclude in item.lower() for exclude in exclude_patterns):
+                if not any(exclude in item.name.lower() for exclude in exclude_patterns):
                     matching_folders.append(item_path)
         
         # Extract unique I-numbers
         i_numbers = []
         for folder in matching_folders:
-            i_num = self.get_inumber_from_name(os.path.basename(folder))
+            i_num = self.get_inumber_from_name(folder.name)
             if i_num and i_num not in i_numbers:
                 i_numbers.append(i_num)
         
@@ -854,16 +735,17 @@ class FileSystemDAO:
         if '{' not in file_path and '}' not in file_path:
             return file_path
 
-        dir_name = os.path.dirname(file_path)
-        base_name = os.path.basename(file_path)
+        path_obj = Path(file_path)
+        dir_name = path_obj.parent
+        base_name = path_obj.name
         new_name = re.sub(r'{.*?}', '', base_name)
 
-        new_path = os.path.join(dir_name, new_name)
+        new_path = dir_name / new_name
 
         try:
-            if os.path.exists(file_path):
-                os.rename(file_path, new_path)
-                return new_path
+            if path_obj.exists():
+                path_obj.rename(new_path)
+                return str(new_path)
         except Exception as e:
             print(f"Error renaming file {file_path}: {e}")
 

@@ -1,6 +1,6 @@
 # logger.py
 import logging
-import os
+from pathlib import Path
 from datetime import datetime
 
 def setup_logger(name, log_dir=None):
@@ -11,13 +11,15 @@ def setup_logger(name, log_dir=None):
     # Create logs directory if it doesn't exist
     if log_dir is None:
         # Default to a logs directory in the same directory as this module
-        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+        log_dir = Path(__file__).resolve().parent / "logs"
+    else:
+        log_dir = Path(log_dir)
     
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
+    if not log_dir.exists():
+        log_dir.mkdir(parents=True)
 
     # File handler - logs to file
-    log_file = os.path.join(log_dir, f"{name}_{datetime.now().strftime('%Y%m%d')}.log")
+    log_file = log_dir / f"{name}_{datetime.now().strftime('%Y%m%d')}.log"
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)  # Make sure this is DEBUG, not INFO
     

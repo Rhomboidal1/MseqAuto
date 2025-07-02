@@ -5,11 +5,11 @@ import tkinter as tk
 from tkinter import filedialog
 import subprocess
 import re
-
+from pathlib import Path
 # Add parent directory to PYTHONPATH for imports
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(str(Path(__file__).parents[2]))
 
 def get_folder_from_user():
     print("Opening folder selection dialog...")
@@ -26,51 +26,36 @@ def get_folder_from_user():
     return folder_path
 
 def main():
-    # Get folder path FIRST before any package imports
+    # Get folder path first before any package imports
     data_folder = get_folder_from_user()
-
+    
     if not data_folder:
         print("No folder selected, exiting")
         return
 
-    # NOW import package modules
-    from mseqauto.utils import setup_logger  # type: ignore
-    from mseqauto.config import MseqConfig  # type: ignore
-    from mseqauto.core import OSCompatibilityManager, FileSystemDAO, MseqAutomation, FolderProcessor  # type: ignore
+    # ONLY NOW import package modules
+    from mseqauto.config import MseqConfig # type: ignore
+    from mseqauto.core import FileSystemDAO, FolderProcessor # type: ignore
+    from mseqauto.utils import setup_logger # type: ignore
+    
+    # Get the script directory
+    script_dir = Path(__file__).parent.resolve()
+    log_dir = script_dir / "logs"
 
     # Setup logger
-    logger = setup_logger("ind_auto_mseq")
-    logger.info("Starting IND auto mSeq...")
+    logger = setup_logger("plate_sort_files", log_dir=log_dir)
 
-    # Log that we already selected folder
-    logger.info(f"Using folder: {data_folder}")
-    data_folder = re.sub(r'/', '\\\\', data_folder)
-
-    # Check for 32-bit Python requirement
-    OSCompatibilityManager.py32_check(
-        script_path=__file__,
-        logger=logger
-    )
-
-    # Log OS environment information
-    OSCompatibilityManager.log_environment_info(logger)
-
+    logger.info("Starting Plate sort files...")
+    
     # Initialize components
-    logger.info("Initializing components...")
     config = MseqConfig()
     logger.info("Config loaded")
-
-    # Use OS compatibility manager for timeouts
-    logger.info("Using OS-specific timeouts")
-
     file_dao = FileSystemDAO(config)
     logger.info("FileSystemDAO initialized")
-
-    ui_automation = MseqAutomation(config, use_fast_navigation=True)
-    logger.info("UI Automation initialized with fast navigation")
-
-    processor = FolderProcessor(file_dao, ui_automation, config, logger=logger.info)
+    processor = FolderProcessor(file_dao, None, config, logger=logger.info)
     logger.info("Folder processor initialized")
+    logger.info(f"Using folder: {data_folder}")
+
 
     
     # Get plate folders
@@ -84,19 +69,9 @@ def main():
     
     # Process each plate folder
     for i, folder in enumerate(plate_folders):
-        logger.info(f"Processing plate folder {i+1}/{len(plate_folders)}: {os.path.basename(folder)}")
-        
-        # Sort controls
-        logger.info(f"Sorting controls in {os.path.basename(folder)}")
-        processor.sort_controls(folder)
-        
-        # Sort blanks
-        logger.info(f"Sorting blanks in {os.path.basename(folder)}")
-        processor.sort_blanks(folder)
-        
-        # Remove braces from filenames
-        logger.info(f"Removing braces from filenames in {os.path.basename(folder)}")
-        processor.remove_braces_from_filenames(folder)
+        logger.info(f"Processing plate folder {i+1}/{len(plate_folders)}")
+        processor.sort_plate_folder(folder)
+    
     
     logger.info("All plate folders processed")
     print("All done!")

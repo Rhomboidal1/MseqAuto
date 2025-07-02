@@ -10,7 +10,7 @@ import shutil
 from datetime import datetime
 
 # Add parent directory to PYTHONPATH for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(str(Path(__file__).parent.parent.resolve()))
 
 # Check if running under GUI
 GUI_MODE = os.environ.get('MSEQAUTO_GUI_MODE', 'False') == 'True'
@@ -18,31 +18,31 @@ GUI_MODE = os.environ.get('MSEQAUTO_GUI_MODE', 'False') == 'True'
 def setup_logger(name):
     """Set up a logger with file and console output"""
     # Create logs directory if it doesn't exist
-    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
-    os.makedirs(log_dir, exist_ok=True)
-    
+    log_dir = Path(__file__).parent / "logs"
+    log_dir.mkdir(exist_ok=True)
+   
     # Create logger
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
-    
+   
     # File handler
-    log_file = os.path.join(log_dir, f"{name}_{datetime.now().strftime('%Y%m%d')}.log")
+    log_file = log_dir / f"{name}_{datetime.now().strftime('%Y%m%d')}.log"
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
-    
+   
     # Console handler
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
-    
+   
     # Formatter
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
-    
+   
     # Add handlers
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
-    
+   
     return logger
 
 def get_folder_from_user():

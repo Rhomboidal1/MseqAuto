@@ -5,9 +5,10 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import re
 from datetime import datetime
+from pathlib import Path
 
 # Add parent directory to PYTHONPATH for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 def get_folder_from_user():
     """Get today's data folder from user"""
@@ -31,28 +32,28 @@ class EndOfDayOrganizer:
         from mseqauto.core import FileSystemDAO #type: ignore
         from mseqauto.utils import setup_logger #type: ignore
         
-        self.data_folder = data_folder
+        self.data_folder = Path(data_folder)
         self.dry_run = dry_run
         self.config = MseqConfig()
         
         # Setup logger
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        log_dir = os.path.join(script_dir, "logs")
-        self.logger = setup_logger("end_of_day_organize", log_dir=log_dir)
+        script_dir = Path(__file__).resolve().parent
+        log_dir = script_dir / "logs"
+        self.logger = setup_logger("end_of_day_organize", log_dir=str(log_dir))
         
         # Initialize file DAO
         self.file_dao = FileSystemDAO(self.config, logger=self.logger)
         
         # Define target directories - correct path construction with normalized paths
-        data_parent = os.path.dirname(data_folder)  # Gets P:/Data  
-        p_drive = os.path.dirname(data_parent)      # Gets P:
+        data_parent = self.data_folder.parent  # Gets P:/Data  
+        p_drive = data_parent.parent           # Gets P:
         
-        self.individuals_dir = os.path.normpath(os.path.join(data_parent, "Individuals"))  # P:/Data/Individuals
-        self.plates_dir = os.path.normpath(os.path.join(data_parent, "Plates"))            # P:/Data/Plates  
-        self.pcr_base_dir = os.path.normpath(os.path.join(p_drive, "PCR"))                 # P:/PCR
+        self.individuals_dir = data_parent / "Individuals"  # P:/Data/Individuals
+        self.plates_dir = data_parent / "Plates"            # P:/Data/Plates  
+        self.pcr_base_dir = p_drive / "PCR"                 # P:/PCR
         
         self.logger.info(f"Initializing End of Day Organizer")
-        self.logger.info(f"Source folder: {data_folder}")
+        self.logger.info(f"Source folder: {self.data_folder}")
         self.logger.info(f"Individuals target: {self.individuals_dir}")
         self.logger.info(f"Plates target: {self.plates_dir}")
         self.logger.info(f"PCR base: {self.pcr_base_dir}")
@@ -69,9 +70,9 @@ class EndOfDayOrganizer:
             
         pcr_number = pcr_match.group(1)
         expected_parent = f"FB-PCR{pcr_number}"
-        parent_path = os.path.join(self.pcr_base_dir, expected_parent)
+        parent_path = self.pcr_base_dir / expected_parent
         
-        if os.path.exists(parent_path):
+        if parent_path.exists():
             self.logger.info(f"Found PCR parent folder: {parent_path}")
             return parent_path
         else:
@@ -86,69 +87,67 @@ class EndOfDayOrganizer:
             'pcr': []
         }
         
-        if not os.path.exists(self.data_folder):
+        if not self.data_folder.exists():
             self.logger.error(f"Data folder does not exist: {self.data_folder}")
             return moves
             
-        for item in os.listdir(self.data_folder):
-            item_path = os.path.join(self.data_folder, item)
-            
+        for item in self.data_folder.iterdir():
             # Skip files and special folders
-            if not os.path.isdir(item_path):
+            if not item.is_dir():
                 continue
-            if item.lower() in ['ind not ready', 'plate not ready', 'zip dump']:
+            if item.name.lower() in ['ind not ready', 'plate not ready', 'zip dump']:
                 continue
-            if item.endswith('.xlsx') or item.endswith('.txt'):
+            if item.name.endswith('.xlsx') or item.name.endswith('.txt'):
                 continue
                 
             # Check folder type
-            if self.config.REGEX_PATTERNS['bioi_folder'].search(item.lower()):
-                moves['individuals'].append((item_path, item))
-                self.logger.info(f"Found BioI folder: {item}")
+            if self.config.REGEX_PATTERNS['bioi_folder'].search(item.name.lower()):
+                moves['individuals'].append((item, item.name))
+                self.logger.info(f"Found BioI folder: {item.name}")
                 
-            elif re.match(r'^p\d+.+', item.lower()):
-                moves['plates'].append((item_path, item))
-                self.logger.info(f"Found Plate folder: {item}")
+            elif re.match(r'^p\d+.+', item.name.lower()):
+                moves['plates'].append((item, item.name))
+                self.logger.info(f"Found Plate folder: {item.name}")
                 
-            elif re.match(r'^fb-pcr\d+', item.lower()):  # More flexible PCR matching
-                parent_folder = self.find_pcr_parent_folder(item)
+            elif re.match(r'^fb-pcr\d+', item.name.lower()):  # More flexible PCR matching
+                parent_folder = self.find_pcr_parent_folder(item.name)
                 if parent_folder:
-                    moves['pcr'].append((item_path, item, parent_folder))
-                    self.logger.info(f"Found PCR folder: {item} -> {parent_folder}")
+                    moves['pcr'].append((item, item.name, parent_folder))
+                    self.logger.info(f"Found PCR folder: {item.name} -> {parent_folder}")
                 else:
-                    self.logger.warning(f"Skipping PCR folder (no parent): {item}")
+                    self.logger.warning(f"Skipping PCR folder (no parent): {item.name}")
             else:
-                self.logger.info(f"Unrecognized folder type, skipping: {item}")
+                self.logger.info(f"Unrecognized folder type, skipping: {item.name}")
                 
         return moves
 
     def safe_move_folder(self, source_path, destination_parent, folder_name):
         """Safely move a folder, handling merging if destination exists"""
-        destination_path = os.path.join(destination_parent, folder_name)
+        destination_path = destination_parent / folder_name
         
-        # Normalize paths for consistent display
-        source_display = os.path.normpath(source_path).replace('\\', '/')
-        dest_display = os.path.normpath(destination_path).replace('\\', '/')
+        # Normalize paths for consistent display using forward slashes
+        source_display = str(source_path).replace('\\', '/')
+        dest_display = str(destination_path).replace('\\', '/')
         
         if self.dry_run:
             print(f"  Would move: {source_display}")
             print(f"         to: {dest_display}")
             self.logger.info(f"DRY RUN: Would move {source_path} -> {destination_path}")
-            if not os.path.exists(destination_parent):
-                print(f"  WARNING: Destination parent does not exist: {os.path.normpath(destination_parent).replace('\\', '/')}")
+            if not destination_parent.exists():
+                print(f"  WARNING: Destination parent does not exist: {str(destination_parent).replace('\\', '/')}")
                 self.logger.warning(f"DRY RUN: Destination parent does not exist: {destination_parent}")
                 return False
             return True
             
         try:
             # Check if destination parent exists
-            if not os.path.exists(destination_parent):
+            if not destination_parent.exists():
                 self.logger.error(f"Destination parent does not exist: {destination_parent}")
                 return False
                 
             # Use the file_dao move_folder method which handles merging
             print(f"  Moving: {folder_name}")
-            success = self.file_dao.move_folder(source_path, destination_path)
+            success = self.file_dao.move_folder(str(source_path), str(destination_path))
             
             if success:
                 print(f"  ✓ Successfully moved: {folder_name}")
@@ -173,7 +172,7 @@ class EndOfDayOrganizer:
         
         missing = []
         for name, path in destinations:
-            if not os.path.exists(path):
+            if not path.exists():
                 missing.append((name, path))
                 self.logger.error(f"Missing destination directory {name}: {path}")
             else:
@@ -192,7 +191,7 @@ class EndOfDayOrganizer:
             print("ERROR: Cannot proceed - missing destination directories:")
             self.logger.error("Cannot proceed - missing destination directories:")
             for name, path in missing_destinations:
-                print(f"  {name}: {os.path.normpath(path).replace('\\', '/')}")
+                print(f"  {name}: {str(path).replace('\\', '/')}")
                 self.logger.error(f"  {name}: {path}")
             return False
         

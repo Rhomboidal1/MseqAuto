@@ -6,28 +6,45 @@ import sys
 from datetime import datetime
 from tkinter import filedialog
 import warnings
+from pathlib import Path
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(str(Path(__file__).parents[2]))
 warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
 
 # Check if running under GUI
-GUI_MODE = os.environ.get('MSEQAUTO_GUI_MODE', 'False') == 'True'
+GUI_MODE = os.getenv('MSEQAUTO_GUI_MODE', 'False') == 'True'
 
 def get_folder_from_user():
+    """
+    Get folder path from user, either from environment variable (in GUI mode) 
+    or via file dialog.
+    
+    Returns:
+        Path: Selected folder path, or None if no folder selected
+    """
     # Check for GUI-provided folder first
-    if GUI_MODE and 'MSEQAUTO_DATA_FOLDER' in os.environ:
-        return os.environ['MSEQAUTO_DATA_FOLDER']
+    if GUI_MODE:
+        env_folder = os.getenv('MSEQAUTO_DATA_FOLDER')
+        if env_folder:
+            folder_path = Path(env_folder)
+            if folder_path.exists() and folder_path.is_dir():
+                return folder_path
+            else:
+                # Could add logging here: folder exists in env var but is invalid
+                pass
+    
+    # Fall back to file dialog
     root = tk.Tk()
     root.withdraw()
-    root.update()  # Add this line - force an update
     
-    folder_path = filedialog.askdirectory(
-        title="Select today's data folder to sort",
-        mustexist=True
-    )
-    
-    root.destroy()
-    return folder_path
+    try:
+        folder_path = filedialog.askdirectory(
+            title="Select today's data folder to sort",
+            mustexist=True
+        )
+        return Path(folder_path) if folder_path else None
+    finally:
+        root.destroy()
 
 def main():
     # Get folder path first before any package imports
@@ -43,8 +60,8 @@ def main():
     from mseqauto.utils import setup_logger # type: ignore
     
     # Get the script directory
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    log_dir = os.path.join(script_dir, "logs")
+    script_dir = Path(__file__).parent.resolve()
+    log_dir = script_dir / "logs"
 
     # Setup logger
     logger = setup_logger("ind_sort_files", log_dir=log_dir)
@@ -99,7 +116,7 @@ def main():
     
     # Process each BioI folder
     for i, folder in enumerate(bio_folders):
-        logger.info(f"Processing folder {i+1}/{len(bio_folders)}: {os.path.basename(folder)}")
+        logger.info(f"Processing folder {i+1}/{len(bio_folders)}: {Path(folder).name}")
         processor.sort_ind_folder(folder, reinject_list, order_key)
     
     # Final cleanup pass for the entire data folder
