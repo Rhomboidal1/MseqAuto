@@ -3,6 +3,7 @@ import os
 import time
 import logging
 import re
+from pathlib import Path
 
 from pywinauto import Application, timings
 from pywinauto.keyboard import send_keys
@@ -11,7 +12,7 @@ import win32api
 # Add parent directory to PYTHONPATH for imports
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(str(Path(__file__).parents[2]))
 import warnings
 warnings.filterwarnings("ignore", message="Revert to STA COM threading mode", module="pywinauto")
 
@@ -96,12 +97,13 @@ class MseqAutomation:
     
     def process_folder(self, folder_path):
         """Process a folder with mSeq - streamlined version based on successful path"""
-        if not os.path.exists(folder_path):
+        folder = Path(folder_path)
+        if not folder.exists():
             self.logger.warning(f"Folder does not exist: {folder_path}")
             return False
         
         # Check for AB1 files
-        ab1_files = [f for f in os.listdir(folder_path) if f.endswith(self.config.ABI_EXTENSION)]
+        ab1_files = [f.name for f in folder.iterdir() if f.suffix == self.config.ABI_EXTENSION]
         if not ab1_files:
             self.logger.warning(f"No AB1 files found in {folder_path}")
             return False
@@ -499,7 +501,6 @@ class MseqAutomation:
                     return True
             
             # Check for read info dialog but DON'T close it yet
-            read_dialog_found = False
             try:
                 from pywinauto import findwindows
                 if self.app:
@@ -508,7 +509,6 @@ class MseqAutomation:
                         process=self.app.process
                     )
                     if read_windows:
-                        read_dialog_found = True
                         if not read_dialog_appeared:
                             read_dialog_appeared = True
                             read_dialog_start_time = time.time()
@@ -518,10 +518,9 @@ class MseqAutomation:
             
             # If read dialog has appeared, check for all 5 text files
             if read_dialog_appeared:
-                txt_count = 0
-                for item in os.listdir(folder_path):
-                    if any(item.endswith(ext) for ext in self.config.TEXT_FILES):
-                        txt_count += 1
+                folder = Path(folder_path)
+                txt_count = sum(1 for item in folder.iterdir() 
+                              if any(item.suffix == ext for ext in self.config.TEXT_FILES))
                 
                 if read_dialog_start_time is not None:
                     time_since_read_dialog = time.time() - read_dialog_start_time
@@ -546,8 +545,9 @@ class MseqAutomation:
             elapsed += interval
         
         # Overall timeout - close any remaining dialogs and check final state
-        txt_count = sum(1 for item in os.listdir(folder_path) 
-                    if any(item.endswith(ext) for ext in self.config.TEXT_FILES))
+        folder = Path(folder_path)
+        txt_count = sum(1 for item in folder.iterdir() 
+                       if any(item.suffix == ext for ext in self.config.TEXT_FILES))
         
         self.logger.error(f"Overall timeout reached. Final file count: {txt_count}/5 - FAILURE")
         self._close_all_read_info_dialogs()  # Clean up any remaining dialogs

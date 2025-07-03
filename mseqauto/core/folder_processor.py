@@ -81,7 +81,7 @@ class FolderProcessor:
           if self.order_key_index is None:
                self.build_order_key_index(order_key)
 
-          file_name = os.path.basename(file_path)
+          file_name = Path(file_path).name
           self.log(f"Processing customer file: {file_name}")
 
           # Extract order number from filename if present
@@ -102,7 +102,7 @@ class FolderProcessor:
                               return self._place_customer_file(file_path, destination_folder, base_normalized_name)
 
                # Prioritize matches from current folder's I number
-               current_i_num = self.file_dao.get_inumber_from_name(os.path.dirname(file_path))
+               current_i_num = self.file_dao.get_inumber_from_name(str(Path(file_path).parent))
 
                for i_num, acct_name, order_num in matches:
                     # Prioritize current I number if available
@@ -137,19 +137,19 @@ class FolderProcessor:
           self.log(f"Target order folder: {order_folder_name}")
 
           # Get parent folder path with consistent naming scheme
-          parent_folder = self._get_bioi_folder_path(i_num, base_path)
+          parent_folder = Path(self._get_bioi_folder_path(i_num, base_path))
           self.log(f"Parent folder: {parent_folder}")
           
           # Create full order folder path inside BioI folder
-          order_folder_path = os.path.join(parent_folder, order_folder_name)
+          order_folder_path = parent_folder / order_folder_name
           self.log(f"Order folder path: {order_folder_path}")
 
           # Create order folder if it doesn't exist
-          if not os.path.exists(order_folder_path):
-               os.makedirs(order_folder_path)
+          if not order_folder_path.exists():
+               order_folder_path.mkdir(parents=True, exist_ok=True)
                self.log(f"Created order folder: {order_folder_path}")
 
-          return order_folder_path
+          return str(order_folder_path)
 
      def _get_bioi_folder_path(self, i_num, base_path=None):
           """
@@ -169,29 +169,30 @@ class FolderProcessor:
           if not data_folder:
                from datetime import datetime
                today = datetime.now().strftime('%m.%d.%y')
-               data_folder = os.path.join('P:', 'Data', today)
+               data_folder_path = Path('P:') / 'Data' / today
                try:
-                    if not os.path.exists(data_folder):
-                         os.makedirs(data_folder)
-                         self.log(f"Created today's data folder: {data_folder}")
+                    if not data_folder_path.exists():
+                         data_folder_path.mkdir(parents=True, exist_ok=True)
+                         self.log(f"Created today's data folder: {data_folder_path}")
+                    data_folder = str(data_folder_path)
                except Exception as e:
                     self.log(f"Error creating date folder: {e}")
                     # Fallback to current directory
-                    data_folder = os.path.dirname(os.getcwd())
+                    data_folder = str(Path.cwd().parent)
           
           # Create path to the standardized BioI folder
           bioi_folder_name = f"BioI-{i_num}"
-          bioi_folder_path = os.path.join(data_folder, bioi_folder_name)
+          bioi_folder_path = Path(data_folder) / bioi_folder_name
           
           # Create the folder if it doesn't exist
-          if not os.path.exists(bioi_folder_path):
+          if not bioi_folder_path.exists():
                try:
-                    os.makedirs(bioi_folder_path)
+                    bioi_folder_path.mkdir(parents=True, exist_ok=True)
                     self.log(f"Created clean BioI folder: {bioi_folder_path}")
                except Exception as e:
                     self.log(f"Error creating BioI folder: {e}")
           
-          return bioi_folder_path
+          return str(bioi_folder_path)
 
      def sort_ind_folder(self, folder_path, reinject_list, order_key):
           """Sort all files in a BioI folder using batch processing with recursive folder scanning"""
@@ -208,7 +209,7 @@ class FolderProcessor:
           if not i_num:
                ab1_files = self.file_dao.get_files_by_extension(folder_path, ".ab1", recursive=True)
                for file_path in ab1_files:
-                    parent_dir = os.path.basename(os.path.dirname(file_path))
+                    parent_dir = Path(file_path).parent.name
                     i_num = self.file_dao.get_inumber_from_name(parent_dir)
                     if i_num:
                          self.log(f"Found I number {i_num} from parent directory of AB1 file")
@@ -216,7 +217,7 @@ class FolderProcessor:
 
           # Create or find the target BioI folder - always use clean format
           if i_num:
-               new_folder_path = self._get_bioi_folder_path(i_num, os.path.dirname(folder_path))
+               new_folder_path = self._get_bioi_folder_path(i_num, str(Path(folder_path).parent))
           else:
                # If no I number found, use the original folder
                new_folder_path = folder_path
@@ -224,10 +225,8 @@ class FolderProcessor:
 
           # Recursively get all .ab1 files in the folder and subfolders
           ab1_files = []
-          for root, dirs, files in os.walk(folder_path):
-               for file in files:
-                    if file.endswith(".ab1"):
-                         ab1_files.append(os.path.join(root, file))
+          for ab1_file in Path(folder_path).rglob("*.ab1"):
+               ab1_files.append(str(ab1_file))
           
           self.log(f"Found {len(ab1_files)} .ab1 files in folder and subfolders")
 
@@ -240,7 +239,7 @@ class FolderProcessor:
 
           # Classify files first
           for file_path in ab1_files:
-               file_name = os.path.basename(file_path)
+               file_name = Path(file_path).name
 
                # Check for PCR files
                pcr_number = self.file_dao.get_pcr_number(file_name)
@@ -294,32 +293,30 @@ class FolderProcessor:
           # Process controls
           if control_files:
                self.log(f"Processing {len(control_files)} control files")
-               controls_folder = os.path.join(new_folder_path, "Controls")
-               if not os.path.exists(controls_folder):
-                    os.makedirs(controls_folder)
+               controls_folder = Path(new_folder_path) / "Controls"
+               controls_folder.mkdir(exist_ok=True)
 
                for file_path in control_files:
-                    target_path = os.path.join(controls_folder, os.path.basename(file_path))
-                    moved = self.file_dao.move_file(file_path, target_path)
+                    target_path = controls_folder / Path(file_path).name
+                    moved = self.file_dao.move_file(file_path, str(target_path))
                     if moved:
-                         self.log(f"Moved control file {os.path.basename(file_path)} to {controls_folder}")
+                         self.log(f"Moved control file {Path(file_path).name} to {controls_folder}")
                     else:
-                         self.log(f"Failed to move control file {os.path.basename(file_path)}")
+                         self.log(f"Failed to move control file {Path(file_path).name}")
 
           # Process blanks
           if blank_files:
                self.log(f"Processing {len(blank_files)} blank files")
-               blank_folder = os.path.join(new_folder_path, "Blank")
-               if not os.path.exists(blank_folder):
-                    os.makedirs(blank_folder)
+               blank_folder = Path(new_folder_path) / "Blank"
+               blank_folder.mkdir(exist_ok=True)
 
                for file_path in blank_files:
-                    target_path = os.path.join(blank_folder, os.path.basename(file_path))
-                    moved = self.file_dao.move_file(file_path, target_path)
+                    target_path = blank_folder / Path(file_path).name
+                    moved = self.file_dao.move_file(file_path, str(target_path))
                     if moved:
-                         self.log(f"Moved blank file {os.path.basename(file_path)} to {blank_folder}")
+                         self.log(f"Moved blank file {Path(file_path).name} to {blank_folder}")
                     else:
-                         self.log(f"Failed to move blank file {os.path.basename(file_path)}")
+                         self.log(f"Failed to move blank file {Path(file_path).name}")
 
           # Process customer files
           if customer_files:
@@ -334,7 +331,7 @@ class FolderProcessor:
                unsorted_folder = None
                
                for file_path in unmatched_files:
-                    file_name = os.path.basename(file_path)
+                    file_name = Path(file_path).name
                     
                     # Check if this is a preemptive but has no match in order key
                     is_preempt = self.is_preemptive(file_name)
@@ -342,13 +339,12 @@ class FolderProcessor:
                     if is_preempt:
                          # For preemptive files with no match, put in Unsorted folder
                          if unsorted_folder is None:
-                              unsorted_folder = os.path.join(new_folder_path, "Unsorted")
-                              if not os.path.exists(unsorted_folder):
-                                   os.makedirs(unsorted_folder)
+                              unsorted_folder = Path(new_folder_path) / "Unsorted"
+                              unsorted_folder.mkdir(exist_ok=True)
                          
                          # Keep original name for Unsorted folder
-                         target_path = os.path.join(unsorted_folder, file_name)
-                         moved = self.file_dao.move_file(file_path, target_path)
+                         target_path = unsorted_folder / file_name
+                         moved = self.file_dao.move_file(file_path, str(target_path))
                          if moved:
                               self.log(f"Moved preemptive unmatched file {file_name} to Unsorted folder")
                          else:
@@ -356,9 +352,9 @@ class FolderProcessor:
                     else:
                          # Clean filename for destination (remove braces)
                          clean_brace_file_name = re.sub(r'{.*?}', '', file_name)
-                         target_path = os.path.join(new_folder_path, clean_brace_file_name)
+                         target_path = Path(new_folder_path) / clean_brace_file_name
                          
-                         moved = self.file_dao.move_file(file_path, target_path)
+                         moved = self.file_dao.move_file(file_path, str(target_path))
                          if moved:
                               self.log(f"Moved unmatched file {file_name} to BioI folder root")
                          else:
@@ -378,9 +374,9 @@ class FolderProcessor:
 
           # Get all .ab1 files in the folder (no recursive search needed for plates)
           ab1_files = []
-          for file in os.listdir(folder_path):
-               if file.endswith(".ab1"):
-                    ab1_files.append(os.path.join(folder_path, file))
+          for file in Path(folder_path).iterdir():
+               if file.suffix == ".ab1":
+                    ab1_files.append(str(file))
           
           self.log(f"Found {len(ab1_files)} .ab1 files in folder")
 
@@ -391,7 +387,7 @@ class FolderProcessor:
 
           # Classify files
           for file_path in ab1_files:
-               file_name = os.path.basename(file_path)
+               file_name = Path(file_path).name
 
                # Check for control files (use PLATE_CONTROLS)
                if self.file_dao.is_control_file(file_name, self.config.PLATE_CONTROLS):
@@ -416,32 +412,30 @@ class FolderProcessor:
           # Process controls
           if control_files:
                self.log(f"Processing {len(control_files)} control files")
-               controls_folder = os.path.join(folder_path, "Controls")
-               if not os.path.exists(controls_folder):
-                    os.makedirs(controls_folder)
+               controls_folder = Path(folder_path) / "Controls"
+               controls_folder.mkdir(exist_ok=True)
 
                for file_path in control_files:
-                    target_path = os.path.join(controls_folder, os.path.basename(file_path))
-                    moved = self.file_dao.move_file(file_path, target_path)
+                    target_path = controls_folder / Path(file_path).name
+                    moved = self.file_dao.move_file(file_path, str(target_path))
                     if moved:
-                         self.log(f"Moved control file {os.path.basename(file_path)} to Controls")
+                         self.log(f"Moved control file {Path(file_path).name} to Controls")
                     else:
-                         self.log(f"Failed to move control file {os.path.basename(file_path)}")
+                         self.log(f"Failed to move control file {Path(file_path).name}")
 
           # Process blanks
           if blank_files:
                self.log(f"Processing {len(blank_files)} blank files")
-               blank_folder = os.path.join(folder_path, "Blank")
-               if not os.path.exists(blank_folder):
-                    os.makedirs(blank_folder)
+               blank_folder = Path(folder_path) / "Blank"
+               blank_folder.mkdir(exist_ok=True)
 
                for file_path in blank_files:
-                    target_path = os.path.join(blank_folder, os.path.basename(file_path))
-                    moved = self.file_dao.move_file(file_path, target_path)
+                    target_path = blank_folder / Path(file_path).name
+                    moved = self.file_dao.move_file(file_path, str(target_path))
                     if moved:
-                         self.log(f"Moved blank file {os.path.basename(file_path)} to Blank")
+                         self.log(f"Moved blank file {Path(file_path).name} to Blank")
                     else:
-                         self.log(f"Failed to move blank file {os.path.basename(file_path)}")
+                         self.log(f"Failed to move blank file {Path(file_path).name}")
 
           # Remove braces from remaining files
           if brace_files:
@@ -449,17 +443,17 @@ class FolderProcessor:
                braces_count = 0
                for file_path in brace_files:
                     # Skip if file was already moved to Controls or Blank folders
-                    if not os.path.exists(file_path):
+                    if not Path(file_path).exists():
                          continue
                          
                     new_path = self.file_dao.rename_file_without_braces(file_path)
                     if new_path != file_path:
                          braces_count += 1
-                         self.log(f"Removed braces from {os.path.basename(file_path)}")
+                         self.log(f"Removed braces from {Path(file_path).name}")
                
                self.log(f"Successfully removed braces from {braces_count} files")
 
-          self.log(f"Completed processing plate folder: {os.path.basename(folder_path)}")
+          self.log(f"Completed processing plate folder: {Path(folder_path).name}")
           return folder_path
 
      def get_destination_for_order(self, order_identifier, base_path=None):
@@ -474,9 +468,9 @@ class FolderProcessor:
                str: Path to the destination parent folder (not the full target path)
           """
           # Determine if we have a folder path or direct I-number
-          if isinstance(order_identifier, str) and os.path.exists(order_identifier):
+          if isinstance(order_identifier, str) and Path(order_identifier).exists():
                # Extract I-number from folder name
-               folder_name = os.path.basename(order_identifier)
+               folder_name = Path(order_identifier).name
                i_num = self.file_dao.get_inumber_from_name(folder_name)
           else:
                # Assume direct I-number was provided
@@ -495,12 +489,11 @@ class FolderProcessor:
           """Get order folders within a BioI folder"""
           order_folders = []
 
-          for item in os.listdir(bio_folder):
-               item_path = os.path.join(bio_folder, item)
-               if os.path.isdir(item_path):
-                    if re.search(r'bioi-\d+_.+_\d+', item.lower()) and not re.search('reinject', item.lower()):
+          for item in Path(bio_folder).iterdir():
+               if item.is_dir():
+                    if re.search(r'bioi-\d+_.+_\d+', item.name.lower()) and not re.search('reinject', item.name.lower()):
                          # If item looks like an order folder BioI-20000_YoMama_123456 and not a reinject folder
-                         order_folders.append(item_path)
+                         order_folders.append(str(item))
 
           return order_folders
      
@@ -522,7 +515,7 @@ class FolderProcessor:
 
      def _should_use_alternate_injections(self, file_path, destination_folder, normalized_name):
           """Check if customer file should be placed in Alternate Injections folder"""
-          file_name = os.path.basename(file_path)
+          file_name = Path(file_path).name
           # Use existing DAO function to get base name without order number
           base_name = self.file_dao.standardize_filename_for_matching(file_name, preserve_order_number=False)
           
@@ -580,32 +573,32 @@ class FolderProcessor:
 
      def _would_overwrite_existing_file(self, file_path, destination_folder):
           """Check if cleaned filename would overwrite existing file"""
-          file_name = os.path.basename(file_path)
+          file_name = Path(file_path).name
           # Use existing DAO function instead of manual regex
           clean_name = self.file_dao.clean_braces_format(file_name)
-          target_path = os.path.join(destination_folder, clean_name)
-          return os.path.exists(target_path)
+          target_path = Path(destination_folder) / clean_name
+          return target_path.exists()
 
      def _move_to_alternate_injections(self, file_path, destination_folder):
           """Move file to Alternate Injections folder preserving original name"""
-          file_name = os.path.basename(file_path)
-          alt_folder = os.path.join(destination_folder, "Alternate Injections")
-          os.makedirs(alt_folder, exist_ok=True)
+          file_name = Path(file_path).name
+          alt_folder = Path(destination_folder) / "Alternate Injections"
+          alt_folder.mkdir(exist_ok=True)
           
-          alt_path = os.path.join(alt_folder, file_name)  # Keep original name with braces
-          success = self.file_dao.move_file(file_path, alt_path)
+          alt_path = alt_folder / file_name  # Keep original name with braces
+          success = self.file_dao.move_file(file_path, str(alt_path))
           if success:
                self.log(f"Moved to Alternate Injections: {file_name}")
           return success
 
      def _move_to_main_folder(self, file_path, destination_folder):
           """Move file to main folder with cleaned filename (braces removed only)"""
-          file_name = os.path.basename(file_path)
+          file_name = Path(file_path).name
           # Remove only braces, keep suffixes like _Premixed and _RTI
           clean_name = re.sub(r'{.*?}', '', file_name)
           
-          target_path = os.path.join(destination_folder, clean_name)
-          success = self.file_dao.move_file(file_path, target_path)
+          target_path = Path(destination_folder) / clean_name
+          success = self.file_dao.move_file(file_path, str(target_path))
           if success:
                self.log(f"Moved to main folder: {file_name}")
           return success
@@ -628,7 +621,7 @@ class FolderProcessor:
 
      def process_bio_folder(self, bio_folder):
           """Process a BioI folder containing multiple order folders"""
-          folder_name = os.path.basename(bio_folder)
+          folder_name = Path(bio_folder).name
           self.log(f"Processing BioI folder: {folder_name}")
           
           # Get all order folders in this BioI folder
@@ -642,11 +635,11 @@ class FolderProcessor:
 
      def process_order_folder(self, order_folder, parent_folder=None):
           """Process an individual order folder"""
-          folder_name = os.path.basename(order_folder)
+          folder_name = Path(order_folder).name
           self.log(f"Processing order folder: {folder_name}")
           
           # Determine if we're in IND Not Ready context
-          in_not_ready = os.path.basename(os.path.dirname(order_folder)) == self.config.IND_NOT_READY_FOLDER
+          in_not_ready = Path(order_folder).parent.name == self.config.IND_NOT_READY_FOLDER
           
           # Get order information
           order_number = self.get_order_number_from_folder_name(order_folder)
@@ -680,16 +673,16 @@ class FolderProcessor:
                          
                          if bioi_folder:
                               # Construct the destination path
-                              destination = os.path.join(bioi_folder, folder_name)
+                              destination = Path(bioi_folder) / folder_name
                               
                               # Check if destination exists
-                              if os.path.exists(destination):
+                              if destination.exists():
                                    self.log(f"Destination already exists: {destination}, leaving in current location")
                               else:
                                    # Use direct shutil.move to avoid nested directory issues
                                    try:
                                         import shutil
-                                        shutil.move(order_folder, destination)
+                                        shutil.move(order_folder, str(destination))
                                         self.log(f"Order moved back: {folder_name}")
                                    except Exception as e:
                                         self.warning(f"Error moving folder: {e}")
@@ -699,17 +692,16 @@ class FolderProcessor:
                else:
                     # Not complete - move to IND Not Ready
                     if not in_not_ready:
-                         not_ready_path = os.path.join(os.path.dirname(parent_folder or order_folder), 
-                                                  self.config.IND_NOT_READY_FOLDER)
-                         self.file_dao.create_folder_if_not_exists(not_ready_path)
+                         not_ready_path = Path(parent_folder or order_folder).parent / self.config.IND_NOT_READY_FOLDER
+                         self.file_dao.create_folder_if_not_exists(str(not_ready_path))
                          
-                         target_path = os.path.join(not_ready_path, folder_name)
-                         if os.path.exists(target_path):
+                         target_path = not_ready_path / folder_name
+                         if target_path.exists():
                               self.log(f"Destination already exists in IND Not Ready: {target_path}")
                          else:
                               try:
                                    import shutil
-                                   shutil.move(order_folder, target_path)
+                                   shutil.move(order_folder, str(target_path))
                                    self.log(f"Incomplete order moved to Not Ready: {folder_name}")
                               except Exception as e:
                                    self.warning(f"Error moving to IND Not Ready: {e}")
@@ -727,16 +719,16 @@ class FolderProcessor:
                
                if bioi_folder:
                     # Construct the destination path
-                    destination = os.path.join(bioi_folder, folder_name)
+                    destination = Path(bioi_folder) / folder_name
                     
                     # Check if destination exists
-                    if os.path.exists(destination):
+                    if destination.exists():
                          self.log(f"Destination already exists: {destination}, leaving in current location")
                     else:
                          # Use direct shutil.move to avoid nested directory issues
                          try:
                               import shutil
-                              shutil.move(order_folder, destination)
+                              shutil.move(order_folder, str(destination))
                               self.log(f"Processed order moved back: {folder_name}")
                          except Exception as e:
                               self.warning(f"Error moving folder: {e}")
@@ -761,16 +753,15 @@ class FolderProcessor:
           pcr_pattern = re.compile(f'pcr{pcr_number}', re.IGNORECASE)
           found_folders = []
           
-          for item in os.listdir(base_path):
-               item_path = os.path.join(base_path, item)
-               if os.path.isdir(item_path) and pcr_pattern.search(item.lower()):
-                    found_folders.append(item_path)
+          for item in Path(base_path).iterdir():
+               if item.is_dir() and pcr_pattern.search(item.name.lower()):
+                    found_folders.append(str(item))
           
           if found_folders:
                # If multiple matches found, prioritize ones with order numbers
                order_pattern = re.compile(f'pcr{pcr_number}_\\d+', re.IGNORECASE)
                for folder in found_folders:
-                    if order_pattern.search(folder.lower()):
+                    if order_pattern.search(Path(folder).name.lower()):
                          self.log(f"Found PCR folder with order number: {folder}")
                          return folder
                
@@ -780,30 +771,31 @@ class FolderProcessor:
           
           # No matching folder found, create a new one
           pcr_folder_name = f"FB-PCR{pcr_number}"
-          new_folder_path = os.path.join(base_path, pcr_folder_name)
+          new_folder_path = Path(base_path) / pcr_folder_name
           self.log(f"Creating new PCR folder: {new_folder_path}")
-          self.file_dao.create_folder_if_not_exists(new_folder_path)
-          return new_folder_path
+          self.file_dao.create_folder_if_not_exists(str(new_folder_path))
+          return str(new_folder_path)
      
      def process_pcr_folder(self, pcr_folder):
           """Process all files in a PCR folder - updated matching logic"""
-          self.log(f"Processing PCR folder: {os.path.basename(pcr_folder)}")
+          self.log(f"Processing PCR folder: {Path(pcr_folder).name}")
 
-          for file in os.listdir(pcr_folder):
-               if file.endswith(config.ABI_EXTENSION):
-                    file_path = os.path.join(pcr_folder, file)
+          for file in Path(pcr_folder).iterdir():
+               if file.suffix == config.ABI_EXTENSION:
+                    file_path = str(file)
+                    file_name = Path(file_path).name
                     
                     # Check if file is in NN folder
                     is_from_nn = self.is_in_not_needed_folder(pcr_folder)
                     
                     # Clean the filename for matching with reinject list
-                    clean_name = self.file_dao.standardize_filename_for_matching(file)
+                    clean_name = self.file_dao.standardize_filename_for_matching(file_name)
 
                     # Check if it's in the reinject list
                     is_reinject = clean_name in self.reinject_list
                     
                     # Check if it's a preemptive reinject
-                    is_preempt = self.is_preemptive(file)
+                    is_preempt = self.is_preemptive(file_name)
                     
                     # Determine if file should go to Alternate Injections
                     go_to_alt_injections = is_from_nn or is_reinject
@@ -812,34 +804,33 @@ class FolderProcessor:
                          # Check for other files with matching name
                          matching_files = self.find_matching_files(pcr_folder, clean_name)
                          # Remove the current file from consideration
-                         matching_files = [f for f in matching_files if f != file]
+                         matching_files = [f for f in matching_files if f != file_name]
                          if matching_files:
                               go_to_alt_injections = True
 
                     if go_to_alt_injections:
                          # Make sure Alternate Injections folder exists
-                         alt_folder = os.path.join(pcr_folder, "Alternate Injections")
-                         if not os.path.exists(alt_folder):
-                              os.mkdir(alt_folder)
+                         alt_folder = Path(pcr_folder) / "Alternate Injections"
+                         alt_folder.mkdir(exist_ok=True)
 
                          # Move file to Alternate Injections
-                         source = os.path.join(pcr_folder, file)
-                         dest = os.path.join(alt_folder, file)  # Keep original filename with brackets
-                         if os.path.exists(source) and not os.path.exists(dest):
-                              self.file_dao.move_file(source, dest)
+                         source = file_path
+                         dest = alt_folder / file_name  # Keep original filename with brackets
+                         if Path(source).exists() and not dest.exists():
+                              self.file_dao.move_file(source, str(dest))
                               reason = ""
                               if is_from_nn: reason += "from NN folder "
                               if is_reinject: reason += "in reinject list "
                               if is_preempt and not is_reinject and matching_files: reason += "preemptive with match"
-                              self.log(f"Moved file {file} to Alternate Injections ({reason.strip()})")
+                              self.log(f"Moved file {file_name} to Alternate Injections ({reason.strip()})")
 
           # Now process the folder with mSeq if it's ready
           was_mseqed, has_braces, has_ab1_files = self.check_order_status(pcr_folder)
           if not was_mseqed and not has_braces and has_ab1_files:
                self.ui_automation.process_folder(pcr_folder)
-               self.log(f"mSeq completed: {os.path.basename(pcr_folder)}")
+               self.log(f"mSeq completed: {Path(pcr_folder).name}")
           else:
-               self.log(f"mSeq NOT completed: {os.path.basename(pcr_folder)}")
+               self.log(f"mSeq NOT completed: {Path(pcr_folder).name}")
 
      def _cleanup_original_folder(self, original_folder: str, new_folder: str):
           """
@@ -851,24 +842,24 @@ class FolderProcessor:
                return
 
           # Process nested NN folders first
-          for root, dirs, files in os.walk(original_folder, topdown=False):  # Process bottom-up
-               for dir_name in dirs:
-                    dir_path = os.path.join(root, dir_name)
-                    dir_lower = dir_name.lower()
+          # Walk the directory tree from bottom-up to process subdirectories first
+          for dir_path in reversed(list(Path(original_folder).rglob("*"))):
+               if dir_path.is_dir():
+                    dir_lower = dir_path.name.lower()
                     
                     # Check if this is an NN folder
                     if dir_lower == "nn" or dir_lower == "nn-preemptives" or dir_lower.startswith("nn_") or dir_lower.startswith("nn-preemptives_"):
-                         self.log(f"Processing nested NN folder: {dir_path}")
+                         self.log(f"Processing nested NN folder: {dir_path.name}")
                          
                          # Get all AB1 files in this NN folder
-                         nn_ab1_files = self.file_dao.get_files_by_extension(dir_path, ".ab1", recursive=True)
+                         nn_ab1_files = self.file_dao.get_files_by_extension(str(dir_path), ".ab1", recursive=True)
                          
                          if nn_ab1_files:
                               self.log(f"Found {len(nn_ab1_files)} AB1 files in nested NN folder")
                               
                               # Process each file
                               for file_path in nn_ab1_files:
-                                   file_name = os.path.basename(file_path)
+                                   file_name = Path(file_path).name
                                    normalized_name = self.file_dao.normalize_filename(file_name)
                                    
                                    # Find matching entry in order key (if available)
@@ -883,13 +874,12 @@ class FolderProcessor:
                                         self.log(f"No order key match for nested NN file: {file_name}")
                               
                          # After processing files, check if NN folder is now empty
-                         remaining_nn_items = os.listdir(dir_path)
-                         if not remaining_nn_items:
+                         if not any(dir_path.iterdir()):
                               try:
-                                   os.rmdir(dir_path)
-                                   self.log(f"Deleted empty NN folder: {dir_path}")
+                                   dir_path.rmdir()
+                                   self.log(f"Deleted empty NN folder: {dir_path.name}")
                               except Exception as e:
-                                   self.log(f"Failed to delete empty NN folder {dir_path}: {e}")
+                                   self.log(f"Failed to delete empty NN folder {dir_path.name}: {e}")
 
           # Force refresh directory cache after processing NN folders
           self.file_dao.get_directory_contents(original_folder, refresh=True)
@@ -901,7 +891,7 @@ class FolderProcessor:
 
                # Log the names of remaining files for debugging
                for file_path in ab1_files:
-                    self.log(f"Remaining file: {os.path.basename(file_path)}")
+                    self.log(f"Remaining file: {Path(file_path).name}")
 
                return
 
@@ -911,7 +901,7 @@ class FolderProcessor:
           # If completely empty, delete the folder
           if not remaining_items:
                try:
-                    os.rmdir(original_folder)
+                    Path(original_folder).rmdir()
                     self.log(f"Deleted empty original folder: {original_folder}")
                     return
                except Exception as e:
@@ -922,49 +912,47 @@ class FolderProcessor:
           moved_all = True
           item: str
           for item in list(remaining_items):  # Create a copy of the list to avoid iteration issues
-               item_path = os.path.join(original_folder, str(item))  # Explicit conversion to string
+               item_path = Path(original_folder) / str(item)
 
                if item in ["Controls", "Blank", "Alternate Injections"]:
                     # Try to move this folder to the new location if it's not empty
-                    if os.path.isdir(item_path) and os.listdir(item_path):
+                    if item_path.is_dir() and any(item_path.iterdir()):
                          try:
                               # Create target folder in new location if needed
-                              target_path = os.path.join(new_folder, item)  # Explicit conversion to string
-                              if not os.path.exists(target_path):
-                                   os.makedirs(target_path)
+                              target_path = Path(new_folder) / item
+                              target_path.mkdir(exist_ok=True)
 
                               # Move all files from old to new location
-                              for subitem in os.listdir(item_path):
-                                   old_file = os.path.join(item_path, subitem)  # Explicit conversion to string
-                                   new_file = os.path.join(target_path, subitem)  # Explicit conversion to string
-                                   if os.path.isfile(old_file):
-                                        self.file_dao.move_file(old_file, new_file)
-                                        self.log(f"Moved remaining file {subitem} to {target_path}")
+                              for subitem in item_path.iterdir():
+                                   if subitem.is_file():
+                                        new_file = target_path / subitem.name
+                                        self.file_dao.move_file(str(subitem), str(new_file))
+                                        self.log(f"Moved remaining file {subitem.name} to {target_path}")
 
                               # Check if folder is now empty and can be deleted
-                              if not os.listdir(item_path):
-                                   os.rmdir(item_path)
+                              if not any(item_path.iterdir()):
+                                   item_path.rmdir()
                                    self.log(f"Deleted now-empty folder: {item}")
                          except Exception as e:
                               self.log(f"Failed to move remaining files from {item}: {e}")
                               moved_all = False
                               continue
 
-                    elif os.path.isdir(item_path) and not os.listdir(item_path):
+                    elif item_path.is_dir() and not any(item_path.iterdir()):
                          # Empty folder - delete it
                          try:
-                              os.rmdir(item_path)
+                              item_path.rmdir()
                               self.log(f"Deleted empty folder: {item}")
                          except Exception as e:
                               self.log(f"Failed to delete empty folder {item}: {e}")
                               moved_all = False
-               elif os.path.isdir(item_path):
+               elif item_path.is_dir():
                     # Check if this is a non-standard folder (like NN) and if it's empty
                     dir_lower = item.lower()
                     if (dir_lower == "nn" or dir_lower == "nn-preemptives" or 
-                         dir_lower.startswith("nn_") or dir_lower.startswith("nn-preemptives_")) and not os.listdir(item_path):
+                         dir_lower.startswith("nn_") or dir_lower.startswith("nn-preemptives_")) and not any(item_path.iterdir()):
                          try:
-                              os.rmdir(item_path)
+                              item_path.rmdir()
                               self.log(f"Deleted empty NN folder: {item}")
                               # Remove from remaining items list
                               remaining_items = [i for i in remaining_items if i != item]
@@ -992,7 +980,7 @@ class FolderProcessor:
           # If we've successfully cleaned everything up, try to delete the original folder
           if not remaining_items:
                try:
-                    os.rmdir(original_folder)
+                    Path(original_folder).rmdir()
                     self.log(f"Deleted original folder after cleaning: {original_folder}")
                except Exception as e:
                     self.log(f"Failed to delete original folder: {e}")
@@ -1000,8 +988,8 @@ class FolderProcessor:
                # Check if all remaining items are empty NN folders
                all_empty_nn = True
                for item in remaining_items:
-                    item_path = os.path.join(original_folder, str(item))
-                    if not os.path.isdir(item_path):
+                    item_path = Path(original_folder) / str(item)
+                    if not item_path.is_dir():
                          all_empty_nn = False
                          break
                          
@@ -1011,23 +999,23 @@ class FolderProcessor:
                          all_empty_nn = False
                          break
                          
-                    if os.listdir(item_path):
+                    if any(item_path.iterdir()):
                          all_empty_nn = False
                          break
                
                if all_empty_nn:
                     # Delete all empty NN folders
                     for item in list(remaining_items):
-                         item_path = os.path.join(original_folder, str(item))
+                         item_path = Path(original_folder) / str(item)
                          try:
-                              os.rmdir(item_path)
+                              item_path.rmdir()
                               self.log(f"Deleted empty NN folder: {item}")
                          except Exception as e:
                               self.log(f"Failed to delete empty NN folder {item}: {e}")
                     
                     # Try to delete the original folder again
                     try:
-                         os.rmdir(original_folder)
+                         Path(original_folder).rmdir()
                          self.log(f"Deleted original folder after cleaning all empty NN folders: {original_folder}")
                     except Exception as e:
                          self.log(f"Failed to delete original folder: {e}")
@@ -1036,7 +1024,7 @@ class FolderProcessor:
 
      def _sort_pcr_file(self, file_path, pcr_number):
           """Sort a PCR file to the appropriate folder"""
-          file_name = os.path.basename(file_path)
+          file_name = Path(file_path).name
           self.log(f"Processing PCR file: {file_name} with PCR Number: {pcr_number}")
 
           # Check if file is in a Not Needed folder
@@ -1049,12 +1037,12 @@ class FolderProcessor:
                day_data_path = self.current_data_folder #type: ignore
           else:
                # Fallback to parent folder logic - should not normally be used
-               current_folder = os.path.dirname(file_path)
+               current_folder = str(Path(file_path).parent)
                # For NN folder files, go up two levels instead of one
                if is_from_nn:
-                    day_data_path = os.path.dirname(os.path.dirname(current_folder))
+                    day_data_path = str(Path(current_folder).parent.parent)
                else:
-                    day_data_path = os.path.dirname(current_folder)
+                    day_data_path = str(Path(current_folder).parent)
           
           self.log(f"Using day data path: {day_data_path}")
 
@@ -1081,7 +1069,7 @@ class FolderProcessor:
           
           # Create the destination path for main folder
           clean_name = re.sub(r'{.*?}', '', file_name)
-          target_path = os.path.join(pcr_folder_path, clean_name)
+          target_path = Path(pcr_folder_path) / clean_name
           
           # Determine if file should go to Alternate Injections
           go_to_alt_injections = False
@@ -1102,78 +1090,70 @@ class FolderProcessor:
                     self.log(f"Preemptive PCR file has no matching files, will be primary: {file_name}")
           
           # Additional check: if file already exists at destination, use Alternate Injections
-          if os.path.exists(target_path):
+          if target_path.exists():
                go_to_alt_injections = True
                self.log(f"PCR file already exists at destination: {file_name}")
           
           # Move the file to the appropriate location
           if go_to_alt_injections:
-               alt_inj_folder = os.path.join(pcr_folder_path, "Alternate Injections")
-               if not os.path.exists(alt_inj_folder):
-                    os.makedirs(alt_inj_folder)
-               alt_file_path = os.path.join(alt_inj_folder, file_name)  # Keep original name with braces
-               return self.file_dao.move_file(file_path, alt_file_path)
+               alt_inj_folder = Path(pcr_folder_path) / "Alternate Injections"
+               alt_inj_folder.mkdir(exist_ok=True)
+               alt_file_path = alt_inj_folder / file_name  # Keep original name with braces
+               return self.file_dao.move_file(file_path, str(alt_file_path))
           else:
                # Put in main folder
-               return self.file_dao.move_file(file_path, target_path)
+               return self.file_dao.move_file(file_path, str(target_path))
 
      def _sort_control_file(self, file_path):
           """Sort a control file to the Controls folder"""
-          parent_folder = os.path.dirname(file_path)
-          controls_folder = os.path.join(parent_folder, "Controls")
-
-          # Create Controls folder if it doesn't exist
-          if not os.path.exists(controls_folder):
-               os.makedirs(controls_folder)
+          parent_folder = Path(file_path).parent
+          controls_folder = parent_folder / "Controls"
+          controls_folder.mkdir(exist_ok=True)
 
           # Just move the file directly (no special handling needed)
-          target_path = os.path.join(controls_folder, os.path.basename(file_path))
-          return self.file_dao.move_file(file_path, target_path)
+          target_path = controls_folder / Path(file_path).name
+          return self.file_dao.move_file(file_path, str(target_path))
 
      def _sort_blank_file(self, file_path):
           """Sort a blank file to the Blank folder"""
           # Get parent BioI folder first, not just the immediate parent folder
-          immediate_parent = os.path.dirname(file_path)
-          file_name = os.path.basename(file_path)
+          immediate_parent = Path(file_path).parent
+          file_name = Path(file_path).name
 
           # Get or create the BioI folder
-          i_num = self.file_dao.get_inumber_from_name(immediate_parent)
+          i_num = self.file_dao.get_inumber_from_name(str(immediate_parent))
           if i_num:
                bioi_folder_name = f"BioI-{i_num}"
-               bioi_folder_path = os.path.join(os.path.dirname(immediate_parent), bioi_folder_name)
-
-               # Ensure BioI folder exists
-               if not os.path.exists(bioi_folder_path):
-                    os.makedirs(bioi_folder_path)
+               bioi_folder_path = immediate_parent.parent / bioi_folder_name
+               bioi_folder_path.mkdir(exist_ok=True)
 
                # Create Blank folder inside BioI folder
-               blank_folder = os.path.join(bioi_folder_path, "Blank")
-               if not os.path.exists(blank_folder):
-                    os.makedirs(blank_folder)
+               blank_folder = bioi_folder_path / "Blank"
+               blank_folder.mkdir(exist_ok=True)
 
                # Move file to Blank folder
-               target_path = os.path.join(blank_folder, file_name)
-               return self.file_dao.move_file(file_path, target_path)
+               target_path = blank_folder / file_name
+               return self.file_dao.move_file(file_path, str(target_path))
           else:
                # Fallback to original logic if no I number found
                parent_folder = immediate_parent
-               blank_folder = os.path.join(parent_folder, "Blank")
-               if not os.path.exists(blank_folder):
-                    os.makedirs(blank_folder)
-               target_path = os.path.join(blank_folder, file_name)
-               return self.file_dao.move_file(file_path, target_path)
+               blank_folder = parent_folder / "Blank"
+               blank_folder.mkdir(exist_ok=True)
+               target_path = blank_folder / file_name
+               return self.file_dao.move_file(file_path, str(target_path))
 
      def _rename_processed_folder(self, folder_path):
           """Rename the folder after processing"""
           i_num = self.file_dao.get_inumber_from_name(folder_path)
           if i_num:
                new_folder_name = f"BioI-{i_num}"
-               new_folder_path = os.path.join(os.path.dirname(folder_path), new_folder_name)
+               folder_pathobj = Path(folder_path)
+               new_folder_path = folder_pathobj.parent / new_folder_name
 
                # Only rename if the new name doesn't already exist
-               if not os.path.exists(new_folder_path) and os.path.basename(folder_path) != new_folder_name:
+               if not new_folder_path.exists() and folder_pathobj.name != new_folder_name:
                     try:
-                         os.rename(folder_path, new_folder_path)
+                         folder_pathobj.rename(new_folder_path)
                          self.log(f"Renamed folder to: {new_folder_name}")
                          return True
                     except Exception as e:
@@ -1183,7 +1163,7 @@ class FolderProcessor:
 
      def get_order_number_from_folder_name(self, folder_path):
           """Extract order number from folder name"""
-          folder_name = os.path.basename(folder_path)
+          folder_name = Path(folder_path).name
           match = re.search(r'_\d+$', folder_name)
           if match:
                order_number = re.search(r'\d+', match.group(0)).group(0) #type: ignore
@@ -1218,22 +1198,19 @@ class FolderProcessor:
                base_normalized_name = normalized_name.split('#', 1)[0]
                
           matching_files = []
-          for item in os.listdir(folder_path):
-               if item.endswith(self.config.ABI_EXTENSION):
-                    item_norm = self.file_dao.normalize_filename(item)
+          for item in Path(folder_path).iterdir():
+               if item.suffix == self.config.ABI_EXTENSION:
+                    item_norm = self.file_dao.normalize_filename(item.name)
                     # Also handle potential order numbers in the normalized matched files
                     if '#' in item_norm:
                          item_norm = item_norm.split('#', 1)[0]
                          
                     if item_norm == base_normalized_name:
-                         matching_files.append(item)
+                         matching_files.append(item.name)
           return matching_files
 
      def get_reinject_list(self, i_numbers, reinject_path=None):
           """Get list of reactions that are reinjects - optimized version"""
-          import re
-          import os
-          import numpy as np
           from pathlib import Path
 
           # Helper function to check if entry is just a well location
@@ -1343,7 +1320,7 @@ class FolderProcessor:
 
      def debug_reinject_detection(self, file_path):
           """Debug helper for all file sorting logic"""
-          file_name = os.path.basename(file_path)
+          file_name = Path(file_path).name
           
           # Check all conditions
           is_from_nn = self.is_in_not_needed_folder(file_path)
@@ -1513,13 +1490,13 @@ class FolderProcessor:
                str: Path to created zip file, or None if failed
           """
           try:
-               folder_name = os.path.basename(folder_path)
+               folder_name = Path(folder_path).name
                self.log(f"Creating zip for full plasmid order: {folder_name}")
                self.log(f"Compression settings: Method={'7-Zip' if use_7zip else 'Python zipfile'}, Level={compression_level}")
                
                # Set up the zip filename
                zip_filename = f"{folder_name}.zip"
-               zip_path = os.path.join(folder_path, zip_filename)
+               zip_path = Path(folder_path) / zip_filename
                
                # Define file extensions to include
                plasmid_extensions = [
@@ -1533,10 +1510,10 @@ class FolderProcessor:
                
                # Collect all files to zip
                all_files = []
-               for item in os.listdir(folder_path):
-                    item_path = os.path.join(folder_path, item)
-                    if os.path.isfile(item_path) and any(item.endswith(ext) for ext in plasmid_extensions):
-                         all_files.append(item)
+               folder_pathobj = Path(folder_path)
+               for item in folder_pathobj.iterdir():
+                    if item.is_file() and any(item.name.endswith(ext) for ext in plasmid_extensions):
+                         all_files.append(item.name)
                
                if not all_files:
                     self.log(f"No matching files found in {folder_path}")
@@ -1549,12 +1526,12 @@ class FolderProcessor:
                     seven_zip_exe = r"G:\Lab\DATA Processing\7-Zip\7z.exe"
                     
                     self.log(f"Checking for 7-Zip at: {seven_zip_exe}")
-                    if os.path.exists(seven_zip_exe):
+                    if Path(seven_zip_exe).exists():
                          self.log(f"Found 7-Zip at: {seven_zip_exe}")
                          self.log("USING 7-ZIP FOR COMPRESSION")
                          
                          # Create a list file for 7-Zip
-                         list_file_path = os.path.join(folder_path, "files_to_zip.txt")
+                         list_file_path = folder_pathobj / "files_to_zip.txt"
                          
                          with open(list_file_path, "w") as f:
                               for item in all_files:
@@ -1566,8 +1543,8 @@ class FolderProcessor:
                               "a",                      # Add files to archive
                               "-tzip",                  # ZIP format
                               f"-mx={compression_level}", # Use the specified compression level
-                              zip_path,                 # Output ZIP file
-                              "@" + list_file_path      # Input list of files
+                              str(zip_path),            # Output ZIP file
+                              "@" + str(list_file_path) # Input list of files
                          ]
                          
                          self.log(f"7-Zip command: {' '.join(command)}")
@@ -1579,7 +1556,7 @@ class FolderProcessor:
                          try:
                               process = subprocess.run(
                               command, 
-                              cwd=folder_path,  # Set working directory to folder_path
+                              cwd=str(folder_pathobj),  # Set working directory to folder_path
                               capture_output=True, 
                               text=True,
                               check=False  # Don't raise exception on non-zero return
@@ -1592,16 +1569,16 @@ class FolderProcessor:
                                    self.log("Falling back to Python zipfile due to 7-Zip error")
                               else:
                                    # Verify the zip file was created
-                                   if os.path.exists(zip_path):
+                                   if zip_path.exists():
                                         self.log(f"Successfully created zip file using 7-Zip: {zip_path}")
                                         
                                         # Clean up list file
                                         try:
-                                             os.remove(list_file_path)
+                                             list_file_path.unlink()
                                         except Exception as e:
                                              self.log(f"Warning: Failed to remove list file: {e}")
                                              
-                                        return zip_path
+                                        return str(zip_path)
                                    else:
                                         self.log(f"7-Zip reported success but zip file not found at: {zip_path}")
                          except Exception as sub_e:
@@ -1623,9 +1600,9 @@ class FolderProcessor:
                # Ensure compression level is within valid range
                python_compression = max(0, min(9, compression_level))
                
-               with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=python_compression) as zipf:
+               with zipfile.ZipFile(str(zip_path), 'w', zipfile.ZIP_DEFLATED, compresslevel=python_compression) as zipf:
                     for item in all_files:
-                         file_path = os.path.join(folder_path, item)
+                         file_path = folder_pathobj / item
                          
                          # Create ZipInfo object for more control
                          zipinfo = zipfile.ZipInfo(item, date_time)
@@ -1642,7 +1619,7 @@ class FolderProcessor:
                               zipf.writestr(zipinfo, file_data, zipfile.ZIP_DEFLATED)
                
                self.log(f"Successfully created zip file using Python zipfile: {zip_path}")
-               return zip_path
+               return str(zip_path)
                     
           except Exception as e:
                self.log(f"Error creating zip file for {folder_path}: {e}")
@@ -1652,9 +1629,10 @@ class FolderProcessor:
     
      def find_zip_file(self, folder_path):
           """Find zip file in a folder"""
-          for item in os.listdir(folder_path):
-               if item.endswith('.zip') and os.path.isfile(os.path.join(folder_path, item)):
-                    return os.path.join(folder_path, item)
+          folder_pathobj = Path(folder_path)
+          for item in folder_pathobj.iterdir():
+               if item.suffix == '.zip' and item.is_file():
+                    return str(item)
           return None
 
      def get_zip_mod_time(self, worksheet, order_number):
@@ -1680,29 +1658,29 @@ class FolderProcessor:
           bio_folders = self.file_dao.get_folders(data_folder, pattern=self.config.REGEX_PATTERNS['bioi_folder'].pattern)
           
           for bio_folder in bio_folders:
-               folder_name = os.path.basename(bio_folder)
+               folder_name = Path(bio_folder).name
                i_number = self.file_dao.get_inumber_from_name(folder_name)
                
                if not i_number:
                     continue
                     
                # Get order folders within this BioI folder
-               for item in os.listdir(bio_folder):
-                    item_path = os.path.join(bio_folder, item)
-                    if (os.path.isdir(item_path) and 
-                         self.config.REGEX_PATTERNS['order_folder'].search(item.lower()) and
-                         not self.config.REGEX_PATTERNS['reinject'].search(item.lower())):
-                         order_folders.append((item_path, i_number))
+               bio_folder_path = Path(bio_folder)
+               for item in bio_folder_path.iterdir():
+                    if (item.is_dir() and 
+                         self.config.REGEX_PATTERNS['order_folder'].search(item.name.lower()) and
+                         not self.config.REGEX_PATTERNS['reinject'].search(item.name.lower())):
+                         order_folders.append((str(item), i_number))
           
           # Get immediate order folders (orders directly in data folder)
           immediate_orders = self.file_dao.get_folders(data_folder, pattern=self.config.REGEX_PATTERNS['order_folder'].pattern)
           # Filter out reinject folders
           immediate_orders = [folder for folder in immediate_orders 
-                              if not self.config.REGEX_PATTERNS['reinject'].search(os.path.basename(folder).lower())]
+                              if not self.config.REGEX_PATTERNS['reinject'].search(Path(folder).name.lower())]
           
           for order_folder in immediate_orders:
                # Extract I-number from folder name for immediate orders
-               i_number = self.file_dao.get_inumber_from_name(os.path.basename(order_folder))
+               i_number = self.file_dao.get_inumber_from_name(Path(order_folder).name)
                if i_number:
                     order_folders.append((order_folder, i_number))
           
@@ -1942,7 +1920,7 @@ if __name__ == "__main__":
     processor = FolderProcessor(file_dao, None, config)
 
     # Test folder processing
-    test_path = os.getcwd()
+    test_path = str(Path.cwd())
     print(f"Testing with folder: {test_path}")
 
     # Test getting I number from a folder name

@@ -7,7 +7,7 @@ import subprocess
 from typing import Dict, Any, Optional
 import os
 # Add parent directory to PYTHONPATH for imports
-sys.path.append(str(Path(__file__).parents[3]))
+sys.path.append(str(Path(__file__).parents[2]))
 
 class OSCompatibilityManager:
     """

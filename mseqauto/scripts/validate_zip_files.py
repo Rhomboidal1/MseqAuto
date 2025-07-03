@@ -126,7 +126,7 @@ def main():
         # Check if order already validated with current or newer zip
         if summary_exists:
             _, _, existing_mod_time = excel_dao.find_order_in_summary(existing_worksheet, order_number)
-            current_mod_time = zip_path.stat().st_mtime
+            current_mod_time = Path(zip_path).stat().st_mtime
             
             if existing_mod_time and float(existing_mod_time) >= current_mod_time:
                 logger.info(f"Skipping {Path(order_folder).name} - already validated with current or newer zip")
