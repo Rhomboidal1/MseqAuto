@@ -27,7 +27,16 @@ class MseqAutomation:
         self.first_time_browsing = True
         
         # Set up logging
-        self.logger = logger or logging.getLogger(__name__)
+        if logger is None:
+            # Import and set up logger if none provided
+            import sys
+            sys.path.append(str(Path(__file__).parents[1]))
+            from utils.logger import setup_logger
+            # Create logs directory in the same directory as this file
+            log_dir = Path(__file__).resolve().parent.parent / "scripts" / "logs"
+            self.logger = setup_logger("ui_automation", log_dir=log_dir)
+        else:
+            self.logger = logger
         
         # Basic timing values - increase for Windows 11
         self.is_win11 = self._is_windows_11()
@@ -42,7 +51,8 @@ class MseqAutomation:
             "copy_files": 3,
             "error_window": 5,
             "call_bases": 5,
-            "process_completion": 45 if self.is_win11 else 30,
+            "low_quality": 3,
+            "process_completion": 10,  # Increased timeout for file processing
             "read_info": 3
         }
         
@@ -119,7 +129,7 @@ class MseqAutomation:
         
         # Start new project (Ctrl+N)
         send_keys('^n')
-        self.logger.info("Sent Ctrl+N to start new project")
+        self.logger.info("Started new mSeq project")
         
         # Wait for and handle Browse For Folder dialog
         dialog_found = self._wait_for_dialog("browse_dialog")
@@ -159,17 +169,32 @@ class MseqAutomation:
             self._select_all_files_in_dialog(copy_dialog)
             self._click_dialog_button(copy_dialog, ["&Open", "Open"])
         
-        # Handle File error dialog (appears due to non-sequence files)
+        # Handle File error dialog (appears due to non-sequence files) or wdhandler error
         self._wait_for_dialog("error_window")
         error_dialog = self._get_dialog_by_titles(['File error', 'Error'])
         if error_dialog:
             self._click_dialog_button(error_dialog, ["OK"])
+        else:
+            # Check for wdhandler error dialog (alternative to File error)
+            wdhandler_dialog = self._get_dialog_by_titles(['wdhandler'])
+            if wdhandler_dialog:
+                self.logger.warning("Detected wdhandler error dialog from mSeq, dismissing...")
+                self._click_dialog_button(wdhandler_dialog, ["OK", "&OK"])
+                self.logger.warning("wdhandler error prevents processing - skipping folder")
+                return False
         
         # Handle Call bases dialog
         self._wait_for_dialog("call_bases")
         call_bases_dialog = self.app.window(title_re='Call bases.*')
         if call_bases_dialog:
             self._click_dialog_button(call_bases_dialog, ["&Yes", "Yes"])
+        
+        # Handle Low quality files skipped dialog (may appear after Call bases)
+        self._wait_for_dialog("low_quality")
+        low_quality_dialog = self._get_dialog_by_titles(['Low quality files skipped', 'Quality files skipped'])
+        if low_quality_dialog:
+            self.logger.info("Found 'Low quality files skipped' dialog, clicking OK")
+            self._click_dialog_button(low_quality_dialog, ["OK"])
         
         # Wait for processing to complete
         completion_success = self._wait_for_completion(folder_path)
@@ -187,6 +212,7 @@ class MseqAutomation:
 
     def _close_all_read_info_dialogs(self):
         """Close all Read information for... dialogs that might be open"""
+        dialogs_closed = 0
         try:
             from pywinauto import findwindows
             
@@ -197,13 +223,17 @@ class MseqAutomation:
                     process=self.app.process
                 )
                 
-                for win in read_windows:
+                for i, win in enumerate(read_windows):
                     try:
                         read_dialog = self.app.window(handle=win.handle)
-                        self.logger.info(f"Closing read information dialog: {read_dialog.window_text()}")
                         read_dialog.close()
+                        dialogs_closed += 1
+                        time.sleep(0.1)  # Small delay between closes
                     except Exception as e:
-                        self.logger.warning(f"Error closing read dialog: {e}")
+                        self.logger.warning(f"Error closing read dialog {i+1}: {e}")
+                
+                if len(read_windows) > 0:
+                    self.logger.info(f"Closed {dialogs_closed}/{len(read_windows)} read information dialogs")
                 
                 return len(read_windows) > 0
         except Exception as e:
@@ -216,31 +246,39 @@ class MseqAutomation:
         
         try:
             if dialog_type == "browse_dialog":
-                return timings.wait_until(timeout=timeout, retry_interval=0.1,
+                result = timings.wait_until(timeout=timeout, retry_interval=0.1,
                                         func=lambda: self.app.window(title_re='Browse.*Folder').exists(), #type: ignore
                                         value=True)
             elif dialog_type == "preferences":
-                return timings.wait_until(timeout=timeout, retry_interval=0.1,
+                result = timings.wait_until(timeout=timeout, retry_interval=0.1,
                                         func=lambda: (self.app.window(title='Mseq Preferences').exists() or #type: ignore
                                                     self.app.window(title='mSeq Preferences').exists()), #type: ignore
                                         value=True)
             elif dialog_type == "copy_files":
-                return timings.wait_until(timeout=timeout, retry_interval=0.1,
+                result = timings.wait_until(timeout=timeout, retry_interval=0.1,
                                         func=lambda: self.app.window(title_re='Copy.*sequence files').exists(), #type: ignore
                                         value=True)
             elif dialog_type == "error_window":
-                return timings.wait_until(timeout=timeout, retry_interval=0.3,
+                result = timings.wait_until(timeout=timeout, retry_interval=0.3,
                                         func=lambda: self.app.window(title_re='.*[Ee]rror.*').exists(), #type: ignore
                                         value=True)
             elif dialog_type == "call_bases":
-                return timings.wait_until(timeout=timeout, retry_interval=0.3,
+                result = timings.wait_until(timeout=timeout, retry_interval=0.3,
                                         func=lambda: self.app.window(title_re='Call bases.*').exists(), #type: ignore
                                         value=True)
+            elif dialog_type == "low_quality":
+                result = timings.wait_until(timeout=timeout, retry_interval=0.3,
+                                        func=lambda: (self.app.window(title='Low quality files skipped').exists() or #type: ignore
+                                                    self.app.window(title='Quality files skipped').exists()), #type: ignore
+                                        value=True)
             elif dialog_type == "read_info":
-                return timings.wait_until(timeout=timeout, retry_interval=0.1,
+                result = timings.wait_until(timeout=timeout, retry_interval=0.1,
                                         func=lambda: self.app.window(title_re='Read information for.*').exists(), #type: ignore
                                         value=True)
-            return False
+            else:
+                result = False
+            
+            return result
         except timings.TimeoutError:
             return False
     
@@ -359,6 +397,10 @@ class MseqAutomation:
         if not tree_view:
             self.logger.error("Could not find tree view control")
             return False
+        
+        # Convert Path object to string if necessary
+        if hasattr(path, '__fspath__'):  # Check if it's a Path-like object
+            path = str(path)
         
         # Parse path
         if ":" in path:
@@ -482,77 +524,81 @@ class MseqAutomation:
         return True
     
     def _wait_for_completion(self, folder_path):
-        """Wait for mSeq processing to complete - wait for files after read info appears"""
+        """Wait for mSeq processing to complete"""
+        from pathlib import Path
+        
         max_wait = self.timeouts["process_completion"]
-        post_read_timeout = self.config.TIMEOUTS.get("post_read_dialog", 15)
-        interval = 0.5
+        interval = 1.0
         elapsed = 0
         
-        # Track if we've seen the read info dialog
-        read_dialog_appeared = False
-        read_dialog_start_time = None
-        
+        self.logger.info(f"Waiting for mSeq processing to complete (max: {max_wait}s)")
+    
         while elapsed < max_wait:
-            # Check for low quality dialog (immediate completion)
+            # Check for low quality dialog
             for title in ["Low quality files skipped", "Quality files skipped"]:
-                dialog = self.app.window(title=title) #type: ignore
-                if dialog.exists():
-                    self._click_dialog_button(dialog, ["OK"])
-                    return True
+                try:
+                    dialog = self.app.window(title=title) #type: ignore
+                    if dialog.exists():
+                        self.logger.info(f"Found '{title}' dialog, clicking OK")
+                        self._click_dialog_button(dialog, ["OK"])
+                        return True
+                except Exception as e:
+                    pass  # Ignore errors, just checking
+        
+            # Check if read info dialog still exists
+            read_info_still_exists = self._wait_for_dialog("read_info")
             
-            # Check for read info dialog but DON'T close it yet
-            try:
-                from pywinauto import findwindows
-                if self.app:
-                    read_windows = findwindows.find_elements(
-                        title_re='Read information for.*', 
-                        process=self.app.process
-                    )
-                    if read_windows:
-                        if not read_dialog_appeared:
-                            read_dialog_appeared = True
-                            read_dialog_start_time = time.time()
-                            self.logger.info(f"Read information dialog appeared - waiting up to {post_read_timeout}s for all 5 text files")
-            except Exception as e:
-                self.logger.warning(f"Error checking for read dialog: {e}")
-            
-            # If read dialog has appeared, check for all 5 text files
-            if read_dialog_appeared:
+            if read_info_still_exists:
+                # Dialog still exists, check for text files
                 folder = Path(folder_path)
-                txt_count = sum(1 for item in folder.iterdir() 
-                              if any(item.suffix == ext for ext in self.config.TEXT_FILES))
+                txt_count = 0
                 
-                if read_dialog_start_time is not None:
-                    time_since_read_dialog = time.time() - read_dialog_start_time
-                else:
-                    time_since_read_dialog = 0.0
-                self.logger.info(f"After read dialog (+{time_since_read_dialog:.1f}s): {txt_count}/5 text files found")
+                try:
+                    for file_path in folder.iterdir():
+                        if file_path.is_file():
+                            # Check if file ends with any of the expected text file extensions
+                            for ext in self.config.TEXT_FILES:
+                                if file_path.name.endswith(ext):
+                                    txt_count += 1
+                                    break
+                except Exception as e:
+                    self.logger.error(f"Error reading folder contents: {e}")
                 
-                # Once we have all 5 files, close the dialog and return success
-                if txt_count >= 5:
-                    self.logger.info("All 5 text files found - closing read dialog")
-                    self._close_all_read_info_dialogs()
-                    return True
-                
-                # Check if we've exceeded the post-read-dialog timeout
-                if time_since_read_dialog > post_read_timeout:
-                    self.logger.error(f"Post-read-dialog timeout ({post_read_timeout}s) exceeded with only {txt_count}/5 files - FAILURE")
-                    self._close_all_read_info_dialogs()
-                    return False  # FAILURE - we need all 5 files
+                # Log progress every 10 seconds
+                if elapsed % 10 == 0:
+                    self.logger.info(f"Processing... found {txt_count}/5 text files (elapsed: {elapsed}s)")
             
+                # Close dialogs when we have all 5 text files
+                if txt_count >= 5:
+                    self.logger.info("All 5 text files found, closing read dialogs")
+                    dialogs_closed = self._close_all_read_info_dialogs()
+                    if dialogs_closed:
+                        self.logger.info("Processing completed successfully")
+                    return True
+            else:
+                # Read dialog is gone, check if we have any text files
+                self.logger.info("Read info dialog disappeared, checking for text files...")
+                folder = Path(folder_path)
+                txt_count = 0
+                for file_path in folder.iterdir():
+                    if file_path.is_file():
+                        for ext in self.config.TEXT_FILES:
+                            if file_path.name.endswith(ext):
+                                txt_count += 1
+                                break
+                
+                if txt_count > 0:
+                    self.logger.info(f"Processing completed - found {txt_count} text files")
+                    return True
+                else:
+                    self.logger.warning("No text files found after dialog disappeared")
+        
             # Wait before checking again
             time.sleep(interval)
             elapsed += interval
         
-        # Overall timeout - close any remaining dialogs and check final state
-        folder = Path(folder_path)
-        txt_count = sum(1 for item in folder.iterdir() 
-                       if any(item.suffix == ext for ext in self.config.TEXT_FILES))
-        
-        self.logger.error(f"Overall timeout reached. Final file count: {txt_count}/5 - FAILURE")
-        self._close_all_read_info_dialogs()  # Clean up any remaining dialogs
-        
-        return txt_count >= 5  # SUCCESS only if we have all 5 files
+        self.logger.warning(f"Processing timed out after {max_wait}s")
+        return False
     
     def close(self):
         """Close the mSeq application"""

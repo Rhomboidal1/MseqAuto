@@ -34,21 +34,21 @@ class MseqConfig:
         "H:": f"{USERNAME} (\\\\w2k16\\users) (H:)"  # Dynamic user mapping
     }
 
-    # Precompiled regex patterns
+    # Precompiled regex patterns for various file/folder name matching and extraction tasks
     REGEX_PATTERNS = {
-        'inumber': re.compile(r'bioi-(\d+)', re.IGNORECASE),
-        'pcr_number': re.compile(r'{pcr(\d+).+}', re.IGNORECASE),
-        'brace_content': re.compile(r'{.*?}'),
-        'bioi_folder': re.compile(r'^bioi-\d+$', re.IGNORECASE),
-        'order_number_extract': re.compile(r'_(\d+)$'),  # Extract order number from end of folder name
-        'raw_data_zip': re.compile(r'rd\d+\.zip$', re.IGNORECASE),  # Raw data zip files
-        'plate_folder': re.compile(r'^P\d+_.+$', re.IGNORECASE),  # For plate folders
-        'ind_blank_file': re.compile(r'{\d+[A-H]}.ab1$', re.IGNORECASE),  # Individual blanks pattern
-        'plate_blank_file': re.compile(r'^\d{2}[A-H]__.ab1$', re.IGNORECASE),  # Plate blanks pattern
-        'order_folder': re.compile(r'bioi-\d+_.+_\d+', re.IGNORECASE),  # For BioI order folders
-        'pcr_folder': re.compile(r'fb-pcr\d+(_\d+)?', re.IGNORECASE),     # For PCR folders
-        'reinject': re.compile(r'reinject', re.IGNORECASE),             # For filtering out reinject folders
-        'double_well': re.compile(r'^{\d+[A-Z]}{(\d+[A-Z])}')
+        'inumber': re.compile(r'bioi-(\d+)', re.IGNORECASE),  # Matches 'bioi-<number>' in a string, e.g., 'bioi-12345'
+        'pcr_number': re.compile(r'{pcr(\d+).+}', re.IGNORECASE),  # Matches '{pcr<number>...}' pattern, e.g., '{pcr1234...}'
+        'brace_content': re.compile(r'{.*?}'),  # Matches any content inside curly braces, non-greedy
+        'bioi_folder': re.compile(r'^bioi-\d+$', re.IGNORECASE),  # Matches folder names like 'bioi-12345'
+        'order_number_extract': re.compile(r'_(\d+)$'),  # Extracts order number at the end of a folder name, e.g., '_12345'
+        'raw_data_zip': re.compile(r'rd\d+\.zip$', re.IGNORECASE),  # Matches raw data zip files like 'rd123.zip'
+        'plate_folder': re.compile(r'^P\d+_.+$', re.IGNORECASE),  # Matches plate folder names like 'P1234_description'
+        'ind_blank_file': re.compile(r'{\d+[A-H]}.ab1$', re.IGNORECASE),  # Matches individual blank files like '{12A}.ab1'
+        'plate_blank_file': re.compile(r'^\d{2}[A-H]__.ab1$', re.IGNORECASE),  # Matches plate blank files like '12A__.ab1'
+        'order_folder': re.compile(r'bioi-\d+_.+_\d+', re.IGNORECASE),  # Matches BioI order folders like 'bioi-12345_description_6789'
+        'pcr_folder': re.compile(r'fb-pcr\d+(_\d+)?', re.IGNORECASE),  # Matches PCR folders like 'fb-pcr1234' or 'fb-pcr1234_5678'
+        'reinject': re.compile(r'reinject', re.IGNORECASE),  # Matches any folder or file containing 'reinject' (case-insensitive)
+        'double_well': re.compile(r'^{\d+[A-Z]}{(\d+[A-Z])}')  # Matches double well patterns like '{12A}{34B}'
     }
 
     # Timeouts for UI operations - extended for Windows 11

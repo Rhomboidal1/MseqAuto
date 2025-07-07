@@ -781,7 +781,7 @@ class FolderProcessor:
           self.log(f"Processing PCR folder: {Path(pcr_folder).name}")
 
           for file in Path(pcr_folder).iterdir():
-               if file.suffix == config.ABI_EXTENSION:
+               if file.suffix == self.config.ABI_EXTENSION:
                     file_path = str(file)
                     file_name = Path(file_path).name
                     
@@ -1174,8 +1174,11 @@ class FolderProcessor:
           """
           Check if file is in a Not Needed folder at any level of nesting
           """
+          # Ensure file_path is a string to avoid Path.replace() vs str.replace() confusion
+          file_path_str = str(file_path)
+          
           # Get the path components
-          path_parts = file_path.replace('\\', '/').split('/')
+          path_parts = file_path_str.replace('\\', '/').split('/')
           
           # Check if any directory in the path is an NN folder
           for part in path_parts:
@@ -1399,7 +1402,7 @@ class FolderProcessor:
           # Check for .ab1 files and braces
           for item in folder_contents:
                item_name = item.name if hasattr(item, "name") else str(item)
-               if item_name.endswith(config.ABI_EXTENSION):
+               if item_name.endswith(self.config.ABI_EXTENSION):
                     has_ab1_files = True
                     if '{' in item_name or '}' in item_name:
                          has_braces = True
