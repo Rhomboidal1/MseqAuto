@@ -1846,6 +1846,12 @@ class FolderProcessor:
           if not folder_path.exists():
                return True
                
+          # Check if this folder should be preserved
+          folder_name_lower = folder_path.name.lower()
+          if folder_name_lower.startswith('ind') or folder_name_lower.startswith('fb-pcr'):
+               self.log(f"Preserving protected folder: {folder_path.name}")
+               return False
+               
           # Get list of items in the folder
           try:
                items = list(folder_path.iterdir())

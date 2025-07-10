@@ -175,9 +175,10 @@ def main(provided_folder=None):
             # Skip folders with files that have braces - uncomment if needed
             # Plate orders typically don't get reinjects, but braces might indicate special handling
             # Note: Some customers might include braces in their sample names, which would be filtered unintentionally
-            # if has_braces:
-            #     print(f"Folder contains files with braces that may need cleaning: {os.path.basename(folder)}")
-            #     continue
+            if has_braces:
+                print(f"Folder contains files with braces that may need cleaning: {os.path.basename(folder)}")
+                print(f'Comment out lines 178-181 in {__file__} to skip this check')
+                continue
                 
             # Process the folder directly with ui_automation
             ui_automation.process_folder(folder)
