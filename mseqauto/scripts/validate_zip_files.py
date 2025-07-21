@@ -98,11 +98,25 @@ def main():
     # Create new workbook for this session's data
     new_workbook = excel_dao.create_workbook()
     new_worksheet = new_workbook.active
-    excel_dao.set_validation_headers(new_worksheet)
 
     # Get all order folders using FolderProcessor method
     order_folders = processor.get_order_folders_for_validation(data_folder)
     logger.info(f"Found {len(order_folders)} total order folders to check")
+
+    # Find FB-PCR zip files
+    fb_pcr_zips = file_dao.find_fb_pcr_zips(data_folder)
+    logger.info(f"Found {len(fb_pcr_zips)} FB-PCR zip files to process")
+    
+    # Set headers based on what data types we have
+    if len(order_folders) > 0 and len(fb_pcr_zips) > 0:
+        # Mixed data - use validation headers as primary, FB-PCR data will use available columns
+        excel_dao.set_validation_headers(new_worksheet)
+    elif len(fb_pcr_zips) > 0:
+        # Only FB-PCR data
+        excel_dao.set_fb_pcr_headers(new_worksheet)
+    else:
+        # Only validation data
+        excel_dao.set_validation_headers(new_worksheet)
 
     # Process each order folder
     order_count = 0
@@ -153,10 +167,32 @@ def main():
                 logger.info(f"Marking previous version of order {order_number} as resolved")
                 excel_dao.resolve_order_status(existing_worksheet, order_number)
 
+    # Process FB-PCR zip files
+    fb_pcr_count = 0
+    for zip_path, pcr_number, order_number, version in fb_pcr_zips:
+        logger.info(f"Processing FB-PCR zip: PCR-{pcr_number}, Order: {order_number}, Version: {version}")
+        
+        # Process FB-PCR zip to get file count
+        fb_pcr_result = processor.process_fb_pcr_zip(zip_path, pcr_number, order_number, version)
+        
+        if fb_pcr_result:
+            fb_pcr_count += 1
+            
+            # Determine if we're using mixed headers
+            mixed_headers = len(order_folders) > 0
+            
+            # Add FB-PCR results to new worksheet
+            new_row_count = excel_dao.add_fb_pcr_result(
+                new_worksheet, new_row_count, fb_pcr_result, zip_path, mixed_headers
+            )
+
+    # Update order count to include FB-PCR zips
+    total_processed = order_count + fb_pcr_count
+
     # Finalize and save results
-    if order_count > 0:
+    if total_processed > 0:
         excel_dao.finalize_workbook(new_worksheet, add_break_at_end=summary_exists)
-        logger.info(f"Processed {order_count} orders")
+        logger.info(f"Processed {order_count} orders and {fb_pcr_count} FB-PCR zips")
 
         if summary_exists:
             # Update existing summary
@@ -172,11 +208,14 @@ def main():
             print("Error: Could not save summary. Make sure the file is not open in Excel.")
             return
 
-    logger.info(f"Validation complete. Total orders processed: {order_count}")
-    if order_count > 0:
-        print(f"All done! {order_count} orders validated. Summary saved to {excel_filename}")
+    logger.info(f"Validation complete. Total orders processed: {order_count}, FB-PCR zips processed: {fb_pcr_count}")
+    if total_processed > 0:
+        if fb_pcr_count > 0:
+            print(f"All done! {order_count} orders and {fb_pcr_count} FB-PCR zips validated. Summary saved to {excel_filename}")
+        else:
+            print(f"All done! {order_count} orders validated. Summary saved to {excel_filename}")
     else:
-        print("All done! No new orders found to validate.")
+        print("All done! No new orders or FB-PCR zips found to validate.")
 
 
 if __name__ == "__main__":

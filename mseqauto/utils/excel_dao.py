@@ -75,6 +75,15 @@ class ExcelDAO:
             cell.font = Font(bold=True)
             cell.alignment = Alignment(horizontal='center')
 
+    def set_fb_pcr_headers(self, worksheet):
+        """Set headers for FB-PCR summary"""
+        headers = ['PCR Number', 'Order Number', 'Version', 'Zip Filename', 
+                   'Total Files', 'File Types', 'Zip Timestamp']
+        for i, header in enumerate(headers, 1):
+            cell = worksheet.cell(row=1, column=i, value=header)
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+
     def auto_adjust_columns(self, worksheet):
         """Adjust column widths based on content - matches original script logic"""
         for column in worksheet.columns:
@@ -217,6 +226,78 @@ class ExcelDAO:
         if is_completed:
             for i in range(order_row + 1, row_count):
                 worksheet.row_dimensions[i].hidden = True
+
+        return row_count
+
+    def add_fb_pcr_result(self, worksheet, row_count, fb_pcr_result, zip_path, mixed_headers=False):
+        """Add FB-PCR result to worksheet with individual file listing"""
+        order_row = row_count  # Store the main row for hiding purposes
+        
+        if mixed_headers:
+            # Use validation headers format for mixed data
+            # I Number, Order Number, Status, Zip Filename, Order Items, File Names, Match Status, Zip Timestamp
+            self.set_cell_value(worksheet, row_count, 1, f"PCR-{fb_pcr_result['pcr_number']}")  # I Number -> PCR Number
+            self.set_cell_value(worksheet, row_count, 2, fb_pcr_result['order_number'])        # Order Number
+            self.set_cell_value(worksheet, row_count, 3, "FB-PCR")                            # Status -> FB-PCR
+            self.set_cell_value(worksheet, row_count, 4, Path(zip_path).name)                 # Zip Filename
+            
+            # Show .ab1 file count prominently, with text file count as additional info
+            ab1_count = fb_pcr_result.get('ab1_count', 0)
+            txt_count = fb_pcr_result.get('txt_count', 0)
+            total_files = fb_pcr_result.get('total_files', 0)
+            self.set_cell_value(worksheet, row_count, 5, f".ab1 Files: {ab1_count}, Text Files: {txt_count}, Total: {total_files}")  # Order Items -> File counts
+            
+            # Format file types as a readable string for File Names column
+            file_types_str = ", ".join([f"{ext}: {count}" for ext, count in fb_pcr_result['file_types'].items()])
+            self.set_cell_value(worksheet, row_count, 6, file_types_str)                      # File Names -> File types
+            
+            self.set_cell_value(worksheet, row_count, 7, f"Version {fb_pcr_result['version']}")  # Match Status -> Version
+            self.set_cell_value(worksheet, row_count, 8, str(int(Path(zip_path).stat().st_mtime)))  # Zip Timestamp
+            
+            # Apply styling for FB-PCR entries
+            self.apply_style(worksheet, f'C{row_count}', 'success')
+        else:
+            # Use FB-PCR specific headers format
+            # PCR Number, Order Number, Version, Zip Filename, Total Files, File Types, Zip Timestamp
+            self.set_cell_value(worksheet, row_count, 1, fb_pcr_result['pcr_number'])
+            self.set_cell_value(worksheet, row_count, 2, fb_pcr_result['order_number'])
+            self.set_cell_value(worksheet, row_count, 3, fb_pcr_result['version'])
+            self.set_cell_value(worksheet, row_count, 4, Path(zip_path).name)
+            
+            # Show .ab1 file count prominently in the Total Files column
+            ab1_count = fb_pcr_result.get('ab1_count', 0)
+            txt_count = fb_pcr_result.get('txt_count', 0)
+            total_files = fb_pcr_result.get('total_files', 0)
+            self.set_cell_value(worksheet, row_count, 5, f".ab1: {ab1_count}, Text: {txt_count}, Total: {total_files}")
+            
+            # Format file types as a readable string
+            file_types_str = ", ".join([f"{ext}: {count}" for ext, count in fb_pcr_result['file_types'].items()])
+            self.set_cell_value(worksheet, row_count, 6, file_types_str)
+            
+            self.set_cell_value(worksheet, row_count, 7, str(int(Path(zip_path).stat().st_mtime)))
+
+        row_count += 1
+
+        # Add individual file names for verification (similar to validation results)
+        # Sort files so .ab1 files appear first, then text files
+        file_names = fb_pcr_result.get('file_names', [])
+        ab1_files = [f for f in file_names if f.lower().endswith('.ab1')]
+        text_files = [f for f in file_names if not f.lower().endswith('.ab1')]
+        sorted_files = ab1_files + text_files
+        
+        for file_name in sorted_files:
+            if mixed_headers:
+                # Use columns 5 and 6 for file details in mixed format
+                self.set_cell_value(worksheet, row_count, 5, "")  # Empty order items column
+                self.set_cell_value(worksheet, row_count, 6, file_name)  # File name in file names column
+            else:
+                # Use available columns for FB-PCR format - put in file types column for now
+                self.set_cell_value(worksheet, row_count, 6, file_name)
+            row_count += 1
+
+        # Hide the individual file name rows (keeping only the summary row visible)
+        for i in range(order_row + 1, row_count):
+            worksheet.row_dimensions[i].hidden = True
 
         return row_count
 

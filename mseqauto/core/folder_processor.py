@@ -1830,6 +1830,65 @@ class FolderProcessor:
           except Exception as e:
                self.log(f"Error validating zip file {zip_path}: {e}")
                return None
+
+     def process_fb_pcr_zip(self, zip_path, pcr_number, order_number, version):
+          """
+          Process FB-PCR zip file to count the total number of files
+          
+          Args:
+               zip_path (str): Path to the FB-PCR zip file
+               pcr_number (str): PCR number extracted from filename
+               order_number (str): Order number extracted from filename  
+               version (str): Version number (e.g., '1', '2', etc.)
+               
+          Returns:
+               dict: Results with file count and other metadata
+          """
+          import zipfile
+          
+          # Results to return
+          fb_pcr_result = {
+               'pcr_number': pcr_number,
+               'order_number': order_number,
+               'version': version,
+               'total_files': 0,
+               'ab1_count': 0,
+               'txt_count': 0,
+               'file_types': {},
+               'file_names': [],
+               'zip_name': Path(zip_path).name
+          }
+          
+          try:
+               # Get all files from zip
+               with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_contents = zip_ref.namelist()
+               
+               fb_pcr_result['total_files'] = len(zip_contents)
+               fb_pcr_result['file_names'] = zip_contents.copy()
+               
+               # Count files by extension for detailed breakdown
+               for file_name in zip_contents:
+                    ext = Path(file_name).suffix.lower()
+                    if ext:
+                         fb_pcr_result['file_types'][ext] = fb_pcr_result['file_types'].get(ext, 0) + 1
+                         # Count .ab1 files specifically
+                         if ext == '.ab1':
+                              fb_pcr_result['ab1_count'] += 1
+                         # Count text files
+                         elif ext == '.txt':
+                              fb_pcr_result['txt_count'] += 1
+                    else:
+                         fb_pcr_result['file_types']['(no extension)'] = fb_pcr_result['file_types'].get('(no extension)', 0) + 1
+               
+               self.log(f"FB-PCR zip processed: {fb_pcr_result['zip_name']} - {fb_pcr_result['total_files']} files total, {fb_pcr_result['ab1_count']} .ab1 files")
+               self.log(f"File types: {fb_pcr_result['file_types']}")
+               
+               return fb_pcr_result
+               
+          except Exception as e:
+               self.log(f"Error processing FB-PCR zip file {zip_path}: {e}")
+               return None
           
      def _try_delete_if_empty(self, folder_path, depth=0):
           """

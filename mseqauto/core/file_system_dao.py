@@ -50,6 +50,7 @@ class FileSystemDAO:
             'ind_blank_file': re.compile(r'{\d+[A-H]}.ab1$', re.IGNORECASE),  # Individual blanks pattern
             'plate_blank_file': re.compile(r'^\d{2}[A-H]__.ab1$', re.IGNORECASE),  # Plate blanks pattern
             'plate_well_prefix': re.compile(r'^\d{2}[a-z]_(.+)$', re.IGNORECASE),  # NEW: Plate well position pattern
+            'fb_pcr_zip': re.compile(r'^FB-PCR\d+_\d+(?:_\d+)?\.zip$', re.IGNORECASE),  # FB-PCR zip pattern
             # Add other patterns as needed
         }
         
@@ -502,6 +503,84 @@ class FileSystemDAO:
                             self.warning(f"Failed to copy zip to dump: {e}")
         
         return copied_count
+
+    def find_fb_pcr_zips(self, folder_path):
+        """
+        Find FB-PCR zip files matching the pattern FB-PCR####_###### or FB-PCR####_######_#
+        Searches in multiple locations:
+        1. Top-level folder (level 0)
+        2. Immediate subfolders (level 1) - where FB-PCR zips typically are
+        3. Zip dump folder if it exists
+        
+        Args:
+            folder_path (str): Path to the folder to search for FB-PCR zip files
+            
+        Returns:
+            list: List of tuples (zip_path, pcr_number, order_number, version) for matching FB-PCR zip files
+        """
+        folder_path_obj = Path(folder_path)
+        fb_pcr_zips = []
+        
+        if not folder_path_obj.exists():
+            return fb_pcr_zips
+        
+        def _scan_single_folder(search_folder):
+            """Helper: scan one folder for FB-PCR zips"""
+            local_zips = []
+            if not search_folder.exists():
+                return local_zips
+                
+            for item in self.get_directory_contents(search_folder):
+                if item.name.endswith('.zip'):
+                    # Check if it matches the FB-PCR pattern
+                    match = self.regex_patterns['fb_pcr_zip'].match(item.name)
+                    if match:
+                        full_path = str(search_folder / item.name)
+                        
+                        # Extract PCR number and order number from filename
+                        # Pattern: FB-PCR3048_149727.zip or FB-PCR3048_149727_2.zip
+                        name_without_ext = item.name[:-4]  # Remove .zip
+                        parts = name_without_ext.split('_')
+                        
+                        if len(parts) >= 2:
+                            pcr_part = parts[0]  # FB-PCR3048
+                            order_number = parts[1]  # 149727
+                            version = parts[2] if len(parts) > 2 else '1'  # 2 or default to 1
+                            
+                            # Extract PCR number from FB-PCR3048
+                            pcr_number = pcr_part[6:]  # Remove "FB-PCR" prefix
+                            
+                            local_zips.append((full_path, pcr_number, order_number, version))
+                            self.log(f"Found FB-PCR zip: {item.name} in {search_folder} (PCR: {pcr_number}, Order: {order_number}, Version: {version})")
+            return local_zips
+        
+        # 1. Check top-level folder (level 0)
+        fb_pcr_zips.extend(_scan_single_folder(folder_path_obj))
+        
+        # 2. Check immediate subfolders (level 1) - where FB-PCR zips typically are
+        for item in self.get_directory_contents(folder_path):
+            if item.is_dir():
+                subfolder_path = folder_path_obj / item.name
+                fb_pcr_zips.extend(_scan_single_folder(subfolder_path))
+        
+        # 3. Check zip dump folder specifically if it exists
+        zip_dump_folder = folder_path_obj / self.config.ZIP_DUMP_FOLDER
+        if zip_dump_folder.exists():
+            fb_pcr_zips.extend(_scan_single_folder(zip_dump_folder))
+        
+        # Remove duplicates (in case same file found in multiple locations)
+        seen_files = set()
+        unique_fb_pcr_zips = []
+        for zip_info in fb_pcr_zips:
+            zip_path = zip_info[0]
+            file_name = Path(zip_path).name
+            if file_name not in seen_files:
+                seen_files.add(file_name)
+                unique_fb_pcr_zips.append(zip_info)
+            else:
+                self.log(f"Skipping duplicate FB-PCR zip: {file_name}")
+        
+        return unique_fb_pcr_zips
 
     
     def get_pcr_number(self, filename):
