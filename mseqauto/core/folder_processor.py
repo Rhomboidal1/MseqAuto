@@ -620,7 +620,7 @@ class FolderProcessor:
           return count
 
      def process_bio_folder(self, bio_folder):
-          """Process a BioI folder containing multiple order folders"""
+          """Process an individual I number plate folder - BioI folder containing multiple order folders"""
           folder_name = Path(bio_folder).name
           self.log(f"Processing BioI folder: {folder_name}")
           
@@ -638,17 +638,29 @@ class FolderProcessor:
           folder_name = Path(order_folder).name
           self.log(f"Processing order folder: {folder_name}")
           
+          # Check for special case: re-sequenced requests (folders ending with underscore and single digit)
+          # These represent secondary uploads, additional requests, etc.
+          import re
+          is_resequenced = bool(re.search(r'_\d$', folder_name))
+          
           # Determine if we're in IND Not Ready context
           in_not_ready = Path(order_folder).parent.name == self.config.IND_NOT_READY_FOLDER
           
           # Get order information
           order_number = self.get_order_number_from_folder_name(order_folder)
           ab1_files = self.file_dao.get_files_by_extension(order_folder, self.config.ABI_EXTENSION)
-          expected_count = self._get_expected_file_count(order_number)
           is_andreev_order = self.config.ANDREEV_NAME in folder_name.lower()
           
           # Check order completeness
-          files_complete = expected_count > 0 and len(ab1_files) == expected_count
+          if is_resequenced:
+               # For re-sequenced requests, bypass normal file count checking
+               # These are often partial uploads with only a few reactions
+               files_complete = len(ab1_files) > 0  # Just need to have some files
+               self.log(f"Re-sequenced request detected: {folder_name}, bypassing file count validation")
+          else:
+               # Normal file count validation
+               expected_count = self._get_expected_file_count(order_number)
+               files_complete = expected_count > 0 and len(ab1_files) == expected_count
           
           # Check order status
           was_mseqed, has_braces, has_ab1_files = self.check_order_status(order_folder)
@@ -664,7 +676,7 @@ class FolderProcessor:
                          # IMPORTANT: Close mSeq to release file handles before moving
                          if self.ui_automation:
                               self.ui_automation.close()
-                              time.sleep(0.5)  # Wait for handles to be released
+                              time.sleep(0.3)  # Wait for handles to be released
                     
                     # If in IND Not Ready, move back to appropriate location
                     if in_not_ready:
@@ -712,7 +724,7 @@ class FolderProcessor:
                # Close mSeq to release file handles before moving
                if self.ui_automation:
                     self.ui_automation.close()
-                    time.sleep(0.5)  # Wait for handles to be released
+                    time.sleep(0.3)  # Wait for handles to be released
                     
                # Get parent BioI folder path
                bioi_folder = self.get_destination_for_order(order_folder, parent_folder)
@@ -1888,6 +1900,68 @@ class FolderProcessor:
                
           except Exception as e:
                self.log(f"Error processing FB-PCR zip file {zip_path}: {e}")
+               return None
+
+     def process_plate_zip(self, zip_path, plate_number, description):
+          """
+          Process plate folder zip file to count the total number of files
+          
+          Args:
+               zip_path (str): Path to the plate folder zip file
+               plate_number (str): Plate number extracted from filename
+               description (str): Description extracted from filename
+               
+          Returns:
+               dict: Results with file count and other metadata
+          """
+          import zipfile
+          
+          # Results to return
+          plate_result = {
+               'plate_number': plate_number,
+               'description': description,
+               'total_files': 0,
+               'ab1_count': 0,
+               'fsa_count': 0,
+               'txt_count': 0,
+               'file_types': {},
+               'file_names': [],
+               'zip_name': Path(zip_path).name
+          }
+          
+          try:
+               # Get all files from zip
+               with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_contents = zip_ref.namelist()
+               
+               plate_result['total_files'] = len(zip_contents)
+               plate_result['file_names'] = zip_contents.copy()
+               
+               # Count files by extension for detailed breakdown
+               for file_name in zip_contents:
+                    ext = Path(file_name).suffix.lower()
+                    if ext:
+                         plate_result['file_types'][ext] = plate_result['file_types'].get(ext, 0) + 1
+                         # Count .ab1 files specifically
+                         if ext == '.ab1':
+                              plate_result['ab1_count'] += 1
+                         # Count .fsa files specifically
+                         elif ext == '.fsa':
+                              plate_result['fsa_count'] += 1
+                         # Count text files
+                         elif ext == '.txt':
+                              plate_result['txt_count'] += 1
+                    else:
+                         # Files without extension
+                         plate_result['file_types']['(no extension)'] = plate_result['file_types'].get('(no extension)', 0) + 1
+               
+               self.log(f"Plate zip processed: {plate_result['zip_name']} - {plate_result['total_files']} files total, {plate_result['ab1_count']} .ab1 files, {plate_result['fsa_count']} .fsa files")
+               self.log(f"File types: {plate_result['file_types']}")
+               
+               return plate_result
+               
+          except Exception as e:
+               self.log(f"Error processing plate zip file {zip_path}: {e}")
                return None
           
      def _try_delete_if_empty(self, folder_path, depth=0):
