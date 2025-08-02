@@ -16,7 +16,7 @@ class FileSystemDAO:
     def __init__(self, config, logger=None):
         self.config = config
         self.directory_cache = {}
-        
+
         # Create a unified logging interface with support for different levels
         import logging
         if logger is None:
@@ -54,12 +54,12 @@ class FileSystemDAO:
             'plate_folder': re.compile(r'^P\d{5}_.*')  # Plate folder pattern P12345_Anythinghere
             # Add other patterns as needed
         }
-        
+
     # Directory Operations
     def get_directory_contents(self, path, refresh=False):
         """Get directory contents with caching"""
         path = Path(path)  # Convert to Path object
-        
+
         if path not in self.directory_cache or refresh:
             if not path.exists():  # Remove duplicate parameter
                 self.directory_cache[path] = []
@@ -75,18 +75,18 @@ class FileSystemDAO:
     def get_folders(self, path, pattern=None): #KEEP
         """
         Get folders matching an optional regex pattern
-        
+
         Args:
             path (str): Path to search for folders
             pattern (str or re.Pattern): A regex pattern string or a compiled regex object
-            
+
         Returns:
             list: List of folder paths matching the pattern
         """
         folder_list = []
         self.log(f"Searching for folders in: {path}")
 
-    
+
         # If pattern is a compiled regex, print its pattern attribute
         if hasattr(pattern, 'pattern'):
             print(f"Regex pattern string: {pattern.pattern}") #type: ignore
@@ -94,7 +94,7 @@ class FileSystemDAO:
 
         contents = self.get_directory_contents(path)
         self.log(f"Found {len(contents)} items in directory")
-        
+
         for item in contents:
             full_path = Path(path) / item
 
@@ -110,24 +110,24 @@ class FileSystemDAO:
                     else:  # String pattern
                         match = re.search(pattern, item.name.lower())
                         match_method = "using re.search"
-                    
+
                     if match:
                         folder_list.append(full_path)
                     else:
                         self.log(f"  No match for {item}")  # Changed from print to self.log
-        
+
         self.log(f"Returning {len(folder_list)} matching folders: {[f.name for f in folder_list]}")  # Changed from print to self.log
         return folder_list
 
     def get_files_by_extension(self, folder_path_str, extension, recursive=False):
         """
         Get all files with a specific extension in a folder
-        
+
         Args:
             folder_path_str (str): Path to the folder
             extension (str): File extension to look for (e.g., '.ab1')
             recursive (bool): Whether to search recursively in subfolders
-            
+
         Returns:
             list: List of file paths with the specified extension
         """
@@ -142,8 +142,8 @@ class FileSystemDAO:
         else:
             # Just search in the current folder
             try:
-                return [str(f) for f in folder_path.iterdir() 
-                    if f.is_file() and 
+                return [str(f) for f in folder_path.iterdir()
+                    if f.is_file() and
                     f.name.lower().endswith(extension.lower())]
             except Exception as e:
                 self.log(f"Error getting files by extension {extension} in {folder_path_str}: {e}")
@@ -162,30 +162,30 @@ class FileSystemDAO:
         if not path.exists():
             path.mkdir()
         return str(path)
-    
+
     def move_folder(self, source, destination, max_retries=3, delay=0.1):
         """
         Move folder with proper error handling and retries
-        
+
         Args:
             source: Source folder path
             destination: Destination folder path
             max_retries: Maximum number of retries (default 3)
             delay: Delay between retries in seconds (default 0.1)
-            
+
         Returns:
             bool: True if successful, False otherwise
         """
         import time
         import shutil
         from pathlib import Path
-        
+
         source_path = Path(source)
         destination_path = Path(destination)
-        
+
         # Ensure the parent directory exists
         destination_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Simple move operation with retries
         for retry in range(max_retries):
             try:
@@ -193,7 +193,7 @@ class FileSystemDAO:
                 shutil.move(str(source_path), str(destination_path))
                 self.log(f"Successfully moved {source_path.name} to {destination_path}")
                 return True
-                
+
             except Exception as e:
                 self.warning(f"Retry {retry+1}/{max_retries}: Error moving folder: {e}")
                 if retry < max_retries - 1:
@@ -201,26 +201,26 @@ class FileSystemDAO:
                 else:
                     self.error(f"Failed to move folder after {max_retries} attempts: {e}")
                     return False
-        
+
         return False
 
     def get_folder_name(self, path_str): #Rename to get_basename and move to path_utilities.py
         """Get the folder name from a path"""
         return Path(path_str).name
 
-    def get_parent_folder(self, path_str): 
+    def get_parent_folder(self, path_str):
         #Rename to get_dirname and move to path_utilities.py
         """Get the parent folder path"""
         return str(Path(path_str).parent)
 
-    def join_paths(self, base_path_str, *args): 
+    def join_paths(self, base_path_str, *args):
         #Move to path_utilities.py
         """Join path components"""
         return str(Path(base_path_str, *args))
-    
+
     #################### Data Loading ####################
 
-    def load_order_key(self, key_file_path): 
+    def load_order_key(self, key_file_path):
         #Keep
         """Load the order key file"""
         try:
@@ -229,18 +229,18 @@ class FileSystemDAO:
         except Exception as e:
             print(f"Error loading order key file: {e}")
             return None
-        
+
     #################### File Existence Checks ####################
-    def file_exists(self, path_str): 
+    def file_exists(self, path_str):
         #KEEP
         """Check if a file exists"""
         return Path(path_str).is_file()
 
-    def folder_exists(self, path_str): 
+    def folder_exists(self, path_str):
         #KEEP
         """Check if a folder exists"""
         return Path(path_str).is_dir()
-    
+
     #################### File Statistics ####################
     def count_files_by_extensions(self, folder, extensions):
         """Count files with specific extensions in a folder"""
@@ -262,12 +262,12 @@ class FileSystemDAO:
         """Get the last modification time of a folder"""
         return Path(folder).stat().st_mtime
 
-    def clean_braces_format(self, file_name): 
+    def clean_braces_format(self, file_name):
         #Move to path_utilities.py
         """Remove anything contained in {} from filename"""
         return re.sub(r'{.*?}', '', self.neutralize_suffixes(file_name))
 
-    def adjust_abi_chars(self, file_name): 
+    def adjust_abi_chars(self, file_name):
         #move to path_utilities.py
         """Adjust characters in file name to match ABI naming conventions"""
         # Create translation table
@@ -343,7 +343,7 @@ class FileSystemDAO:
             file_name_str = file_name.name
         else:
             file_name_str = str(file_name)
-            
+
         if extension and file_name_str.endswith(extension):
             return file_name_str[:-len(extension)]
         return Path(file_name_str).stem
@@ -402,75 +402,75 @@ class FileSystemDAO:
     def find_recent_zips(self, folder_path, max_age_minutes=15):
         """
         Finds recently created or modified zip files within a specified folder.
-        
+
         Args:
             folder_path (str): The path to the folder to search for zip files.
             max_age_minutes (int): The maximum age in minutes for a zip file to be considered recent.
-            
+
         Returns:
             list: A list of Path objects representing the paths to recently created zip files.
         """
         from datetime import datetime, timedelta
-        
+
         folder_path_obj = Path(folder_path)
         self.log(f"Checking for recently created zip files in {folder_path_obj.name}")
-        
+
         # Calculate the cutoff time for determining recent files
         now = datetime.now()
         cutoff_time = now - timedelta(minutes=max_age_minutes)
         recent_zips = []
-        
+
         # Ensure the folder exists before proceeding
         if not folder_path_obj.exists():
             return recent_zips
-        
+
         # Iterate through items in the specified folder
         for item in self.get_directory_contents(folder_path):
             # Check if the item is a zip file based on the configured extension
             if item.name.endswith(self.config.ZIP_EXTENSION):
                 zip_path_obj = folder_path_obj / item
-                
+
                 # Skip if the item is not a file
                 if not zip_path_obj.is_file():
                     continue
-                    
+
                 # Get the modification time of the zip file
                 modified_time = datetime.fromtimestamp(zip_path_obj.stat().st_mtime)
-                
+
                 # Check if the file's modification time is within the specified age limit
                 if modified_time >= cutoff_time:
                     recent_zips.append(zip_path_obj)
                     self.debug(f"Found recent zip: {item}")
-        
+
         return recent_zips
 
 
     def copy_recent_zips_to_dump(self, folder_list, zip_dump_folder, max_age_minutes=15):
         """
         Copies recently created zip files found in specified folders to a designated dump folder.
-        
+
         Args:
             folder_list (list): A list of folder paths to check for zip files.
             zip_dump_folder (str): The path to the target folder where recent zip files will be copied.
             max_age_minutes (int): The maximum age in minutes for a zip file to be considered recent.
-            
+
         Returns:
             int: The number of zip files successfully copied to the dump folder.
         """
         self.log(f"Checking for recently created zip files (within {max_age_minutes} minutes)")
-        
+
         zip_dump_folder_obj = Path(zip_dump_folder)
-        
+
         # Create the zip dump folder if it does not already exist
         if not zip_dump_folder_obj.exists():
             zip_dump_folder_obj.mkdir()
-        
+
         copied_count = 0
-        
+
         # Process each folder in the provided list
         for parent_folder in folder_list:
             parent_folder_obj = Path(parent_folder)
-            
+
             # Special handling for folders starting with "bioi-" (assuming they contain order subfolders)
             if parent_folder_obj.name.lower().startswith("bioi-"):
                 # Iterate through subfolders within the BioI folder
@@ -479,7 +479,7 @@ class FileSystemDAO:
                     if order_path_obj.is_dir():
                         # Find recent zip files within this order subfolder
                         recent_zips = self.find_recent_zips(order_path_obj, max_age_minutes)
-                        
+
                         # Copy each found recent zip file to the dump folder if it doesn't already exist
                         for zip_path in recent_zips:
                             dump_path_obj = zip_dump_folder_obj / zip_path.name
@@ -492,7 +492,7 @@ class FileSystemDAO:
             else:
                 # For other folders (e.g., PCR), find recent zip files directly
                 recent_zips = self.find_recent_zips(parent_folder_obj, max_age_minutes)
-                
+
                 # Copy each found recent zip file to the dump folder if it doesn't already exist
                 for zip_path in recent_zips:
                     dump_path_obj = zip_dump_folder_obj / zip_path.name
@@ -502,7 +502,7 @@ class FileSystemDAO:
                             copied_count += 1
                         except Exception as e:
                             self.warning(f"Failed to copy zip to dump: {e}")
-        
+
         return copied_count
 
     def find_fb_pcr_zips(self, folder_path):
@@ -512,63 +512,63 @@ class FileSystemDAO:
         1. Top-level folder (level 0)
         2. Immediate subfolders (level 1) - where FB-PCR zips typically are
         3. Zip dump folder if it exists
-        
+
         Args:
             folder_path (str): Path to the folder to search for FB-PCR zip files
-            
+
         Returns:
             list: List of tuples (zip_path, pcr_number, order_number, version) for matching FB-PCR zip files
         """
         folder_path_obj = Path(folder_path)
         fb_pcr_zips = []
-        
+
         if not folder_path_obj.exists():
             return fb_pcr_zips
-        
+
         def _scan_single_folder(search_folder):
             """Helper: scan one folder for FB-PCR zips"""
             local_zips = []
             if not search_folder.exists():
                 return local_zips
-                
+
             for item in self.get_directory_contents(search_folder):
                 if item.name.endswith('.zip'):
                     # Check if it matches the FB-PCR pattern
                     match = self.regex_patterns['fb_pcr_zip'].match(item.name)
                     if match:
                         full_path = str(search_folder / item.name)
-                        
+
                         # Extract PCR number and order number from filename
                         # Pattern: FB-PCR3048_149727.zip or FB-PCR3048_149727_2.zip
                         name_without_ext = item.name[:-4]  # Remove .zip
                         parts = name_without_ext.split('_')
-                        
+
                         if len(parts) >= 2:
                             pcr_part = parts[0]  # FB-PCR3048
                             order_number = parts[1]  # 149727
                             version = parts[2] if len(parts) > 2 else '1'  # 2 or default to 1
-                            
+
                             # Extract PCR number from FB-PCR3048
                             pcr_number = pcr_part[6:]  # Remove "FB-PCR" prefix
-                            
+
                             local_zips.append((full_path, pcr_number, order_number, version))
                             self.log(f"Found FB-PCR zip: {item.name} in {search_folder} (PCR: {pcr_number}, Order: {order_number}, Version: {version})")
             return local_zips
-        
+
         # 1. Check top-level folder (level 0)
         fb_pcr_zips.extend(_scan_single_folder(folder_path_obj))
-        
+
         # 2. Check immediate subfolders (level 1) - where FB-PCR zips typically are
         for item in self.get_directory_contents(folder_path):
             if item.is_dir():
                 subfolder_path = folder_path_obj / item.name
                 fb_pcr_zips.extend(_scan_single_folder(subfolder_path))
-        
+
         # 3. Check zip dump folder specifically if it exists
         zip_dump_folder = folder_path_obj / self.config.ZIP_DUMP_FOLDER
         if zip_dump_folder.exists():
             fb_pcr_zips.extend(_scan_single_folder(zip_dump_folder))
-        
+
         # Remove duplicates (in case same file found in multiple locations)
         seen_files = set()
         unique_fb_pcr_zips = []
@@ -580,7 +580,7 @@ class FileSystemDAO:
                 unique_fb_pcr_zips.append(zip_info)
             else:
                 self.log(f"Skipping duplicate FB-PCR zip: {file_name}")
-        
+
         return unique_fb_pcr_zips
 
     def find_plate_folder_zips(self, folder_path):
@@ -590,25 +590,25 @@ class FileSystemDAO:
         1. Top-level folder (level 0)
         2. Immediate subfolders (level 1) - where plate zips typically are
         3. Zip dump folder if it exists
-        
+
         Args:
             folder_path (str): Path to the folder to search for plate folder zip files
-            
+
         Returns:
             list: List of tuples (zip_path, plate_number, description) for matching plate folder zip files
         """
         folder_path_obj = Path(folder_path)
         plate_zips = []
-        
+
         if not folder_path_obj.exists():
             return plate_zips
-        
+
         def _scan_single_folder(search_folder):
             """Helper: scan one folder for plate folder zips"""
             local_zips = []
             if not search_folder.exists():
                 return local_zips
-                
+
             for item in self.get_directory_contents(search_folder):
                 if item.name.endswith('.zip'):
                     # Check if it matches the plate folder pattern (but for zip files)
@@ -616,15 +616,15 @@ class FileSystemDAO:
                     name_without_ext = item.name[:-4]  # Remove .zip
                     if self.regex_patterns['plate_folder'].match(name_without_ext):
                         full_path = str(search_folder / item.name)
-                        
+
                         # Extract plate number and description from filename
                         # Pattern: P12345_description.zip
                         parts = name_without_ext.split('_', 1)  # Split on first underscore only
-                        
+
                         if len(parts) >= 2:
                             plate_number = parts[0][1:]  # Remove "P" prefix (P12345 -> 12345)
                             description = parts[1]  # Everything after first underscore
-                            
+
                             local_zips.append((full_path, plate_number, description))
                             self.log(f"Found plate folder zip: {item.name} in {search_folder} (Plate: {plate_number}, Description: {description})")
                         else:
@@ -634,21 +634,21 @@ class FileSystemDAO:
                             local_zips.append((full_path, plate_number, description))
                             self.log(f"Found plate folder zip: {item.name} in {search_folder} (Plate: {plate_number}, No description)")
             return local_zips
-        
+
         # 1. Check top-level folder (level 0)
         plate_zips.extend(_scan_single_folder(folder_path_obj))
-        
+
         # 2. Check immediate subfolders (level 1) - where plate zips typically are
         for item in self.get_directory_contents(folder_path):
             if item.is_dir():
                 subfolder_path = folder_path_obj / item.name
                 plate_zips.extend(_scan_single_folder(subfolder_path))
-        
+
         # 3. Check zip dump folder specifically if it exists
         zip_dump_folder = folder_path_obj / self.config.ZIP_DUMP_FOLDER
         if zip_dump_folder.exists():
             plate_zips.extend(_scan_single_folder(zip_dump_folder))
-        
+
         # Remove duplicates (in case same file found in multiple locations)
         seen_files = set()
         unique_plate_zips = []
@@ -660,10 +660,10 @@ class FileSystemDAO:
                 unique_plate_zips.append(zip_info)
             else:
                 self.log(f"Skipping duplicate plate folder zip: {file_name}")
-        
+
         return unique_plate_zips
 
-    
+
     def get_pcr_number(self, filename):
         #Move to path_utilities.py-done
         """Extract PCR number from file name"""
@@ -680,15 +680,15 @@ class FileSystemDAO:
         clean_name = self.clean_braces_format(file_name)
         clean_name = self.remove_extension(clean_name)
         clean_name_lower = clean_name.lower()
-        
+
         # Check each control pattern
         for control in control_list:
             control_lower = control.lower()
-            
+
             # Direct match (for individual sequencing controls)
             if clean_name_lower == control_lower:
                 return True
-                
+
             # For plate controls: check if filename matches pattern [2digits][letter]_[control_name]
             # Example: "12a_pgem_m13f-20" should match "pgem_m13f-20"
             well_match = self.regex_patterns['plate_well_prefix'].match(clean_name_lower)
@@ -697,7 +697,7 @@ class FileSystemDAO:
                 name_after_well = well_match.group(1)
                 if name_after_well == control_lower:
                     return True
-        
+
         return False
 
     def is_blank_file(self, file_name):
@@ -716,7 +716,7 @@ class FileSystemDAO:
             return True
 
         return False
-    
+
     #################### Advanced Directory Operations ####################
     def get_inumber_from_name(self, name):
         """Extract I number from a name using precompiled regex"""
@@ -724,7 +724,7 @@ class FileSystemDAO:
         if match:
             return match.group(1)  # Return just the number
         return None
-    
+
     def get_recent_files(self, paths, days=None, hours=None):
         #Keep
         """Get list of files modified within specified time period"""
@@ -759,12 +759,12 @@ class FileSystemDAO:
 
         # Return just the file names
         return [file_info[0] for file_info in sorted_files]
-    
-    def collect_active_inumbers(self, paths, days=5, hours=12, min_inum=None, 
+
+    def collect_active_inumbers(self, paths, days=5, hours=12, min_inum=None,
                                 return_most_recent=False, return_files=False):
         """
         Comprehensive method to collect active I-numbers with various filtering options
-        
+
         Args:
             paths (list): List of paths to search for files
             days (int, optional): Include files modified in the last N days (default: 5)
@@ -772,12 +772,12 @@ class FileSystemDAO:
             min_inum (str, optional): Only include I-numbers greater than this value
             return_most_recent (bool): If True, return only the most recent I-number
             return_files (bool): If True, return the files instead of just I-numbers
-        
+
         Returns:
             list: Deduplicated list of I-numbers or files meeting criteria
         """
         collected_items = {}  # Use dict to track inums and their source files
-        
+
         # Get files from the past N days
         if days:
             day_files = self.get_recent_files(paths, days=days)
@@ -787,7 +787,7 @@ class FileSystemDAO:
                     if inum not in collected_items:
                         collected_items[inum] = []
                     collected_items[inum].append(file)
-        
+
         # Get files from the past N hours
         if hours:
             hour_files = self.get_recent_files(paths, hours=hours)
@@ -797,7 +797,7 @@ class FileSystemDAO:
                     if inum not in collected_items:
                         collected_items[inum] = []
                     collected_items[inum].append(file)
-        
+
         # Handle return options
         if return_most_recent and collected_items:
             # Find most recent I-number (highest number assuming sequential assignment)
@@ -805,14 +805,14 @@ class FileSystemDAO:
             if return_files:
                 return collected_items[most_recent]
             return [most_recent]
-        
+
         if return_files:
             # Flatten the file list
             all_files = []
             for files in collected_items.values():
                 all_files.extend(files)
             return all_files
-        
+
         # Return just the I-numbers
         return list(collected_items.keys())
 
@@ -822,15 +822,15 @@ class FileSystemDAO:
             folders = self.get_directory_contents(path)
             if not folders:
                 return None
-                
+
             # Sort folders by modification time (newest first)
             path_obj = Path(path)
             sorted_folders = sorted(
                 [f for f in folders if (path_obj / f).is_dir()],
-                key=lambda f: (path_obj / f).stat().st_mtime, 
+                key=lambda f: (path_obj / f).stat().st_mtime,
                 reverse=True
             )
-            
+
             # Extract I number from the most recent folder
             if sorted_folders:
                 return self.get_inumber_from_name(sorted_folders[0])
@@ -842,40 +842,40 @@ class FileSystemDAO:
     def get_folders_with_inumbers(self, path, folder_pattern='bioi_folder', exclude_patterns=None):
         """
         Get folders matching a specified pattern and extract their I-numbers
-        
+
         Args:
             path (str): Directory to search
             folder_pattern (str): Regex pattern key to match folders (default: 'bioi_folder')
             exclude_patterns (list): List of patterns to exclude (default: ['reinject'])
-        
+
         Returns:
             tuple: (list of I-numbers, list of folder paths)
         """
         if exclude_patterns is None:
             exclude_patterns = ['reinject']
-        
-        path = Path(path)  # Ensure path is a Path object 
+
+        path = Path(path)  # Ensure path is a Path object
         matching_folders = []
-        
+
         # Scan the directory for matching folders
         for item in self.get_directory_contents(path):
             item_path = path / item.name
             if not item_path.is_dir():
                 continue
-                
+
             # Check if folder matches pattern
             if self.regex_patterns[folder_pattern].search(item.name):
                 # Check exclusion patterns
                 if not any(exclude in item.name.lower() for exclude in exclude_patterns):
                     matching_folders.append(item_path)
-        
+
         # Extract unique I-numbers
         i_numbers = []
         for folder in matching_folders:
             i_num = self.get_inumber_from_name(folder.name)
             if i_num and i_num not in i_numbers:
                 i_numbers.append(i_num)
-        
+
         return i_numbers, matching_folders
 
     #################### File Operations ####################
@@ -916,7 +916,7 @@ class FileSystemDAO:
         """
         Standardized filename cleaning method for consistent matching across all code
         Used for PCR files, reinject lists, validation, and any other string comparison operations
-        
+
         Args:
             file_name (str): The filename to standardize
             remove_extension (bool): Whether to remove file extension
@@ -926,7 +926,7 @@ class FileSystemDAO:
         order_number = None
         if preserve_order_number:
             order_number = self.extract_order_number_from_filename(file_name)
-        
+
         # Step 2: Remove file extension if needed
         if remove_extension and file_name.endswith(self.config.ABI_EXTENSION):
             clean_name = file_name[:-4]
@@ -938,13 +938,13 @@ class FileSystemDAO:
         if well_pattern.match(clean_name):
             # For well locations, keep them as is to avoid empty string normalization
             return clean_name
-                
+
         # Step 4: Apply ABI character adjustments - ENSURE SPACES ARE REMOVED
         clean_name = self.adjust_abi_chars(clean_name)
-        
+
         # Step 4.5: EXPLICITLY remove spaces if adjust_abi_chars didn't do it
         clean_name = clean_name.replace(' ', '')
-        
+
         # Step 5: Remove content in brackets
         clean_name = re.sub(r'{.*?}', '', clean_name)
 
@@ -966,11 +966,11 @@ class FileSystemDAO:
         """
         Specialized method for customer file matching in order key
         Removes well locations and normalizes for order key lookup
-        
+
         Args:
             file_name (str): The filename to standardize
             remove_extension (bool): Whether to remove file extension
-            
+
         Returns:
             str: Cleaned filename for order key matching
         """
@@ -979,11 +979,11 @@ class FileSystemDAO:
             clean_name = file_name[:-4]
         else:
             clean_name = file_name
-            
+
         # Step 2: Apply ABI character adjustments and remove spaces
         clean_name = self.adjust_abi_chars(clean_name)
         clean_name = clean_name.replace(' ', '')
-        
+
         # Step 3: Remove ALL content in brackets (including well locations)
         clean_name = re.sub(r'{.*?}', '', clean_name)
 
@@ -1002,11 +1002,11 @@ class FileSystemDAO:
         """
         Specialized method for reinject list matching
         Preserves well locations for complex well-based matching
-        
+
         Args:
             file_name (str): The filename to standardize
             remove_extension (bool): Whether to remove file extension
-            
+
         Returns:
             str: Cleaned filename for reinject matching
         """
@@ -1021,15 +1021,15 @@ class FileSystemDAO:
         if well_pattern.match(clean_name):
             # For well locations, keep them as is
             return clean_name
-                
+
         # Step 3: Apply ABI character adjustments and remove spaces
         clean_name = self.adjust_abi_chars(clean_name)
         clean_name = clean_name.replace(' ', '')
-        
+
         # Step 4: For reinject matching, we may want to preserve some bracket content
         # Remove only outer brackets but preserve structure for well matching
         # This is where reinject-specific logic would go
-        
+
         # Step 5: Remove standard suffixes
         clean_name = self.neutralize_suffixes(clean_name)
 

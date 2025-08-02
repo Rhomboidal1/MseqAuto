@@ -12,35 +12,35 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 def inspect_reinject_list(i_numbers=None, verbose=True):
     """
     Detailed inspection of reinject list contents
-    
+
     Args:
         i_numbers: List of specific I-numbers to check (default: [22055, 22056])
         verbose: Whether to show detailed debug information
     """
     from mseqauto.config import MseqConfig
     from mseqauto.core import FileSystemDAO, FolderProcessor
-    
+
     # Initialize components
     config = MseqConfig()
     file_dao = FileSystemDAO(config)
     processor = FolderProcessor(file_dao, None, config)
-    
+
     # Use provided I-numbers or defaults
     if not i_numbers:
         i_numbers = ['22082']
-    
+
     print(f"\n=== Reinject List Inspection for I-numbers: {i_numbers} ===")
-    
+
     # Get today's reinject file path
     today = datetime.now().strftime('%m-%d-%Y')
     reinject_path = f"P:\\Data\\Reinjects\\Reinject List_{today}.xlsx"
-    
+
     # Check paths that will be searched
     paths_to_check = [
         'G:\\Lab\\Spreadsheets\\Individual Uploaded to ABI',
         'G:\\Lab\\Spreadsheets'
     ]
-    
+
     print("\nSearching for reinject information in:")
     for path in paths_to_check:
         print(f"- {path}")
@@ -50,7 +50,7 @@ def inspect_reinject_list(i_numbers=None, verbose=True):
                 print(f"  Found {len(files)} reinject-related files:")
                 for f in files:
                     print(f"  - {f}")
-    
+
     print(f"\nChecking for Excel reinject list: {reinject_path}")
     if os.path.exists(reinject_path):
         print("Found today's reinject Excel file")
@@ -64,36 +64,36 @@ def inspect_reinject_list(i_numbers=None, verbose=True):
                 most_recent = sorted(reinject_files)[-1]
                 reinject_path = os.path.join(reinject_dir, most_recent)
                 print(f"Using most recent reinject file instead: {most_recent}")
-    
+
     # Get the reinject list with detailed logging
     class DebugLogger:
         def info(self, msg):
             if verbose:
                 print(f"DEBUG: {msg}")
-    
+
     debug_logger = DebugLogger()
     processor.logger = debug_logger
-    
+
     print("\nGetting reinject list...")
     reinject_list = processor.get_reinject_list(i_numbers, reinject_path)
     raw_reinject_list = processor.raw_reinject_list
-    
+
     print(f"\nFound {len(reinject_list)} total reinjections")
-    
+
     # Display the complete lists
     print("\n=== Raw Reinject List ===")
     for i, (raw, normalized) in enumerate(zip(raw_reinject_list, reinject_list)):
         print(f"\n{i+1}. RAW: {raw}")
         print(f"   NORM: {normalized}")
-    
+
     # Interactive testing function
     def test_filename(filename):
         print(f"\n=== Testing filename: {filename} ===")
-        
+
         # Normalize the test filename
         normalized_test = file_dao.standardize_filename_for_matching(filename)
         print(f"Normalized to: {normalized_test}")
-        
+
         # Check if it's in the reinject list
         if normalized_test in reinject_list:
             idx = reinject_list.index(normalized_test)
@@ -102,22 +102,22 @@ def inspect_reinject_list(i_numbers=None, verbose=True):
             print(f"  Normalized entry: {reinject_list[idx]}")
         else:
             print("Not found in reinject list")
-        
+
         # Check for preemptive pattern
         if processor.is_preemptive(filename):
             print("File has preemptive pattern (double well location)")
-        
+
         # Check if file would go to Alternate Injections
         debug_info = processor.debug_reinject_detection(filename)
         print("\nReinject Detection Analysis:")
         for key, value in debug_info.items():
             print(f"  {key}: {value}")
-    
+
     # Interactive testing loop
     print("\n=== Interactive Testing ===")
     print("Enter filenames to test why they might be flagged as reinjections")
     print("Enter 'q' to quit")
-    
+
     while True:
         try:
             test_input = input("\nEnter filename to test (or 'q' to quit): ").strip()
@@ -129,7 +129,7 @@ def inspect_reinject_list(i_numbers=None, verbose=True):
             break
         except Exception as e:
             print(f"Error testing file: {e}")
-    
+
     return reinject_list, raw_reinject_list
 
 if __name__ == "__main__":

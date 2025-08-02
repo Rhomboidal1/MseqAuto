@@ -14,7 +14,7 @@ class ExcelDAO:
         self.attention_style = PatternFill(start_color='FF4747', end_color='FF4747', fill_type='solid')
         self.resolved_style = PatternFill(start_color='FFA500', end_color='FFA500', fill_type='solid')
         self.break_style = PatternFill(start_color='DDD9C4', end_color='DDD9C4', fill_type='solid')
-        
+
         # Store hidden row states for preservation during updates
         self._stored_hidden_states = {}
 
@@ -77,7 +77,7 @@ class ExcelDAO:
 
     def set_fb_pcr_headers(self, worksheet):
         """Set headers for FB-PCR summary"""
-        headers = ['PCR Number', 'Order Number', 'Version', 'Zip Filename', 
+        headers = ['PCR Number', 'Order Number', 'Version', 'Zip Filename',
                    'Total Files', 'File Types', 'Zip Timestamp']
         for i, header in enumerate(headers, 1):
             cell = worksheet.cell(row=1, column=i, value=header)
@@ -86,7 +86,7 @@ class ExcelDAO:
 
     def set_plate_headers(self, worksheet):
         """Set headers for plate folder summary"""
-        headers = ['Plate Number', 'Description', 'Zip Filename', 'Total Files', 
+        headers = ['Plate Number', 'Description', 'Zip Filename', 'Total Files',
                    'AB1 Files', 'FSA Files', 'File Types', 'Zip Timestamp']
         for i, header in enumerate(headers, 1):
             cell = worksheet.cell(row=1, column=i, value=header)
@@ -144,14 +144,14 @@ class ExcelDAO:
     def resolve_order_status(self, worksheet, order_number):
         """Mark an order as resolved and hide associated rows"""
         found, order_row, _ = self.find_order_in_summary(worksheet, order_number)
-        
+
         if not found:
             return False
-            
+
         # Set status to "Resolved"
         self.set_cell_value(worksheet, order_row, 3, "Resolved")  # Column C
         self.apply_style(worksheet, f'C{order_row}', 'resolved')
-        
+
         # Hide rows until we hit another order or end of data
         current_row = order_row + 1 #type: ignore
         while current_row <= worksheet.max_row:
@@ -161,7 +161,7 @@ class ExcelDAO:
             else:
                 worksheet.row_dimensions[current_row].hidden = True
                 current_row += 1
-                
+
         return True
 
     def add_break_row(self, worksheet, row_num):
@@ -195,7 +195,7 @@ class ExcelDAO:
 
         status = 'Completed' if is_completed else 'ATTENTION'
         style = 'success' if is_completed else 'attention'
-        
+
         self.set_cell_value(worksheet, order_row, 3, status)
         self.apply_style(worksheet, f'C{order_row}', style)
 
@@ -241,7 +241,7 @@ class ExcelDAO:
     def add_fb_pcr_result(self, worksheet, row_count, fb_pcr_result, zip_path, mixed_headers=False):
         """Add FB-PCR result to worksheet with individual file listing"""
         order_row = row_count  # Store the main row for hiding purposes
-        
+
         if mixed_headers:
             # Use validation headers format for mixed data
             # I Number, Order Number, Status, Zip Filename, Order Items, File Names, Match Status, Zip Timestamp
@@ -249,20 +249,20 @@ class ExcelDAO:
             self.set_cell_value(worksheet, row_count, 2, fb_pcr_result['order_number'])        # Order Number
             self.set_cell_value(worksheet, row_count, 3, "FB-PCR")                            # Status -> FB-PCR
             self.set_cell_value(worksheet, row_count, 4, Path(zip_path).name)                 # Zip Filename
-            
+
             # Show .ab1 file count prominently, with text file count as additional info
             ab1_count = fb_pcr_result.get('ab1_count', 0)
             txt_count = fb_pcr_result.get('txt_count', 0)
             total_files = fb_pcr_result.get('total_files', 0)
             self.set_cell_value(worksheet, row_count, 5, f".ab1 Files: {ab1_count}, Text Files: {txt_count}, Total: {total_files}")  # Order Items -> File counts
-            
+
             # Format file types as a readable string for File Names column
             file_types_str = ", ".join([f"{ext}: {count}" for ext, count in fb_pcr_result['file_types'].items()])
             self.set_cell_value(worksheet, row_count, 6, file_types_str)                      # File Names -> File types
-            
+
             self.set_cell_value(worksheet, row_count, 7, f"Version {fb_pcr_result['version']}")  # Match Status -> Version
             self.set_cell_value(worksheet, row_count, 8, str(int(Path(zip_path).stat().st_mtime)))  # Zip Timestamp
-            
+
             # Apply styling for FB-PCR entries
             self.apply_style(worksheet, f'C{row_count}', 'success')
         else:
@@ -272,17 +272,17 @@ class ExcelDAO:
             self.set_cell_value(worksheet, row_count, 2, fb_pcr_result['order_number'])
             self.set_cell_value(worksheet, row_count, 3, fb_pcr_result['version'])
             self.set_cell_value(worksheet, row_count, 4, Path(zip_path).name)
-            
+
             # Show .ab1 file count prominently in the Total Files column
             ab1_count = fb_pcr_result.get('ab1_count', 0)
             txt_count = fb_pcr_result.get('txt_count', 0)
             total_files = fb_pcr_result.get('total_files', 0)
             self.set_cell_value(worksheet, row_count, 5, f".ab1: {ab1_count}, Text: {txt_count}, Total: {total_files}")
-            
+
             # Format file types as a readable string
             file_types_str = ", ".join([f"{ext}: {count}" for ext, count in fb_pcr_result['file_types'].items()])
             self.set_cell_value(worksheet, row_count, 6, file_types_str)
-            
+
             self.set_cell_value(worksheet, row_count, 7, str(int(Path(zip_path).stat().st_mtime)))
 
         row_count += 1
@@ -293,7 +293,7 @@ class ExcelDAO:
         ab1_files = [f for f in file_names if f.lower().endswith('.ab1')]
         text_files = [f for f in file_names if not f.lower().endswith('.ab1')]
         sorted_files = ab1_files + text_files
-        
+
         for file_name in sorted_files:
             if mixed_headers:
                 # Use columns 5 and 6 for file details in mixed format
@@ -313,7 +313,7 @@ class ExcelDAO:
     def add_plate_result(self, worksheet, row_count, plate_result, zip_path, mixed_headers=False):
         """Add plate folder result to worksheet with individual file listing"""
         order_row = row_count  # Store the main row for hiding purposes
-        
+
         if mixed_headers:
             # Use validation headers format for mixed data
             # I Number, Order Number, Status, Zip Filename, Order Items, File Names, Match Status, Zip Timestamp
@@ -321,21 +321,21 @@ class ExcelDAO:
             self.set_cell_value(worksheet, row_count, 2, plate_result['description'])         # Order Number -> Description
             self.set_cell_value(worksheet, row_count, 3, "PLATE")                            # Status -> PLATE
             self.set_cell_value(worksheet, row_count, 4, Path(zip_path).name)                # Zip Filename
-            
+
             # Show file counts prominently
             ab1_count = plate_result.get('ab1_count', 0)
             fsa_count = plate_result.get('fsa_count', 0)
             txt_count = plate_result.get('txt_count', 0)
             total_files = plate_result.get('total_files', 0)
             self.set_cell_value(worksheet, row_count, 5, f".ab1: {ab1_count}, .fsa: {fsa_count}, Text: {txt_count}, Total: {total_files}")  # Order Items -> File counts
-            
+
             # Format file types as a readable string for File Names column
             file_types_str = ", ".join([f"{ext}: {count}" for ext, count in plate_result['file_types'].items()])
             self.set_cell_value(worksheet, row_count, 6, file_types_str)                      # File Names -> File types
-            
+
             self.set_cell_value(worksheet, row_count, 7, "PLATE")                             # Match Status -> PLATE
             self.set_cell_value(worksheet, row_count, 8, str(int(Path(zip_path).stat().st_mtime)))  # Zip Timestamp
-            
+
             # Apply styling for plate entries
             self.apply_style(worksheet, f'C{row_count}', 'success')
         else:
@@ -344,7 +344,7 @@ class ExcelDAO:
             self.set_cell_value(worksheet, row_count, 1, plate_result['plate_number'])
             self.set_cell_value(worksheet, row_count, 2, plate_result['description'])
             self.set_cell_value(worksheet, row_count, 3, Path(zip_path).name)
-            
+
             # Show file counts in Total Files column
             ab1_count = plate_result.get('ab1_count', 0)
             fsa_count = plate_result.get('fsa_count', 0)
@@ -353,11 +353,11 @@ class ExcelDAO:
             self.set_cell_value(worksheet, row_count, 4, f"Total: {total_files}")
             self.set_cell_value(worksheet, row_count, 5, f".ab1: {ab1_count}")
             self.set_cell_value(worksheet, row_count, 6, f".fsa: {fsa_count}")
-            
+
             # Format file types as a readable string
             file_types_str = ", ".join([f"{ext}: {count}" for ext, count in plate_result['file_types'].items()])
             self.set_cell_value(worksheet, row_count, 7, file_types_str)
-            
+
             self.set_cell_value(worksheet, row_count, 8, str(int(Path(zip_path).stat().st_mtime)))
 
         row_count += 1
@@ -369,9 +369,9 @@ class ExcelDAO:
         fsa_files = [f for f in file_names if f.lower().endswith('.fsa')]
         text_files = [f for f in file_names if f.lower().endswith('.txt')]
         other_files = [f for f in file_names if not any(f.lower().endswith(ext) for ext in ['.ab1', '.fsa', '.txt'])]
-        
+
         sorted_files = ab1_files + fsa_files + text_files + other_files
-        
+
         for file_name in sorted_files:
             if mixed_headers:
                 # Use columns 5 and 6 for file details in mixed format
@@ -392,11 +392,11 @@ class ExcelDAO:
     def copy_data_with_formatting(self, source_worksheet, start_row=2):
         """Copy data with formatting from source worksheet"""
         copied_rows = []
-        
+
         for i, row in enumerate(source_worksheet.iter_rows(min_row=start_row, values_only=False), start=start_row):
             row_data = []
             hidden = source_worksheet.row_dimensions[i].hidden
-            
+
             for cell in row:
                 cell_fill = cell.fill
                 cell_data = {
@@ -408,16 +408,16 @@ class ExcelDAO:
                     }
                 }
                 row_data.append(cell_data)
-            
+
             copied_rows.append([row_data, hidden])
-        
+
         return copied_rows
 
     def paste_data_with_formatting(self, worksheet, data_rows, start_row=2):
         """Paste data with formatting to worksheet"""
         for i, (row_data, hidden) in enumerate(data_rows, start=start_row):
             worksheet.row_dimensions[i].hidden = hidden
-            
+
             for col_num, cell_data in enumerate(row_data, start=1):
                 cell = worksheet.cell(row=i, column=col_num, value=cell_data['value'])
                 cell.fill = PatternFill(
@@ -430,25 +430,25 @@ class ExcelDAO:
         """Update existing summary with new data"""
         existing_sheet = existing_workbook.active
         new_sheet = new_data_workbook.active
-        
+
         # Get new data with formatting
         new_data_rows = self.copy_data_with_formatting(new_sheet)
         num_new_rows = len(new_data_rows)
-        
+
         if num_new_rows == 0:
             return True
-            
+
         # Insert rows and handle data transfer
         self.insert_rows_at_top(existing_sheet, num_new_rows)
         self.paste_data_with_formatting(existing_sheet, new_data_rows, start_row=2)
-        
+
         # Copy column widths
         for col_letter, col_dimension in new_sheet.column_dimensions.items():
             existing_sheet.column_dimensions[col_letter].width = col_dimension.width
-        
+
         # Restore hidden states with offset
         self.restore_hidden_row_states(existing_sheet, offset=num_new_rows)
-        
+
         return self.save_with_error_handling(existing_workbook, save_path)
 
     def finalize_workbook(self, worksheet, add_break_at_end=False):
@@ -465,9 +465,9 @@ if __name__ == "__main__":
 
     config = TestConfig()
     excel_dao = ExcelDAO(config)
-    
+
     wb = excel_dao.create_workbook()
     ws = wb.active
     excel_dao.set_validation_headers(ws)
-    
+
     print("Simplified ExcelDAO test completed!")

@@ -39,12 +39,12 @@ class OSCompatibilityManager:
         "expand_delay": 0.3,
         "polling_interval": 0.5
     }
-        
+
     @classmethod
     def py32_check(cls, script_path=None, logger=None, use_venv=True):
         """
         Check if running in 64-bit Python and restart in 32-bit if needed.
-        
+
         Args:
             script_path: Path to the script being run
             logger: Logger for output
@@ -55,39 +55,39 @@ class OSCompatibilityManager:
             if logger:
                 logger.info("Already in a relaunch attempt, continuing with current interpreter")
             return True
-            
+
         # Check if running in 64-bit Python
         if sys.maxsize > 2 ** 32:
             # Get 32-bit Python path
             py32_path = os.environ.get('PYTHON32_PATH') or getattr(
-                __import__('mseqauto.config', fromlist=['MseqConfig']).MseqConfig, 
-                'PYTHON32_PATH', 
+                __import__('mseqauto.config', fromlist=['MseqConfig']).MseqConfig,
+                'PYTHON32_PATH',
                 None
             )
-            
+
             # Get venv path if needed
             venv_path = None
             venv_activate = None
             if use_venv:
                 config = __import__('mseqauto.config', fromlist=['MseqConfig']).MseqConfig
-                venv_path = getattr(config, 'VENV32_PATH', 
+                venv_path = getattr(config, 'VENV32_PATH',
                                 str(Path(py32_path).parent / "venv32")) #type: ignore
                 venv_activate = str(Path(venv_path) / "Scripts" / "activate.bat")
-            
+
             # Only relaunch if we have a valid 32-bit Python path
-            if (script_path and py32_path and Path(py32_path).exists() 
+            if (script_path and py32_path and Path(py32_path).exists()
                     and py32_path != sys.executable):
-                
+
                 # Set the environment variable to prevent recursive relaunching
                 os.environ['PYTHON_LAUNCHER_ACTIVE'] = '1'
-                
+
                 if logger:
                     logger.info(f"Restarting with 32-bit Python: {py32_path}")
-                    
+
                 # Use batch file approach for proper path handling
                 if use_venv and Path(venv_path).exists(): #type: ignore
                     # Create and run a batch file for venv activation
-                    batch_file = str(Path(os.environ.get('TEMP', Path.cwd())) / 
+                    batch_file = str(Path(os.environ.get('TEMP', Path.cwd())) /
                                             'run_script.bat')
                     with open(batch_file, 'w') as f:
                         f.write(f'@echo off\n')
@@ -97,10 +97,10 @@ class OSCompatibilityManager:
                         if len(sys.argv) > 1:
                             f.write(f' {" ".join(sys.argv[1:])}')
                         f.write('\n')
-                    
+
                     # Run the batch file
                     os.system(batch_file)
-                    
+
                     # Clean up
                     try:
                         os.remove(batch_file)
@@ -109,13 +109,13 @@ class OSCompatibilityManager:
                 else:
                     # Direct execution without venv
                     subprocess.run([py32_path, script_path] + sys.argv[1:])
-                    
+
                 sys.exit(0)
-                
+
             else:
                 if logger:
                     logger.info("32-bit Python not found or is current interpreter")
-                    
+
         return True
 
     @classmethod
@@ -158,7 +158,7 @@ class OSCompatibilityManager:
 
         # Get multiplier based on OS
         multiplier = cls.TIMEOUT_MULTIPLIERS.get(cls.get_os_key(), 1.0)
-        
+
         # Environment variable can override
         env_multiplier = os.environ.get('MSEQ_TIMEOUT_MULTIPLIER')
         if env_multiplier:

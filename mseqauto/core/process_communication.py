@@ -14,8 +14,8 @@ def send_gui_message(msg_type, data):
 
 def send_progress(current, total, description=""):
     send_gui_message("progress", {
-        "current": current, 
-        "total": total, 
+        "current": current,
+        "total": total,
         "description": description
     })
 
