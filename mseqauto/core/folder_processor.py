@@ -1252,14 +1252,14 @@ class FolderProcessor:
           # Build list of reinject files
           if spreadsheets_path.exists():
                for file_path in self.file_dao.get_directory_contents(spreadsheets_path):
-                    # file_path is now a Path object
+                    # file_path is a Path object
                     if 'reinject' in file_path.name.lower() and file_path.suffix == '.txt':
                          if any(i_num in file_path.name for i_num in i_numbers):
                               reinject_files.append(str(file_path))  # Convert to string for numpy
 
           if abi_path.exists():
                for file_path in self.file_dao.get_directory_contents(abi_path):
-                    # file_path is now a Path object
+                    # file_path is a Path object
                     if 'reinject' in file_path.name.lower() and file_path.suffix == '.txt':
                          if any(i_num in file_path.name for i_num in i_numbers):
                               reinject_files.append(str(file_path))  # Convert to string for numpy
@@ -1272,9 +1272,9 @@ class FolderProcessor:
 
                     processed_files.add(file_path)
                     self.log(f"Processing reinject file: {file_path}")
-                    data = np.loadtxt(file_path, dtype=str, delimiter='\t', skiprows=4)
+                    data = np.loadtxt(file_path, dtype=str, delimiter='\t', skiprows=5)
 
-                    # Parse rows (no need to skip 5 rows since we already skipped headers)
+                    # Parse rows (data already has headers skipped via skiprows=5)
                     for j in range(0, min(96, data.shape[0])):  # Adjusted range since we skipped headers
                          if j < data.shape[0] and data.shape[1] > 1:
                               raw_name = data[j, 1]
@@ -1315,7 +1315,7 @@ class FolderProcessor:
                          # Process each txt file
                          for file_path in txt_files:
                               try:
-                                   data = np.loadtxt(file_path, dtype=str, delimiter='\t', skiprows=4)
+                                   data = np.loadtxt(file_path, dtype=str, delimiter='\t', skiprows=5)
                                    for j in range(0, min(96, data.shape[0])):  # Adjusted range here too
                                         if j < data.shape[0] and data.shape[1] > 1:
                                              raw_name = data[j, 1]
