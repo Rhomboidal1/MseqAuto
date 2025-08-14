@@ -196,8 +196,8 @@ def main():
         
         # Import modules only after we know we need them
         try:
-            from mseqauto.config import MseqConfig
-            from mseqauto.core.file_system_dao import FileSystemDAO
+            from mseqauto.config import MseqConfig #type: ignore
+            from mseqauto.core.file_system_dao import FileSystemDAO #type: ignore
         except ImportError as e:
             print(f"Import error: {e}")
             print("Make sure you're running this from the correct directory and all dependencies are installed.")
@@ -220,8 +220,8 @@ def main():
         
         # ONLY NOW import package modules after folder selection
         try:
-            from mseqauto.config import MseqConfig
-            from mseqauto.core.file_system_dao import FileSystemDAO
+            from mseqauto.config import MseqConfig #type: ignore
+            from mseqauto.core.file_system_dao import FileSystemDAO #type: ignore
         except ImportError as e:
             print(f"Import error: {e}")
             print("Make sure you're running this from the correct directory and all dependencies are installed.")
