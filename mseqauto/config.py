@@ -17,7 +17,7 @@ class MseqConfig:
     else:
         # If no 32-bit Python is found, use the current interpreter
         PYTHON32_PATH = Path(sys.executable)
-    
+
     VENV32_PATH = PYTHON32_PATH.parent / "venv32"
     MSEQ_PATH = Path("C:/DNA/Mseq4/bin")
     MSEQ_EXECUTABLE = "j.exe -jprofile mseq.ijl"
@@ -119,22 +119,22 @@ class MseqConfig:
     def get_python32_path_str(cls) -> str:
         """Get the Python 32-bit path as a string for subprocess calls"""
         return str(cls.PYTHON32_PATH)
-    
+
     @classmethod
     def get_mseq_path_str(cls) -> str:
         """Get the mSeq path as a string for subprocess calls"""
         return str(cls.MSEQ_PATH)
-    
+
     @classmethod
     def get_key_file_path_str(cls) -> str:
         """Get the order key file path as a string"""
         return str(cls.KEY_FILE_PATH)
-    
+
     @classmethod
     def get_batch_file_path_str(cls) -> str:
         """Get the batch file path as a string"""
         return str(cls.BATCH_FILE_PATH)
-    
+
     @classmethod
     def get_reinject_folder_str(cls) -> str:
         """Get the reinject folder path as a string"""

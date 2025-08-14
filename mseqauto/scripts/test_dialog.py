@@ -7,15 +7,15 @@ def get_folder_dialog():
     print("Opening dialog...")
     root = tk.Tk()
     root.withdraw()
-    
+
     # Force update to ensure window is fully initialized
     root.update()
-    
+
     folder_path = filedialog.askdirectory(
         title="Test dialog",
         mustexist=True
     )
-    
+
     root.destroy()
     print(f"Selected: {folder_path}")
     return folder_path

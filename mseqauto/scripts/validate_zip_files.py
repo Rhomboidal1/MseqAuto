@@ -19,7 +19,7 @@ def get_folder_from_user():
     root = tk.Tk()
     root.withdraw()
     root.update()
-    
+
     folder_path = filedialog.askdirectory(
         title="Select folder containing zip files to validate",
         mustexist=True
@@ -37,7 +37,7 @@ def get_folder_from_user():
 def main():
     # Get folder path first before any package imports
     data_folder = get_folder_from_user()
-    
+
     if not data_folder:
         print("No folder selected, exiting")
         return
@@ -46,13 +46,13 @@ def main():
     from mseqauto.config import MseqConfig # type: ignore
     from mseqauto.core import FileSystemDAO, FolderProcessor # type: ignore
     from mseqauto.utils import setup_logger, ExcelDAO # type: ignore
-    
+
     # Setup logging
     script_dir = Path(__file__).parent.resolve()
     log_dir = script_dir / "logs"
     logger = setup_logger("validate_zip_files", log_dir=log_dir)
     logger.info("Starting zip file validation...")
-    
+
     # Initialize components
     config = MseqConfig()
     file_dao = FileSystemDAO(config, logger=logger)
@@ -94,7 +94,7 @@ def main():
             return
         existing_worksheet = existing_workbook.active
         logger.info("Existing workbook loaded successfully")
-    
+
     # Create new workbook for this session's data
     new_workbook = excel_dao.create_workbook()
     new_worksheet = new_workbook.active
@@ -106,11 +106,11 @@ def main():
     # Find FB-PCR zip files
     fb_pcr_zips = file_dao.find_fb_pcr_zips(data_folder)
     logger.info(f"Found {len(fb_pcr_zips)} FB-PCR zip files to process")
-    
+
     # Find plate folder zip files
     plate_zips = file_dao.find_plate_folder_zips(data_folder)
     logger.info(f"Found {len(plate_zips)} plate folder zip files to process")
-    
+
     # Set headers based on what data types we have
     if len(order_folders) > 0 and (len(fb_pcr_zips) > 0 or len(plate_zips) > 0):
         # Mixed data - use validation headers as primary, other data will use available columns
@@ -151,7 +151,7 @@ def main():
         if summary_exists:
             _, _, existing_mod_time = excel_dao.find_order_in_summary(existing_worksheet, order_number)
             current_mod_time = Path(zip_path).stat().st_mtime
-            
+
             if existing_mod_time and float(existing_mod_time) >= current_mod_time:
                 logger.info(f"Skipping {Path(order_folder).name} - already validated with current or newer zip")
                 continue
@@ -162,16 +162,16 @@ def main():
 
         if validation_result:
             order_count += 1
-            
+
             # Check if this is an Andreev order
             is_andreev = config.ANDREEV_NAME.lower() in Path(order_folder).name.lower()
-            
+
             # Add validation results to new worksheet
             new_row_count = excel_dao.add_validation_result(
                 new_worksheet, new_row_count, validation_result, zip_path,
                 i_number, order_number, is_andreev
             )
-            
+
             # If updating existing order, mark old one as resolved
             if summary_exists and existing_mod_time:
                 logger.info(f"Marking previous version of order {order_number} as resolved")
@@ -181,16 +181,16 @@ def main():
     fb_pcr_count = 0
     for zip_path, pcr_number, order_number, version in fb_pcr_zips:
         logger.info(f"Processing FB-PCR zip: PCR-{pcr_number}, Order: {order_number}, Version: {version}")
-        
+
         # Process FB-PCR zip to get file count
         fb_pcr_result = processor.process_fb_pcr_zip(zip_path, pcr_number, order_number, version)
-        
+
         if fb_pcr_result:
             fb_pcr_count += 1
-            
+
             # Determine if we're using mixed headers
             mixed_headers = len(order_folders) > 0 or len(plate_zips) > 0
-            
+
             # Add FB-PCR results to new worksheet
             new_row_count = excel_dao.add_fb_pcr_result(
                 new_worksheet, new_row_count, fb_pcr_result, zip_path, mixed_headers
@@ -200,16 +200,16 @@ def main():
     plate_count = 0
     for zip_path, plate_number, description in plate_zips:
         logger.info(f"Processing plate zip: P{plate_number}, Description: {description}")
-        
+
         # Process plate zip to get file count
         plate_result = processor.process_plate_zip(zip_path, plate_number, description)
-        
+
         if plate_result:
             plate_count += 1
-            
+
             # Determine if we're using mixed headers
             mixed_headers = len(order_folders) > 0 or len(fb_pcr_zips) > 0
-            
+
             # Add plate results to new worksheet
             new_row_count = excel_dao.add_plate_result(
                 new_worksheet, new_row_count, plate_result, zip_path, mixed_headers
@@ -247,7 +247,7 @@ def main():
             processed_parts.append(f"{fb_pcr_count} FB-PCR zips")
         if plate_count > 0:
             processed_parts.append(f"{plate_count} plate zips")
-        
+
         processed_text = " and ".join(processed_parts)
         print(f"All done! {processed_text} validated. Summary saved to {excel_filename}")
     else:
