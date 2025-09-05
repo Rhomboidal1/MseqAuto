@@ -1174,12 +1174,43 @@ class FolderProcessor:
           return False
 
      def get_order_number_from_folder_name(self, folder_path):
-          """Extract order number from folder name"""
+          """Extract order number from folder name
+          
+          Handles both original folders (BioI-22342_Mehle_151132) and 
+          re-sequenced folders (BioI-22342_Mehle_151132_2).
+          Always returns the 6-digit order number, not the re-sequence suffix.
+          """
           folder_name = Path(folder_path).name
+          
+          # Pattern: BioI-{I-number}_{Customer}_{OrderNumber}[_{ResequenceNumber}]
+          # We want to extract the OrderNumber part (typically 6 digits)
+          
+          # Split by underscores and look for the pattern
+          parts = folder_name.split('_')
+          
+          if len(parts) >= 3:
+               # The order number should be the third part (index 2)
+               # It should be a 6-digit number
+               potential_order = parts[2]
+               if potential_order.isdigit() and len(potential_order) == 6:
+                    return potential_order
+          
+          # Fallback: look for any 6-digit number in the folder name
+          # This handles edge cases where naming might vary
+          six_digit_match = re.search(r'\b\d{6}\b', folder_name)
+          if six_digit_match:
+               return six_digit_match.group(0)
+               
+          # Final fallback: original logic for backwards compatibility
           match = re.search(r'_\d+$', folder_name)
           if match:
-               order_number = re.search(r'\d+', match.group(0)).group(0) #type: ignore
-               return order_number
+               order_match = re.search(r'\d+', match.group(0))
+               if order_match:
+                    order_number = order_match.group(0)
+                    # Only return if it's actually a 6-digit number
+                    if len(order_number) == 6:
+                         return order_number
+          
           return None
 
      def is_in_not_needed_folder(self, file_path):
