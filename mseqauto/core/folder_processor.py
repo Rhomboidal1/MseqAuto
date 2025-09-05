@@ -1466,6 +1466,24 @@ class FolderProcessor:
           try:
                folder_path_obj = Path(folder_path)
                folder_name = folder_path_obj.name
+               
+               # Check if folder is empty
+               folder_contents = list(folder_path_obj.iterdir())
+               if not folder_contents:
+                    self.log(f"Skipping zip creation for empty folder: {folder_name}")
+                    return None
+               
+               # Check for files with braces in their names (only in root directory, not subdirectories)
+               files_with_braces = []
+               for item in folder_contents:
+                    if item.is_file() and ('{' in item.name or '}' in item.name):
+                         files_with_braces.append(item.name)
+               
+               if files_with_braces:
+                    self.log(f"Skipping zip creation for folder with braces in filenames: {folder_name}")
+                    self.log(f"Files with braces: {', '.join(files_with_braces)}")
+                    return None
+               
                is_andreev_order = self.config.ANDREEV_NAME.lower() in folder_name.lower()
 
                # For Andreev orders, use different naming and never include txt files

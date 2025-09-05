@@ -361,11 +361,16 @@ class FileSystemDAO:
 
     def zip_files(self, source_folder: str, zip_path: str, file_extensions=None, exclude_extensions=None):
         #Keep
-        """Create a zip file from files in source_folder matching extensions"""
+        """Create a zip file from files in source_folder matching extensions
+        
+        Only includes files from the root directory of source_folder.
+        Files in subdirectories (like 'Alternate Injections') are automatically excluded.
+        """
         source_folder_path = Path(source_folder)
         with ZipFile(zip_path, 'w') as zip_file:
             for item in self.get_directory_contents(source_folder):
                 file_path = source_folder_path / item
+                # Skip directories - only process files in the root directory
                 if not file_path.is_file():
                     continue
                 if file_extensions and not any(item.name.endswith(ext) for ext in file_extensions):
